@@ -1,0 +1,259 @@
+// Firestore utility functions
+import { 
+  collection, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  getDocs, 
+  updateDoc, 
+  query, 
+  where,
+  deleteDoc,
+  DocumentData
+} from 'firebase/firestore';
+import { db } from './config';
+
+// User collections
+const DRIVERS_COLLECTION = 'drivers';
+const EQUIPMENT_OWNERS_COLLECTION = 'equipmentOwners';
+const EQUIPMENT_COLLECTION = 'equipment';
+
+// Driver functions
+export const createDriver = async (driverId: string, driverData: any) => {
+  try {
+    await setDoc(doc(db, DRIVERS_COLLECTION, driverId), {
+      ...driverData,
+      isVerified: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error creating driver:', error);
+    return { success: false, error };
+  }
+};
+
+export const getDrivers = async () => {
+  try {
+    const driversSnapshot = await getDocs(collection(db, DRIVERS_COLLECTION));
+    const drivers : object[] = [];
+    driversSnapshot.forEach((doc) => {
+      drivers.push({ id: doc.id, ...doc.data() });
+    });
+    return { success: true, data: drivers };
+  } catch (error:any) {
+    console.error('Error getting drivers:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const getDriver = async (driverId: string) => {
+  try {
+    const driverDoc = await getDoc(doc(db, DRIVERS_COLLECTION, driverId));
+    if (driverDoc.exists()) {
+      return { success: true, data: driverDoc.data() };
+    } else {
+      return { success: false, error: 'Driver not found' };
+    }
+  } catch (error) {
+    console.error('Error getting driver:', error);
+    return { success: false, error };
+  }
+};
+
+export const updateDriver = async (driverId: string, driverData: any) => {
+  try {
+    await updateDoc(doc(db, DRIVERS_COLLECTION, driverId), {
+      ...driverData,
+      updatedAt: new Date()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating driver:', error);
+    return { success: false, error };
+  }
+};
+
+export const verifyDriver = async (driverId: string) => {
+  try {
+    await updateDoc(doc(db, DRIVERS_COLLECTION, driverId), {
+      isVerified: true,
+      updatedAt: new Date()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error verifying driver:', error);
+    return { success: false, error };
+  }
+};
+
+// Equipment Owner functions
+export const createEquipmentOwner = async (ownerId: string, ownerData: any) => {
+  try {
+    await setDoc(doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId), {
+      ...ownerData,
+      isVerified: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error creating equipment owner:', error);
+    return { success: false, error };
+  }
+};
+
+export const getEquipmentOwner = async (ownerId: string) => {
+  try {
+    const ownerDoc = await getDoc(doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId));
+    if (ownerDoc.exists()) {
+      return { success: true, data: ownerDoc.data() };
+    } else {
+      return { success: false, error: 'Equipment owner not found' };
+    }
+  } catch (error) {
+    console.error('Error getting equipment owner:', error);
+    return { success: false, error };
+  }
+};
+
+export const updateEquipmentOwner = async (ownerId: string, ownerData: any) => {
+  try {
+    await updateDoc(doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId), {
+      ...ownerData,
+      updatedAt: new Date()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating equipment owner:', error);
+    return { success: false, error };
+  }
+};
+
+export const verifyEquipmentOwner = async (ownerId: string) => {
+  try {
+    await updateDoc(doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId), {
+      isVerified: true,
+      updatedAt: new Date()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error verifying equipment owner:', error);
+    return { success: false, error };
+  }
+};
+
+// Equipment functions
+export const createEquipment = async (equipmentData: any) => {
+  try {
+    const equipmentRef = doc(collection(db, EQUIPMENT_COLLECTION));
+    await setDoc(equipmentRef, {
+      ...equipmentData,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    return { success: true, id: equipmentRef.id };
+  } catch (error) {
+    console.error('Error creating equipment:', error);
+    return { success: false, error };
+  }
+};
+
+export const getEquipment = async (equipmentId: string) => {
+  try {
+    const equipmentDoc = await getDoc(doc(db, EQUIPMENT_COLLECTION, equipmentId));
+    if (equipmentDoc.exists()) {
+      return { success: true, data: equipmentDoc.data() };
+    } else {
+      return { success: false, error: 'Equipment not found' };
+    }
+  } catch (error) {
+    console.error('Error getting equipment:', error);
+    return { success: false, error };
+  }
+};
+
+export const getEquipments = async () => {
+  try {
+    const equipmentSnapshot = await getDocs(collection(db, EQUIPMENT_COLLECTION));
+    const equipments : object[] = [];
+    equipmentSnapshot.forEach((doc) => {
+      equipments.push({ id: doc.id, ...doc.data() });
+    });
+    return { success: true, data: equipments };
+  } catch (error) {
+    console.error('Error getting equipment:', error);
+    return { success: false, error };
+  }
+};
+export const updateEquipment = async (equipmentId: string, equipmentData: any) => {
+  try {
+    await updateDoc(doc(db, EQUIPMENT_COLLECTION, equipmentId), {
+      ...equipmentData,
+      updatedAt: new Date()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating equipment:', error);
+    return { success: false, error };
+  }
+};
+
+export const getOwnerEquipment = async (ownerId: string) => {
+  try {
+    const equipmentQuery = query(
+      collection(db, EQUIPMENT_COLLECTION),
+      where('ownerId', '==', ownerId)
+    );
+    const equipmentSnapshot = await getDocs(equipmentQuery);
+    const equipment: DocumentData[] = [];
+    equipmentSnapshot.forEach((doc) => {
+      equipment.push({ id: doc.id, ...doc.data() });
+    });
+    return { success: true, data: equipment };
+  } catch (error) {
+    console.error('Error getting owner equipment:', error);
+    return { success: false, error };
+  }
+};
+
+// Authentication functions
+export const getUserByPhone = async (phoneNumber: string) => {
+  try {
+    // Check in drivers collection
+    const driverQuery = query(
+      collection(db, DRIVERS_COLLECTION),
+      where('phoneNumber', '==', phoneNumber)
+    );
+    const driverSnapshot = await getDocs(driverQuery);
+    
+    if (!driverSnapshot.empty) {
+      const driverDoc = driverSnapshot.docs[0];
+      return { 
+        success: true, 
+        data: { id: driverDoc.id, ...driverDoc.data(), userType: 'driver' } 
+      };
+    }
+    
+    // Check in equipment owners collection
+    const ownerQuery = query(
+      collection(db, EQUIPMENT_OWNERS_COLLECTION),
+      where('phoneNumber', '==', phoneNumber)
+    );
+    const ownerSnapshot = await getDocs(ownerQuery);
+    
+    if (!ownerSnapshot.empty) {
+      const ownerDoc = ownerSnapshot.docs[0];
+      return { 
+        success: true, 
+        data: { id: ownerDoc.id, ...ownerDoc.data(), userType: 'equipmentOwner' } 
+      };
+    }
+    
+    return { success: false, error: 'User not found' };
+  } catch (error) {
+    console.error('Error getting user by phone:', error);
+    return { success: false, error };
+  }
+};
