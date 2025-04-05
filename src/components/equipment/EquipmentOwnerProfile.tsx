@@ -5,13 +5,14 @@ import { getEquipmentOwner, updateEquipmentOwner } from '@/lib/firebase/firestor
 import { uploadDriverPhoto } from '@/lib/firebase/storage';
 import { getSession, logout } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
+import { OwnerData } from '@/lib/interface';
 
 const EquipmentOwnerProfile = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [ownerData, setOwnerData] = useState<any>(null);
+  const [ownerData, setOwnerData] = useState<OwnerData[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   
   // Form state
@@ -31,7 +32,7 @@ const EquipmentOwnerProfile = () => {
       try {
         const result = await getEquipmentOwner(session.id);
         if (result.success) {
-          setOwnerData(result.data);
+          setOwnerData(result.data as OwnerData[]);
           // Initialize form state
           setName(result.data?.name || '');
           setEquipmentDetails(result.data?.equipmentDetails || '');
@@ -75,7 +76,7 @@ const EquipmentOwnerProfile = () => {
     }
     
     try {
-      let photoUrl = ownerData?.photoUrl || '';
+      let photoUrl = ownerData.photoUrl || '';
       
       // Upload new photo if selected
       if (photoFile) {

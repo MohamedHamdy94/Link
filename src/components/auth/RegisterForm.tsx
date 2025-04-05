@@ -23,7 +23,7 @@ const RegisterForm = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
-  const [userId, setUserId] = useState('');
+  // const [userId, setUserId] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +56,7 @@ const RegisterForm = () => {
         
         if (result.success) {
           setRegistered(true);
-          setUserId(phoneNumber);
+          // setUserId(phoneNumber);
         } else {
           setError( 'حدث خطأ أثناء التسجيل');
         }
@@ -75,7 +75,7 @@ const RegisterForm = () => {
         
         if (result.success) {
           setRegistered(true);
-          setUserId(phoneNumber);
+          // setUserId(phoneNumber);
         } else {
           setError( 'حدث خطأ أثناء التسجيل');
         }

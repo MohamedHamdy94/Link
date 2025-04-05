@@ -15,10 +15,26 @@ const firebaseConfig = {
   measurementId: "G-JS35DN9NRG"
 };
 
+const firebaseConfig2 = {
+  apiKey: "AIzaSyDttPdopekjqxZd1jgikyAYHeMq-FWmp0Q",
+  authDomain: "manlift-36e37.firebaseapp.com",
+  databaseURL: "https://manlift-36e37.firebaseio.com", 
+  projectId: "manlift-36e37",
+  storageBucket: "manlift-36e37.appspot.com",
+  messagingSenderId: "982378961801",
+  appId: "1:982378961801:web:4f68d5325a135983025f58",
+  measurementId: "G-KWXVK0MSW1"
+};
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const storage = getStorage(app);
+// تهيئة التطبيق الأساسي
+const app1 = initializeApp(firebaseConfig);
 
-export { app, db, storage };
+// تهيئة التطبيق الثاني باسم مختلف
+const app2 = initializeApp(firebaseConfig2, 'app2');
+
+// الحصول على الخدمات لكل تطبيق
+const db = getFirestore(app1);
+
+const storage = getStorage(app2);
+
+export { db, storage };

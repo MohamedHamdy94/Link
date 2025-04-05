@@ -2,17 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { getDrivers } from '@/lib/firebase/firestore';
-import { getSession } from '@/lib/firebase/auth';
+// import { getSession } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+// import Link from 'next/link';
 import DriverCard from './DriverCard';
 import FilterButtons from '../ui/FilterButtons';
+import { Driver } from '@/lib/interface';
 
 const DriversList = () => {
-  const router = useRouter();
+  // const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [drivers, setDrivers] = useState<any[]>([]);
+  const [drivers, setDrivers] = useState([]);
   const [filter, setFilter] = useState('مانلفت');
 
   useEffect(() => {
@@ -20,7 +21,7 @@ const DriversList = () => {
       try {
         const result = await getDrivers();
         if (result.success) {
-          setDrivers(result.data as any[]);
+          setDrivers(result.data as []);
           setLoading(false);
         } else {
           setError('فشل في تحميل بيانات السائق');
@@ -35,7 +36,7 @@ const DriversList = () => {
     fetchDrivers();
   }, []);
   const filteredDrivers = drivers.filter(
-    (driver) => driver.equipmentType === filter
+    (driver:Driver) => driver.equipmentType === filter
   );
   if (loading) {
     return (
@@ -68,7 +69,7 @@ const DriversList = () => {
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-2 md:gap-12">
           {' '}
-          {filteredDrivers.map((driver) => (
+          {filteredDrivers.map((driver:Driver) => (
             <DriverCard key={driver.id} driver={driver} />
           ))}
         </div>

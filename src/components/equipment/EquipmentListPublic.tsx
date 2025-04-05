@@ -1,16 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import FilterButtons from '../ui/FilterButtons';
-import { createEquipment, getEquipments } from '@/lib/firebase/firestore';
+import {  getEquipments } from '@/lib/firebase/firestore';
+import {  Equipment } from '@/lib/interface';
 
 const EquipmentListPublic = () => {
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [equipment, setEquipment] = useState<any[]>([]);
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [filterType, setFilterType] = useState('all'); 
   const [filter, setFilter] = useState('مانلفت');
   
@@ -19,7 +17,7 @@ const EquipmentListPublic = () => {
       try {
          const result = await getEquipments();
             if (result.success) {
-              setEquipment(result.data as object[] );
+              setEquipment(result.data as Equipment[] );
               setLoading(false);
             } else {
               setError('فشل في تحميل بيانات السائق');
