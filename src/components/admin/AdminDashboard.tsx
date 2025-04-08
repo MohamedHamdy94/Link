@@ -15,7 +15,7 @@
 //   const [users, setUsers] = useState<User[]>([]);
 //   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
 //   const [filter, setFilter] = useState('all'); // 'all', 'verified', 'unverified'
-//   const [userType, setUserType] = useState('all'); // 'all', 'driver', 'equipmentOwner'
+//   const [userType, setUserType] = useState('all'); // 'all', 'drivers', 'equipmentOwners'
 //   const [searchTerm, setSearchTerm] = useState('');
 
 //   useEffect(() => {
@@ -62,10 +62,10 @@
 //     }
     
 //     // Filter by user type
-//     if (userType === 'driver') {
-//       result = result.filter(user => user.userType === 'driver');
-//     } else if (userType === 'equipmentOwner') {
-//       result = result.filter(user => user.userType === 'equipmentOwner');
+//     if (userType === 'drivers') {
+//       result = result.filter(user => user.userType === 'drivers');
+//     } else if (userType === 'equipmentOwners') {
+//       result = result.filter(user => user.userType === 'equipmentOwners');
 //     }
     
 //     // Filter by search term
@@ -79,7 +79,7 @@
 //     setFilteredUsers(result);
 //   }, [filter, userType, searchTerm, users]);
 
-//   const handleToggleVerification = async (  userType: 'driver' | 'equipmentOwner' | 'admin';
+//   const handleToggleVerification = async (  userType: 'drivers' | 'equipmentOwners' | 'admin';
 //     ,userId: string, currentStatus: boolean) => {
 //     setError('');
 //     setSuccess('');
@@ -192,9 +192,9 @@
 //               جميع المستخدمين
 //             </button>
 //             <button
-//               onClick={() => setUserType('driver')}
+//               onClick={() => setUserType('drivers')}
 //               className={`px-3 py-1 rounded-md text-sm ${
-//                 userType === 'driver' 
+//                 userType === 'drivers' 
 //                   ? 'bg-blue-600 text-white' 
 //                   : 'bg-gray-200 text-gray-800'
 //               }`}
@@ -202,9 +202,9 @@
 //               السائقين
 //             </button>
 //             <button
-//               onClick={() => setUserType('equipmentOwner')}
+//               onClick={() => setUserType('equipmentOwners')}
 //               className={`px-3 py-1 rounded-md text-sm ${
-//                 userType === 'equipmentOwner' 
+//                 userType === 'equipmentOwners' 
 //                   ? 'bg-blue-600 text-white' 
 //                   : 'bg-gray-200 text-gray-800'
 //               }`}
@@ -286,7 +286,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [filter, setFilter] = useState<'all' | 'verified' | 'unverified'>('all');
-  const [userType, setUserType] = useState<'all' | 'driver' | 'equipmentOwner'>('all');
+  const [userType, setUserType] = useState<'all' | 'drivers' | 'equipmentOwners'>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -332,10 +332,10 @@ const AdminDashboard = () => {
     }
     
     // Filter by user type
-    if (userType === 'driver') {
-      result = result.filter(user => user.userType === 'driver');
-    } else if (userType === 'equipmentOwner') {
-      result = result.filter(user => user.userType === 'equipmentOwner');
+    if (userType === 'drivers') {
+      result = result.filter(user => user.userType === 'drivers');
+    } else if (userType === 'equipmentOwners') {
+      result = result.filter(user => user.userType === 'equipmentOwners');
     }
     
     // Filter by search term
@@ -350,7 +350,7 @@ const AdminDashboard = () => {
   }, [filter, userType, searchTerm, users]);
 
   const handleToggleVerification = async (
-    userType: 'driver' | 'equipmentOwner', 
+    userType: 'drivers' | 'equipmentOwners', 
     userId: string, 
     currentStatus: boolean
   ) => {
@@ -465,9 +465,9 @@ const AdminDashboard = () => {
               جميع المستخدمين
             </button>
             <button
-              onClick={() => setUserType('driver')}
+              onClick={() => setUserType('drivers')}
               className={`px-3 py-1 rounded-md text-sm ${
-                userType === 'driver' 
+                userType === 'drivers' 
                   ? 'bg-blue-600 text-white' 
                   : 'bg-gray-200 text-gray-800'
               }`}
@@ -475,9 +475,9 @@ const AdminDashboard = () => {
               السائقين
             </button>
             <button
-              onClick={() => setUserType('equipmentOwner')}
+              onClick={() => setUserType('equipmentOwners')}
               className={`px-3 py-1 rounded-md text-sm ${
-                userType === 'equipmentOwner' 
+                userType === 'equipmentOwners' 
                   ? 'bg-blue-600 text-white' 
                   : 'bg-gray-200 text-gray-800'
               }`}
