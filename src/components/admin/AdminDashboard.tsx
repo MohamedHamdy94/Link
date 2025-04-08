@@ -308,8 +308,25 @@ const AdminDashboard = () => {
     try {
       const result = await getAllUsers();
       if (result.success && result.data) {
-        console.log(result.data)
-        setUsers(result.data);
+        const formattedUsers: User[] = result.data.map(user => ({
+          id: user.id,
+          name: user.name || 'غير محدد', // تعيين قيمة افتراضية إذا لم تكن موجودة
+          phoneNumber: user.phoneNumber || 'غير محدد', // تعيين قيمة افتراضية إذا لم تكن موجودة
+          userType: user.userType === 'driver' ? 'driver' : 'equipmentOwner', // تأكد من تطابق القيم
+          isVerified: user.isVerified || false, // تعيين قيمة افتراضية
+          createdAt: user.createdAt ? new Date(user.createdAt) : new Date(), // تعيين تاريخ افتراضي
+          updatedAt: user.updatedAt ? new Date(user.updatedAt) : undefined,
+          age: user.age,
+          equipmentType: user.equipmentType,
+          hasLicense: user.hasLicense,
+          isAvailable: user.isAvailable,
+          equipmentDetails: user.equipmentDetails,
+          photoUrl: user.photoUrl,
+          password: user.password,
+        }));
+        console.log(formattedUsers)
+        setUsers(formattedUsers);
+
         setFilteredUsers(result.data);
       } else {
         setError(result.error || 'فشل في تحميل بيانات المستخدمين');
