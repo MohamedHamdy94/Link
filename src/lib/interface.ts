@@ -10,6 +10,16 @@ export interface Driver {
   phoneNumber: string;
   isVerified: boolean;
 }
+export interface User {
+  id: string;
+  name: string;
+  age: number;
+  photoUrl?: string;
+  phoneNumber: string;
+  isVerified: boolean;
+  password:string;
+  userType:"driver" | "equipmentOwner"
+}
 export interface UpdateResult<T = Driver> {
   success: boolean;
   data?: T;

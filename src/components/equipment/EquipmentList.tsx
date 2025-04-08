@@ -5,8 +5,9 @@ import { getOwnerEquipment } from '@/lib/firebase/firestore';
 import { getSession } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Equipment } from '@/lib/interface';
 
-const EquipmentCard = ({ equipment }: { equipment: any }) => {
+const EquipmentCard = ({ equipment }: { equipment: Equipment }) => {
   return (
     <div className="bg-white overflow-hidden shadow-md rounded-lg">
       <div className="h-48 w-full overflow-hidden">
@@ -53,7 +54,7 @@ const EquipmentList = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [equipment, setEquipment] = useState<any[]>([]);
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
   
   useEffect(() => {
     const fetchEquipment = async () => {

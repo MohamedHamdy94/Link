@@ -12,6 +12,7 @@ import {
   DocumentData
 } from 'firebase/firestore';
 import { db } from './config';
+import { Equipment,Driver,OwnerData } from '@/lib/interface';
 
 // User collections
 const DRIVERS_COLLECTION = 'drivers';
@@ -19,11 +20,13 @@ const EQUIPMENT_OWNERS_COLLECTION = 'equipmentOwners';
 const EQUIPMENT_COLLECTION = 'equipment';
 
 // Driver functions
-export const createDriver = async (driverId: string, driverData: any) => {
+export const createDriver = async (driverId: string, driverData: Driver) => {
   try {
     await setDoc(doc(db, DRIVERS_COLLECTION, driverId), {
       ...driverData,
       isVerified: false,
+      userType:'drivers' ,
+
       createdAt: new Date(),
       updatedAt: new Date()
     });
@@ -62,7 +65,7 @@ export const getDriver = async (driverId: string) => {
   }
 };
 
-export const updateDriver = async (driverId: string, driverData: any) => {
+export const updateDriver = async (driverId: string, driverData: Driver) => {
   try {
     await updateDoc(doc(db, DRIVERS_COLLECTION, driverId), {
       ...driverData,
@@ -75,26 +78,17 @@ export const updateDriver = async (driverId: string, driverData: any) => {
   }
 };
 
-export const verifyDriver = async (driverId: string) => {
-  try {
-    await updateDoc(doc(db, DRIVERS_COLLECTION, driverId), {
-      isVerified: true,
-      updatedAt: new Date()
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error verifying driver:', error);
-    return { success: false, error };
-  }
-};
+
 
 // Equipment Owner functions
-export const createEquipmentOwner = async (ownerId: string, ownerData: any) => {
+export const createEquipmentOwner = async (ownerId: string, ownerData: OwnerData) => {
   try {
     await setDoc(doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId), {
       ...ownerData,
       isVerified: false,
       createdAt: new Date(),
+      userType:'equipmentOwners' ,
+
       updatedAt: new Date()
     });
     return { success: true };
@@ -118,7 +112,7 @@ export const getEquipmentOwner = async (ownerId: string) => {
   }
 };
 
-export const updateEquipmentOwner = async (ownerId: string, ownerData: any) => {
+export const updateEquipmentOwner = async (ownerId: string, ownerData: OwnerData) => {
   try {
     await updateDoc(doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId), {
       ...ownerData,
@@ -131,21 +125,9 @@ export const updateEquipmentOwner = async (ownerId: string, ownerData: any) => {
   }
 };
 
-export const verifyEquipmentOwner = async (ownerId: string) => {
-  try {
-    await updateDoc(doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId), {
-      isVerified: true,
-      updatedAt: new Date()
-    });
-    return { success: true };
-  } catch (error) {
-    console.error('Error verifying equipment owner:', error);
-    return { success: false, error };
-  }
-};
 
 // Equipment functions
-export const createEquipment = async (equipmentData: any) => {
+export const createEquipment = async (equipmentData: Equipment) => {
   try {
     const equipmentRef = doc(collection(db, EQUIPMENT_COLLECTION));
     await setDoc(equipmentRef, {
@@ -187,7 +169,7 @@ export const getEquipments = async () => {
     return { success: false, error };
   }
 };
-export const updateEquipment = async (equipmentId: string, equipmentData: any) => {
+export const updateEquipment = async (equipmentId: string, equipmentData: Equipment) => {
   try {
     await updateDoc(doc(db, EQUIPMENT_COLLECTION, equipmentId), {
       ...equipmentData,
