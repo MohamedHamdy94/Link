@@ -9,16 +9,26 @@ export interface Driver {
   photoUrl?: string;
   phoneNumber: string;
   isVerified: boolean;
-  userType:"drivers" 
+  userType:string
 }
 export interface User {
   id: string;
   name: string;
-  photoUrl?: string;
   phoneNumber: string;
+  userType: 'driver' | 'equipmentOwner';
   isVerified: boolean;
-  password:string;
-  userType: 'drivers' | 'equipmentOwners' | 'admin';
+  createdAt: Date;
+  updatedAt?: Date;
+  // حقول خاصة بالسائقين
+  age?: number;
+  equipmentType?: string;
+  hasLicense?: boolean;
+  isAvailable?: boolean;
+  // حقول خاصة بأصحاب المعدات
+  equipmentDetails?: string;
+  photoUrl?: string;
+  // حقول مشتركة
+  password?: string; // لا ينصح بتخزينه في الواجهة الأمامية
 }
 export interface UpdateResult<T = Driver> {
   success: boolean;
@@ -42,5 +52,5 @@ export interface OwnerData {
   phoneNumber?: string;      // Optional string for the phone number
   isVerified?: boolean;      // Optional boolean for the verification status
   equipmentDetails?: string; // Optional string for the equipment details
-  userType:"equipmentOwners" 
+  userType:string 
 }

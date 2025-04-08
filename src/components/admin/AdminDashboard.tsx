@@ -308,6 +308,7 @@ const AdminDashboard = () => {
     try {
       const result = await getAllUsers();
       if (result.success && result.data) {
+        console.log(result.data)
         setUsers(result.data);
         setFilteredUsers(result.data);
       } else {

@@ -22,12 +22,13 @@ const RegisterForm = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [whatsAppLink, setWhatsAppLink] = useState('');
+  const [photoUrl, setphotoUrl] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    
+    setphotoUrl('')
     // Validate passwords match
     if (password !== confirmPassword) {
       setError('كلمات المرور غير متطابقة');
