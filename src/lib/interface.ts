@@ -9,6 +9,7 @@ export interface Driver {
   photoUrl?: string;
   phoneNumber: string;
   isVerified: boolean;
+  userType:"drivers" 
 }
 export interface User {
   id: string;
@@ -17,7 +18,7 @@ export interface User {
   phoneNumber: string;
   isVerified: boolean;
   password:string;
-  userType:"driver" | "equipmentOwner"
+  userType: 'drivers' | 'equipmentOwners' | 'admin';
 }
 export interface UpdateResult<T = Driver> {
   success: boolean;
@@ -41,4 +42,5 @@ export interface OwnerData {
   phoneNumber?: string;      // Optional string for the phone number
   isVerified?: boolean;      // Optional boolean for the verification status
   equipmentDetails?: string; // Optional string for the equipment details
+  userType:"equipmentOwners" 
 }
