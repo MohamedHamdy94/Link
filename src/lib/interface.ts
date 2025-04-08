@@ -15,19 +15,16 @@ export interface User {
   id: string;
   name: string;
   phoneNumber: string;
-  userType: 'drivers' | 'equipmentOwners';
+  userType: 'drivers' | 'equipmentOwners'; // تأكد من أن القيم تتطابق مع ما لديك
   isVerified: boolean;
   createdAt: Date;
-  updatedAt?: Date;
-  // حقول خاصة بالسائقين
-  age?: number;
-  equipmentType?: string;
-  hasLicense?: boolean;
-  isAvailable?: boolean;
-  // حقول خاصة بأصحاب المعدات
-  equipmentDetails?: string;
-  photoUrl?: string;
-  // حقول مشتركة
+  updatedAt?: Date; // هذا الحقل اختياري
+  age?: number; // هذا الحقل اختياري
+  equipmentType?: string; // هذا الحقل اختياري
+  hasLicense?: boolean; // هذا الحقل اختياري
+  isAvailable?: boolean; // هذا الحقل اختياري
+  equipmentDetails?: string; // هذا الحقل اختياري
+  photoUrl?: string; // هذا الحقل اختياري
   password?: string; // لا ينصح بتخزينه في الواجهة الأمامية
 }
 export interface UpdateResult<T = Driver> {

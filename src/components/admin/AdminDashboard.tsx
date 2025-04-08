@@ -312,7 +312,7 @@ const AdminDashboard = () => {
           id: user.id,
           name: user.name || 'غير محدد', // تعيين قيمة افتراضية إذا لم تكن موجودة
           phoneNumber: user.phoneNumber || 'غير محدد', // تعيين قيمة افتراضية إذا لم تكن موجودة
-          userType: user.userType === 'driver' ? 'driver' : 'equipmentOwner', // تأكد من تطابق القيم
+          userType: user.userType === 'drivers' ? 'drivers' : 'equipmentOwners', // تأكد من تطابق القيم
           isVerified: user.isVerified || false, // تعيين قيمة افتراضية
           createdAt: user.createdAt ? new Date(user.createdAt) : new Date(), // تعيين تاريخ افتراضي
           updatedAt: user.updatedAt ? new Date(user.updatedAt) : undefined,
