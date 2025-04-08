@@ -283,10 +283,10 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [filter, setFilter] = useState<'all' | 'verified' | 'unverified'>('all');
-  const [userType, setUserType] = useState<'all' | 'drivers' | 'equipmentOwners'>('all');
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const [userType, setUserType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -350,7 +350,7 @@ const AdminDashboard = () => {
   }, [filter, userType, searchTerm, users]);
 
   const handleToggleVerification = async (
-    userType: 'drivers' | 'equipmentOwners', 
+    userType: string, 
     userId: string, 
     currentStatus: boolean
   ) => {
