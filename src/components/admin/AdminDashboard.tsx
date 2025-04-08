@@ -276,7 +276,6 @@ import { useRouter } from 'next/navigation';
 import { getAllUsers, updateUserVerificationStatus } from '@/lib/firebase/admin';
 import { getSession, logout } from '@/lib/firebase/auth';
 import UserInfo from "./UserInfo";
-import { User } from '@/lib/interface';
 
 const AdminDashboard = () => {
   const router = useRouter();
