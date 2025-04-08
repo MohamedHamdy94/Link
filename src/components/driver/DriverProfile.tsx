@@ -115,7 +115,7 @@ const DriverProfile = () => {
       
       // Upload new photo if selected
       if (photoFile) {
-        const uploadResult = await uploadDriverPhoto(session.id, photoFile);
+       await uploadDriverPhoto(session.id, photoFile);
      
       }
       
