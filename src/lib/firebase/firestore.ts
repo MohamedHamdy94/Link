@@ -8,7 +8,6 @@ import {
   updateDoc, 
   query, 
   where,
-  deleteDoc,
   DocumentData
 } from 'firebase/firestore';
 import { db } from './config';
@@ -45,7 +44,7 @@ export const getDrivers = async () => {
       drivers.push({ id: doc.id, ...doc.data() });
     });
     return { success: true, data: drivers };
-  } catch (error:any) {
+  } catch (error) {
     console.error('Error getting drivers:', error);
     return { success: false, error: error.message };
   }

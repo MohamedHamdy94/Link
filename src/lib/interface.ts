@@ -13,7 +13,6 @@ export interface Driver {
 export interface User {
   id: string;
   name: string;
-  age: number;
   photoUrl?: string;
   phoneNumber: string;
   isVerified: boolean;

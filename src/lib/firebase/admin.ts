@@ -1,5 +1,5 @@
 import { db } from './config';
-import { collection, getDocs, doc, updateDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc,  } from 'firebase/firestore';
 
 // Get all users (both drivers and equipment owners)
 export const getAllUsers = async () => {
@@ -52,80 +52,11 @@ export const updateUserVerificationStatus = async (userType:string, userId: stri
   }
 };
 
-// Get verified users only
-// export const getVerifiedUsers = async () => {
-//   try {
-//     // Get verified drivers
-//     const driversQuery = query(collection(db, 'drivers'), where('isVerified', '==', true));
-//     const driversSnapshot = await getDocs(driversQuery);
-//     const drivers = driversSnapshot.docs.map(doc => ({
-//       id: doc.id,
-//       ...doc.data(),
-//       userType: 'drivers'
-//     }));
 
-//     // Get verified equipment owners
-//     const ownersQuery = query(collection(db, 'equipmentOwners'), where('isVerified', '==', true));
-//     const ownersSnapshot = await getDocs(ownersQuery);
-//     const owners = ownersSnapshot.docs.map(doc => ({
-//       id: doc.id,
-//       ...doc.data(),
-//       userType: 'equipmentOwners'
-//     }));
-
-//     // Combine and return verified users
-//     return {
-//       success: true,
-//       data: [...drivers, ...owners]
-//     };
-//   } catch (error) {
-//     console.error('Error getting verified users:', error);
-//     return {
-//       success: false,
-//       error: 'فشل في جلب بيانات المستخدمين المفعلين'
-//     };
-//   }
-// };
-
-// // Get unverified users only
-// export const getUnverifiedUsers = async () => {
-//   try {
-//     // Get unverified drivers
-//     const driversQuery = query(collection(db, 'drivers'), where('isVerified', '==', false));
-//     const driversSnapshot = await getDocs(driversQuery);
-//     const drivers = driversSnapshot.docs.map(doc => ({
-//       id: doc.id,
-//       ...doc.data(),
-//       userType: 'drivers'
-//     }));
-
-//     // Get unverified equipment owners
-//     const ownersQuery = query(collection(db, 'equipmentOwners'), where('isVerified', '==', false));
-//     const ownersSnapshot = await getDocs(ownersQuery);
-//     const owners = ownersSnapshot.docs.map(doc => ({
-//       id: doc.id,
-//       ...doc.data(),
-//       userType: 'equipmentOwners'
-//     }));
-
-//     // Combine and return unverified users
-//     return {
-//       success: true,
-//       data: [...drivers, ...owners]
-//     };
-//   } catch (error) {
-//     console.error('Error getting unverified users:', error);
-//     return {
-//       success: false,
-//       error: 'فشل في جلب بيانات المستخدمين غير المفعلين'
-//     };
-//   }
-// };
 
 // Check if user is admin
 export const checkAdminRole = async (userId: string) => {
   try {
-    const adminRef = doc(db, 'admins', userId);
     const adminDoc = await getDocs(collection(db, 'admins'));
     const admins = adminDoc.docs.map(doc => ({
       id: doc.id,

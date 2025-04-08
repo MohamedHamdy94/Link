@@ -1,7 +1,7 @@
 "use client";
 
 import { db } from './config';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
 // Custom authentication functions
 let currentSession: {

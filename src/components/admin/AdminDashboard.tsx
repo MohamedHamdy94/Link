@@ -2,16 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAllUsers, updateUserVerificationStatus,getVerifiedUsers, } from '@/lib/firebase/admin';
+import { getAllUsers, updateUserVerificationStatus, } from '@/lib/firebase/admin';
 import { getSession, logout } from '@/lib/firebase/auth';
 import UserInfo from "./UserInfo"
+import { User } from '@/lib/interface';
+
 const AdminDashboard = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [users, setUsers] = useState<any[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [filter, setFilter] = useState('all'); // 'all', 'verified', 'unverified'
   const [userType, setUserType] = useState('all'); // 'all', 'driver', 'equipmentOwner'
   const [searchTerm, setSearchTerm] = useState('');

@@ -3,14 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { getDrivers } from '@/lib/firebase/firestore';
 // import { getSession } from '@/lib/firebase/auth';
-import { useRouter } from 'next/navigation';
 // import Link from 'next/link';
 import DriverCard from './DriverCard';
 import FilterButtons from '../ui/FilterButtons';
 import { Driver } from '@/lib/interface';
 
 const DriversList = () => {
-  // const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [drivers, setDrivers] = useState([]);

@@ -111,19 +111,12 @@ const DriverProfile = () => {
     }
     
     try {
-      let photoUrl = driverData?.photoUrl || '';
+      const photoUrl = driverData?.photoUrl || '';
       
       // Upload new photo if selected
       if (photoFile) {
         const uploadResult = await uploadDriverPhoto(session.id, photoFile);
-        if (uploadResult.success) {
-          let photoUrl = driverData?.photoUrl || '';
-    
-        } else {
-          setError('فشل في رفع الصورة');
-          setLoading(false);
-          return;
-        }
+     
       }
       
       // Update driver data
