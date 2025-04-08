@@ -276,16 +276,17 @@ import { useRouter } from 'next/navigation';
 import { getAllUsers, updateUserVerificationStatus } from '@/lib/firebase/admin';
 import { getSession, logout } from '@/lib/firebase/auth';
 import UserInfo from "./UserInfo";
+import { User } from '@/lib/interface';
 
 const AdminDashboard = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [users, setUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  const [filter, setFilter] = useState('all');
-  const [userType, setUserType] = useState('all');
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<OwnerData[]|Driver[]>([]);
+  const [filter, setFilter] = useState<'all' | 'verified' | 'unverified'>('all');
+  const [userType, setUserType] = useState<'all' | 'drivers' | 'equipmentOwners'>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
