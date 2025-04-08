@@ -15,7 +15,7 @@ export interface User {
   id: string;
   name: string;
   phoneNumber: string;
-  userType: 'driver' | 'equipmentOwner';
+  userType: 'drivers' | 'equipmentOwners';
   isVerified: boolean;
   createdAt: Date;
   updatedAt?: Date;
