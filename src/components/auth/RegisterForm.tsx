@@ -48,6 +48,7 @@ const RegisterForm = () => {
           equipmentType,
           isAvailable,
           hasLicense,
+          photoUrl,
           userType ,
           isVerified: false,
           createdAt: new Date()
@@ -66,6 +67,7 @@ const RegisterForm = () => {
           password,
           name,
           userType,
+          photoUrl,
           isVerified: false,
           createdAt: new Date()
         });
