@@ -1,26 +1,52 @@
+import { User } from '../interface';
 import { db } from './config';
 import { collection, getDocs, doc, updateDoc,  } from 'firebase/firestore';
 
 // Get all users (both drivers and equipment owners)
-export const getAllUsers = async () => {
+export const getAllUsers = async (): Promise<{
+  success: boolean;
+  data?: User[];
+  error?: string;
+}> => {
   try {
-    // Get drivers
+    // جلب السائقين
     const driversSnapshot = await getDocs(collection(db, 'drivers'));
-    const drivers = driversSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      userType: 'drivers'
-    }));
+    const drivers: User[] = driversSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name || 'غير محدد',
+        phoneNumber: data.phoneNumber || 'غير محدد',
+        userType: 'drivers',
+        isVerified: data.isVerified || false,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate(),
+        age: data.age,
+        equipmentType: data.equipmentType,
+        hasLicense: data.hasLicense,
+        isAvailable: data.isAvailable,
+        password: data.password
+      };
+    });
 
-    // Get equipment owners
+    // جلب أصحاب المعدات
     const ownersSnapshot = await getDocs(collection(db, 'equipmentOwners'));
-    const owners = ownersSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      userType: 'equipmentOwners'
-    }));
+    const owners: User[] = ownersSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name: data.name || 'غير محدد',
+        phoneNumber: data.phoneNumber || 'غير محدد',
+        userType: 'equipmentOwners',
+        isVerified: data.isVerified || false,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate(),
+        equipmentDetails: data.equipmentDetails,
+        photoUrl: data.photoUrl,
+        password: data.password
+      };
+    });
 
-    // Combine and return all users
     return {
       success: true,
       data: [...drivers, ...owners]
