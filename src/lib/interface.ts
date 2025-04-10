@@ -4,31 +4,43 @@ export interface Driver {
   name: string;
   age: number;
   equipmentType: string;
-  isAvailable: boolean;
   hasLicense: boolean;
+  isAvailable: boolean;
   photoUrl?: string;
   phoneNumber: string;
   isVerified: boolean;
-  userType:string,
-  password?: string, // لا ينصح بتخزينه في الواجهة الأمامية
-  createdAt?:Date
+  userType: string;
+  password?: string; // لا ينصح بتخزينه في الواجهة الأمامية
+  createdAt?: Date;
+}
+export interface OwnerData {
+  id?: string;
+  photoUrl?: string; // Optional string for the photo URL
+  name?: string; // Optional string for the owner's name
+  phoneNumber?: string; // Optional string for the phone number
+  isVerified?: boolean; // Optional boolean for the verification status
+  equipmentDetails?: string; // Optional string for the equipment details
+  userType: string;
+  password?: string;
+  createdAt: Date;
 }
 export interface User {
-  id: string;
+  id: string | undefined;
   name: string;
   phoneNumber: string;
-  userType: 'drivers' | 'equipmentOwners'; // تأكد من أن القيم تتطابق مع ما لديك
+  userType: 'drivers' | 'equipmentOwners';
   isVerified: boolean;
   createdAt: Date;
-  updatedAt?: Date; // هذا الحقل اختياري
-  age?: number; // هذا الحقل اختياري
-  equipmentType?: string; // هذا الحقل اختياري
-  hasLicense?: boolean; // هذا الحقل اختياري
-  isAvailable?: boolean; // هذا الحقل اختياري
-  equipmentDetails?: string; // هذا الحقل اختياري
-  photoUrl?: string; // هذا الحقل اختياري
-  password?: string; // لا ينصح بتخزينه في الواجهة الأمامية
+  updatedAt: Date | undefined;
+  password?: string;
+  age?: number;
+  equipmentType?: string;
+  hasLicense?: boolean;
+  photoUrl?: string;
+  isAvailable?: boolean;
+
 }
+
 export interface UpdateResult<T = Driver> {
   success: boolean;
   data?: T;
@@ -47,14 +59,14 @@ export interface Equipment {
 }
 export interface OwnerData {
   id?: string;
-  photoUrl?: string;         // Optional string for the photo URL
-  name?: string;             // Optional string for the owner's name
-  phoneNumber?: string;      // Optional string for the phone number
-  isVerified?: boolean;      // Optional boolean for the verification status
+  photoUrl?: string; // Optional string for the photo URL
+  name?: string; // Optional string for the owner's name
+  phoneNumber?: string; // Optional string for the phone number
+  isVerified?: boolean; // Optional boolean for the verification status
   equipmentDetails?: string; // Optional string for the equipment details
-  userType:string ,
-  password?: string, 
-  createdAt:Date;
+  userType: string;
+  password?: string;
+  createdAt: Date;
 }
 
 // في ملف types/userTypes.ts أو أعلى الملف

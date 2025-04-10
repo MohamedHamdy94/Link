@@ -284,7 +284,7 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<OwnerData[]|Driver[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [filter, setFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [userType, setUserType] = useState<'all' | 'drivers' | 'equipmentOwners'>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -320,7 +320,6 @@ const AdminDashboard = () => {
           equipmentType: user.equipmentType,
           hasLicense: user.hasLicense,
           isAvailable: user.isAvailable,
-          equipmentDetails: user.equipmentDetails,
           photoUrl: user.photoUrl,
           password: user.password,
         }));

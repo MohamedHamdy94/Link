@@ -3,7 +3,7 @@ import { UserInfoProps } from '@/lib/interface';
 
 const UserInfo: React.FC<UserInfoProps> = ({ user, handleToggleVerification }) => {
   return (
-    <tr key={user.id}>
+    <tr >
       <td className="px-6 py-4 whitespace-nowrap text-right">
         <div className="text-sm font-medium text-gray-900">{user.name || 'غير محدد'}</div>
       </td>
@@ -26,7 +26,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ user, handleToggleVerification }) =
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <button
-          onClick={() => handleToggleVerification(user.userType, user.id, user.isVerified)}
+          onClick={() => handleToggleVerification(user.userType, user.phoneNumber, user.isVerified)}
           className={`px-3 py-1 rounded-md text-xs text-white ${
             user.isVerified 
               ? 'bg-red-600 hover:bg-red-700' 
