@@ -25,10 +25,10 @@
 //         router.push('/auth/login');
 //         return;
 //       }
-
+      
 //       fetchUsers();
 //     };
-
+    
 //     checkAdminAccess();
 //   }, [router]);
 
@@ -53,29 +53,29 @@
 //   useEffect(() => {
 //     // Apply filters whenever filter state changes
 //     let result = [...users];
-
+    
 //     // Filter by verification status
 //     if (filter === 'verified') {
 //       result = result.filter(user => user.isVerified);
 //     } else if (filter === 'unverified') {
 //       result = result.filter(user => !user.isVerified);
 //     }
-
+    
 //     // Filter by user type
 //     if (userType === 'drivers') {
 //       result = result.filter(user => user.userType === 'drivers');
 //     } else if (userType === 'equipmentOwners') {
 //       result = result.filter(user => user.userType === 'equipmentOwners');
 //     }
-
+    
 //     // Filter by search term
 //     if (searchTerm) {
-//       result = result.filter(user =>
-//         user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//       result = result.filter(user => 
+//         user.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
 //         user.phoneNumber?.includes(searchTerm)
 //       );
 //     }
-
+    
 //     setFilteredUsers(result);
 //   }, [filter, userType, searchTerm, users]);
 
@@ -83,13 +83,13 @@
 //     ,userId: string, currentStatus: boolean) => {
 //     setError('');
 //     setSuccess('');
-
+    
 //     try {
 //       const result = await updateUserVerificationStatus(usertype, userId, !currentStatus);
-
+      
 //       if (result.success) {
 //         setSuccess(`تم ${!currentStatus ? 'تفعيل' : 'إلغاء تفعيل'} الحساب بنجاح`);
-
+        
 //         // Update local state
 //         const updatedUsers = users.map(user => {
 //           if (user.id === userId) {
@@ -97,7 +97,7 @@
 //           }
 //           return user;
 //         });
-
+        
 //         setUsers(updatedUsers);
 //       } else {
 //         setError('فشل في تحديث حالة الحساب');
@@ -132,27 +132,27 @@
 //         </button>
 //         <h2 className="text-2xl font-bold text-gray-800">لوحة تحكم المسؤول</h2>
 //       </div>
-
+      
 //       {error && (
 //         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-right">
 //           {error}
 //         </div>
 //       )}
-
+      
 //       {success && (
 //         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-right">
 //           {success}
 //         </div>
 //       )}
-
+      
 //       <div className="mb-6">
 //         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 //           <div className="flex flex-wrap gap-2">
 //             <button
 //               onClick={() => setFilter('all')}
 //               className={`px-3 py-1 rounded-md text-sm ${
-//                 filter === 'all'
-//                   ? 'bg-blue-600 text-white'
+//                 filter === 'all' 
+//                   ? 'bg-blue-600 text-white' 
 //                   : 'bg-gray-200 text-gray-800'
 //               }`}
 //             >
@@ -161,8 +161,8 @@
 //             <button
 //               onClick={() => setFilter('verified')}
 //               className={`px-3 py-1 rounded-md text-sm ${
-//                 filter === 'verified'
-//                   ? 'bg-green-600 text-white'
+//                 filter === 'verified' 
+//                   ? 'bg-green-600 text-white' 
 //                   : 'bg-gray-200 text-gray-800'
 //               }`}
 //             >
@@ -171,21 +171,21 @@
 //             <button
 //               onClick={() => setFilter('unverified')}
 //               className={`px-3 py-1 rounded-md text-sm ${
-//                 filter === 'unverified'
-//                   ? 'bg-red-600 text-white'
+//                 filter === 'unverified' 
+//                   ? 'bg-red-600 text-white' 
 //                   : 'bg-gray-200 text-gray-800'
 //               }`}
 //             >
 //               الحسابات الغير مفعلة
 //             </button>
 //           </div>
-
+          
 //           <div className="flex flex-wrap gap-2">
 //             <button
 //               onClick={() => setUserType('all')}
 //               className={`px-3 py-1 rounded-md text-sm ${
-//                 userType === 'all'
-//                   ? 'bg-blue-600 text-white'
+//                 userType === 'all' 
+//                   ? 'bg-blue-600 text-white' 
 //                   : 'bg-gray-200 text-gray-800'
 //               }`}
 //             >
@@ -194,8 +194,8 @@
 //             <button
 //               onClick={() => setUserType('drivers')}
 //               className={`px-3 py-1 rounded-md text-sm ${
-//                 userType === 'drivers'
-//                   ? 'bg-blue-600 text-white'
+//                 userType === 'drivers' 
+//                   ? 'bg-blue-600 text-white' 
 //                   : 'bg-gray-200 text-gray-800'
 //               }`}
 //             >
@@ -204,8 +204,8 @@
 //             <button
 //               onClick={() => setUserType('equipmentOwners')}
 //               className={`px-3 py-1 rounded-md text-sm ${
-//                 userType === 'equipmentOwners'
-//                   ? 'bg-blue-600 text-white'
+//                 userType === 'equipmentOwners' 
+//                   ? 'bg-blue-600 text-white' 
 //                   : 'bg-gray-200 text-gray-800'
 //               }`}
 //             >
@@ -213,7 +213,7 @@
 //             </button>
 //           </div>
 //         </div>
-
+        
 //         <div className="mt-4">
 //           <input
 //             type="text"
@@ -225,7 +225,7 @@
 //           />
 //         </div>
 //       </div>
-
+      
 //       {filteredUsers.length === 0 ? (
 //         <div className="text-center py-12">
 //           <p className="text-gray-500">لا يوجد مستخدمين مطابقين للبحث</p>
@@ -254,10 +254,10 @@
 //             </thead>
 //             <tbody className="bg-white divide-y divide-gray-200">
 //             {filteredUsers.map((user) => (
-//   <UserInfo
-//     key={user.id}
-//     user={user}
-//     handleToggleVerification={handleToggleVerification}
+//   <UserInfo 
+//     key={user.id} 
+//     user={user} 
+//     handleToggleVerification={handleToggleVerification} 
 //   />
 // ))}
 //             </tbody>
@@ -269,17 +269,14 @@
 // };
 
 // export default AdminDashboard;
-'use client';
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  getAllUsers,
-  updateUserVerificationStatus,
-} from '@/lib/firebase/admin';
+import { getAllUsers, updateUserVerificationStatus } from '@/lib/firebase/admin';
 import { getSession, logout } from '@/lib/firebase/auth';
-import UserInfo from './UserInfo';
-import { User, OwnerData, Driver } from '@/lib/interface';
+import UserInfo from "./UserInfo";
+import { User,OwnerData,Driver } from '@/lib/interface';
 
 const AdminDashboard = () => {
   const router = useRouter();
@@ -287,15 +284,9 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<OwnerData[] | Driver[]>(
-    []
-  );
-  const [filter, setFilter] = useState<'all' | 'verified' | 'unverified'>(
-    'all'
-  );
-  const [userType, setUserType] = useState<
-    'all' | 'drivers' | 'equipmentOwners'
-  >('all');
+  const [filteredUsers, setFilteredUsers] = useState<OwnerData[]|Driver[]>([]);
+  const [filter, setFilter] = useState<'all' | 'verified' | 'unverified'>('all');
+  const [userType, setUserType] = useState<'all' | 'drivers' | 'equipmentOwners'>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -305,10 +296,10 @@ const AdminDashboard = () => {
         router.push('/auth/login');
         return;
       }
-
+      
       fetchUsers();
     };
-
+    
     checkAdminAccess();
   }, [router]);
 
@@ -317,13 +308,13 @@ const AdminDashboard = () => {
     try {
       const result = await getAllUsers();
       if (result.success && result.data) {
-        const formattedUsers: User[] = result.data.map((user) => ({
+        const formattedUsers: User[] = result.data.map(user => ({
           id: user.id,
           name: user.name || 'غير محدد',
-          phoneNumber: user.phoneNumber || 'غير محدد',
-          userType: user.userType === 'drivers' ? 'drivers' : 'equipmentOwners', // تأكد من تطابق القيم
+           phoneNumber: user.phoneNumber || 'غير محدد',
+               userType: user.userType === 'drivers' ? 'drivers' : 'equipmentOwners', // تأكد من تطابق القيم
           isVerified: user.isVerified || false,
-          createdAt: user.createdAt ? new Date(user.createdAt) : new Date(), // تعيين تاريخ افتراضي
+             createdAt: user.createdAt ? new Date(user.createdAt) : new Date(), // تعيين تاريخ افتراضي
           updatedAt: user.updatedAt ? new Date(user.updatedAt) : undefined,
           age: user.age,
           equipmentType: user.equipmentType,
@@ -333,7 +324,7 @@ const AdminDashboard = () => {
           photoUrl: user.photoUrl,
           password: user.password,
         }));
-        console.log(formattedUsers);
+        console.log(formattedUsers)
         setUsers(formattedUsers);
 
         setFilteredUsers(result.data);
@@ -350,61 +341,54 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     let result = [...users];
-
+    
     // Filter by verification status
     if (filter === 'verified') {
-      result = result.filter((user) => user.isVerified);
+      result = result.filter(user => user.isVerified);
     } else if (filter === 'unverified') {
-      result = result.filter((user) => !user.isVerified);
+      result = result.filter(user => !user.isVerified);
     }
-
+    
     // Filter by user type
     if (userType === 'drivers') {
-      result = result.filter((user) => user.userType === 'drivers');
+      result = result.filter(user => user.userType === 'drivers');
     } else if (userType === 'equipmentOwners') {
-      result = result.filter((user) => user.userType === 'equipmentOwners');
+      result = result.filter(user => user.userType === 'equipmentOwners');
     }
-
+    
     // Filter by search term
     if (searchTerm) {
-      result = result.filter(
-        (user) =>
-          user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.phoneNumber?.includes(searchTerm)
+      result = result.filter(user => 
+        (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        user.phoneNumber?.includes(searchTerm))
       );
     }
-
+    
     setFilteredUsers(result);
   }, [filter, userType, searchTerm, users]);
 
   const handleToggleVerification = async (
-    userType: string,
-    userId: string,
+    userType: string, 
+    userId: string, 
     currentStatus: boolean
   ) => {
     setError('');
     setSuccess('');
-
+    
     try {
-      const result = await updateUserVerificationStatus(
-        userType,
-        userId,
-        !currentStatus
-      );
-
+      const result = await updateUserVerificationStatus(userType, userId, !currentStatus);
+      
       if (result.success) {
-        setSuccess(
-          `تم ${!currentStatus ? 'تفعيل' : 'إلغاء تفعيل'} الحساب بنجاح`
-        );
-
+        setSuccess(`تم ${!currentStatus ? 'تفعيل' : 'إلغاء تفعيل'} الحساب بنجاح`);
+        
         // Update local state
-        const updatedUsers = users.map((user) => {
+        const updatedUsers = users.map(user => {
           if (user.id === userId) {
             return { ...user, isVerified: !currentStatus };
           }
           return user;
         });
-
+        
         setUsers(updatedUsers);
       } else {
         setError(result.error || 'فشل في تحديث حالة الحساب');
@@ -439,27 +423,27 @@ const AdminDashboard = () => {
         </button>
         <h2 className="text-2xl font-bold text-gray-800">لوحة تحكم المسؤول</h2>
       </div>
-
+      
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-right">
           {error}
         </div>
       )}
-
+      
       {success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-right">
           {success}
         </div>
       )}
-
+      
       <div className="mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setFilter('all')}
               className={`px-3 py-1 rounded-md text-sm ${
-                filter === 'all'
-                  ? 'bg-blue-600 text-white'
+                filter === 'all' 
+                  ? 'bg-blue-600 text-white' 
                   : 'bg-gray-200 text-gray-800'
               }`}
             >
@@ -468,8 +452,8 @@ const AdminDashboard = () => {
             <button
               onClick={() => setFilter('verified')}
               className={`px-3 py-1 rounded-md text-sm ${
-                filter === 'verified'
-                  ? 'bg-green-600 text-white'
+                filter === 'verified' 
+                  ? 'bg-green-600 text-white' 
                   : 'bg-gray-200 text-gray-800'
               }`}
             >
@@ -478,21 +462,21 @@ const AdminDashboard = () => {
             <button
               onClick={() => setFilter('unverified')}
               className={`px-3 py-1 rounded-md text-sm ${
-                filter === 'unverified'
-                  ? 'bg-red-600 text-white'
+                filter === 'unverified' 
+                  ? 'bg-red-600 text-white' 
                   : 'bg-gray-200 text-gray-800'
               }`}
             >
               الحسابات الغير مفعلة
             </button>
           </div>
-
+          
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setUserType('all')}
               className={`px-3 py-1 rounded-md text-sm ${
-                userType === 'all'
-                  ? 'bg-blue-600 text-white'
+                userType === 'all' 
+                  ? 'bg-blue-600 text-white' 
                   : 'bg-gray-200 text-gray-800'
               }`}
             >
@@ -501,8 +485,8 @@ const AdminDashboard = () => {
             <button
               onClick={() => setUserType('drivers')}
               className={`px-3 py-1 rounded-md text-sm ${
-                userType === 'drivers'
-                  ? 'bg-blue-600 text-white'
+                userType === 'drivers' 
+                  ? 'bg-blue-600 text-white' 
                   : 'bg-gray-200 text-gray-800'
               }`}
             >
@@ -511,8 +495,8 @@ const AdminDashboard = () => {
             <button
               onClick={() => setUserType('equipmentOwners')}
               className={`px-3 py-1 rounded-md text-sm ${
-                userType === 'equipmentOwners'
-                  ? 'bg-blue-600 text-white'
+                userType === 'equipmentOwners' 
+                  ? 'bg-blue-600 text-white' 
                   : 'bg-gray-200 text-gray-800'
               }`}
             >
@@ -520,7 +504,7 @@ const AdminDashboard = () => {
             </button>
           </div>
         </div>
-
+        
         <div className="mt-4">
           <input
             type="text"
@@ -532,7 +516,7 @@ const AdminDashboard = () => {
           />
         </div>
       </div>
-
+      
       {filteredUsers.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500">لا يوجد مستخدمين مطابقين للبحث</p>
@@ -542,44 +526,29 @@ const AdminDashboard = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   الاسم
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   رقم الهاتف
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   نوع المستخدم
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   حالة التفعيل
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   الإجراءات
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredUsers.map((user) => (
-                <UserInfo
-                  key={user.phoneNumber}
-                  user={user}
-                  handleToggleVerification={handleToggleVerification}
+                <UserInfo 
+                  key={user.phoneNumber} 
+                  user={user} 
+                  handleToggleVerification={handleToggleVerification} 
                 />
               ))}
             </tbody>

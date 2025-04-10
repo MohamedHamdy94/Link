@@ -58,7 +58,7 @@ const RegisterForm = () => {
           setSuccess('تم إنشاء حساب السائق بنجاح');
           setWhatsAppLink(getWhatsAppGroupLink());
         } else {
-          setError(result.error || 'فشل في إنشاء الحساب');
+          setError( 'فشل في إنشاء الحساب');
         }
       } else {
         // Create equipment owner
@@ -76,7 +76,7 @@ const RegisterForm = () => {
           setSuccess('تم إنشاء حساب صاحب المعدات بنجاح');
           setWhatsAppLink(getWhatsAppGroupLink());
         } else {
-          setError(result.error || 'فشل في إنشاء الحساب');
+          setError('فشل في إنشاء الحساب');
         }
       }
     } catch (err) {

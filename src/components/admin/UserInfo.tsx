@@ -1,6 +1,7 @@
 import React from 'react'
+import { UserInfoProps } from '@/lib/interface';
 
-const UserInfo = ({ user, handleToggleVerification }) => {
+const UserInfo: React.FC<UserInfoProps> = ({ user, handleToggleVerification }) => {
   return (
     <tr key={user.id}>
       <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -11,7 +12,7 @@ const UserInfo = ({ user, handleToggleVerification }) => {
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right">
         <div className="text-sm text-gray-500">
-          {user.userType === 'driver' ? 'سائق' : 'صاحب معدات'}
+          {user.userType === 'drivers' ? 'سائق' : 'صاحب معدات'}
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right">

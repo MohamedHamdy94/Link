@@ -1,6 +1,6 @@
 // تعريف نوع بيانات السائق
 export interface Driver {
-  id: string;
+  id?: string;
   name: string;
   age: number;
   equipmentType: string;
@@ -9,7 +9,9 @@ export interface Driver {
   photoUrl?: string;
   phoneNumber: string;
   isVerified: boolean;
-  userType:string
+  userType:string,
+  password?: string, // لا ينصح بتخزينه في الواجهة الأمامية
+  createdAt?:Date
 }
 export interface User {
   id: string;
@@ -38,16 +40,29 @@ export interface Equipment {
   description: string;
   equipmentType: string;
   status: string;
-  price: 250000;
+  price: number;
   photoUrl: string;
   ownerId: string;
   ownerPhone: string;
 }
 export interface OwnerData {
+  id?: string;
   photoUrl?: string;         // Optional string for the photo URL
   name?: string;             // Optional string for the owner's name
   phoneNumber?: string;      // Optional string for the phone number
   isVerified?: boolean;      // Optional boolean for the verification status
   equipmentDetails?: string; // Optional string for the equipment details
-  userType:string 
+  userType:string ,
+  password?: string, 
+  createdAt:Date;
+}
+
+// في ملف types/userTypes.ts أو أعلى الملف
+export interface UserInfoProps {
+  user: User;
+  handleToggleVerification: (
+    userType: 'drivers' | 'equipmentOwners',
+    userId: string,
+    currentStatus: boolean
+  ) => Promise<void>;
 }
