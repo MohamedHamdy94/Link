@@ -13,7 +13,7 @@ export default function AdminLayout({
   
   useEffect(() => {
     const session = getSession();
-    if (!session || session.userType !== 'admin') {
+    if (!session || session.userType !== 'admins') {
       router.push('/auth/login');
     }
   }, [router]);
