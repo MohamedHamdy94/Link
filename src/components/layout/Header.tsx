@@ -9,7 +9,7 @@ const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userType, setUserType] = useState<'driver' | 'equipmentOwner' | null>(null);
+  const [userType, setUserType] = useState<'drivers' | 'equipmentOwners'| "admins" | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -25,9 +25,9 @@ const Header = () => {
   };
 
   const getProfileLink = () => {
-    if (userType === 'driver') {
+    if (userType === 'drivers') {
       return '/driver/profile';
-    } else if (userType === 'equipmentOwner') {
+    } else if (userType === 'equipmentOwners') {
       return '/equipment-owner/profile';
     }
     return '/auth/login';
@@ -85,7 +85,7 @@ const Header = () => {
                 >
                   الملف الشخصي
                 </Link>
-                {userType === 'equipmentOwner' && (
+                {userType === 'equipmentOwners' && (
                   <Link
                     href="/equipment-owner/add-equipment"
                     className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
@@ -210,7 +210,7 @@ const Header = () => {
                 >
                   الملف الشخصي
                 </Link>
-                {userType === 'equipmentOwner' && (
+                {userType === 'equipmentOwners' && (
                   <Link
                     href="/equipment-owner/add-equipment"
                     className="block pr-3 pl-4 py-2 border-r-4 border-transparent text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"

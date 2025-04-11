@@ -74,8 +74,8 @@ export const getSession = () => {
 };
 
 // Get user type
-export const getUserType = () => {
-  return currentSession?.userType;
+export const getUserType = (): 'drivers' | 'equipmentOwners' | 'admins' | null => {
+  return currentSession?.userType ?? null;
 };
 
 // Logout
