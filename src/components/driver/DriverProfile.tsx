@@ -33,6 +33,7 @@ const DriverProfile = () => {
   useEffect(() => {
     const fetchDriverData = async () => {
       const session = getSession();
+      console.log(session)
       if (!session || session.userType !== 'drivers') {
         router.push('/auth/login');
         return;

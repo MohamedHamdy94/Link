@@ -1,66 +1,56 @@
-"use client";
-
 import { db } from './config';
 import { doc, getDoc } from 'firebase/firestore';
 
-// Custom authentication functions
-let currentSession: {
+// Types
+type UserType = 'drivers' | 'equipmentOwners' | 'admins';
+
+interface Session {
   id: string;
   phoneNumber: string;
-  userType: 'drivers' | 'equipmentOwners' | 'admins';
+  userType: UserType;
   role?: string;
-} | null = null;
+}
 
-// Login user
-export const loginUser = async (phoneNumber: string, password: string) => {
+interface AuthResponse {
+  success: boolean;
+  userType?: UserType;
+  error?: string;
+}
+
+// Current session state
+let currentSession: Session | null = null;
+
+// Main authentication functions
+export const loginUser = async (phoneNumber: string, password: string): Promise<AuthResponse> => {
+  console.log('Attempting login for:', phoneNumber);
   try {
-    // Check if user exists in drivers collection
-    const driverSnapshot = await getDoc(doc(db, 'drivers', phoneNumber));
-    if (driverSnapshot.exists()) {
-      const driverData = driverSnapshot.data();
-      if (driverData.password === password) {
-        // Set session
-        currentSession = {
-          id: phoneNumber,
-          phoneNumber,
-          userType: 'drivers'
-        };
-        return { success: true, userType: 'drivers' };
+    const userTypes: UserType[] = ['drivers', 'equipmentOwners', 'admins'];
+    
+    for (const userType of userTypes) {
+      console.log(`Checking ${userType} collection`);
+      const snapshot = await getDoc(doc(db, userType, phoneNumber));
+      
+      if (snapshot.exists()) {
+        console.log('User found in', userType);
+        const userData = snapshot.data();
+        
+        if (userData.password === password) {
+          console.log('Password matches');
+          currentSession = {
+            id: phoneNumber,
+            phoneNumber,
+            userType,
+            role: userType === 'admins' ? 'admins' : undefined
+          };
+          console.log('Session created:', currentSession);
+          return { success: true, userType };
+        } else {
+          console.log('Password does not match');
+        }
       }
     }
 
-    // Check if user exists in equipment owners collection
-    const ownerSnapshot = await getDoc(doc(db, 'equipmentOwners', phoneNumber));
-    if (ownerSnapshot.exists()) {
-      const ownerData = ownerSnapshot.data();
-      if (ownerData.password === password) {
-        // Set session
-        currentSession = {
-          id: phoneNumber,
-          phoneNumber,
-          userType: 'equipmentOwners'
-        };
-        return { success: true, userType: 'equipmentOwners' };
-      }
-    }
-    
-    // Check if user is admin
-    const adminSnapshot = await getDoc(doc(db, 'admins', phoneNumber));
-    
-    if (adminSnapshot.exists()) {
-      const adminData = adminSnapshot.data();
-      if (adminData.password === password) {
-        // Set session
-        currentSession = {
-          id: phoneNumber,
-          phoneNumber,
-          userType: 'admins',
-          role: 'admin'
-        };
-        return { success: true, userType: 'admins' };
-      }
-    }
-
+    console.log('User not found or password incorrect');
     return { success: false, error: 'رقم الهاتف أو كلمة المرور غير صحيحة' };
   } catch (error) {
     console.error('Login error:', error);
@@ -68,22 +58,18 @@ export const loginUser = async (phoneNumber: string, password: string) => {
   }
 };
 
-// Get current session
-export const getSession = () => {
+export const getSession = (): Session | null => {
   return currentSession;
 };
 
-// Get user type
-export const getUserType = (): 'drivers' | 'equipmentOwners' | 'admins' | null => {
+export const getUserType = (): UserType | null => {
   return currentSession?.userType ?? null;
 };
 
-// Logout
-export const logout = () => {
+export const logout = (): void => {
   currentSession = null;
 };
 
-// Get WhatsApp group link
-export const getWhatsAppGroupLink = () => {
+export const getWhatsAppGroupLink = (): string => {
   return 'https://chat.whatsapp.com/example-group-link';
 };

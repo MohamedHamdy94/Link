@@ -20,11 +20,11 @@ const LoginForm = () => {
       const result = await loginUser(phoneNumber, password);
       
       if (result.success) {
-        if (result.userType === 'driver') {
+        if (result.userType === 'drivers') {
           router.push('/driver/profile');
-        } else if (result.userType === 'equipmentOwner') {
+        } else if (result.userType === 'equipmentOwners') {
           router.push('/equipment-owner/profile');
-        } else if (result.userType === 'admin') {
+        } else if (result.userType === 'admins') {
           router.push('/admin/dashboard');
         }
       } else {

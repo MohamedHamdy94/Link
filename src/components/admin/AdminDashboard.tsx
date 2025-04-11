@@ -22,7 +22,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const checkAdminAccess = async () => {
       const session = getSession();
-      if (!session || session.role !== 'admin') {
+      if (!session || session.role !== 'admins') {
         router.push('/auth/login');
         return;
       }
