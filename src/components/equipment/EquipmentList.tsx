@@ -67,26 +67,29 @@ const EquipmentList = () => {
   useEffect(() => {
     const fetchEquipment = async () => {
       const session = getSession();
-      if (!session || session.userType !== 'equipmentOwner') {
+      if (!session || session.userType !== 'equipmentOwners') {
         router.push('/auth/login');
         return;
       }
-
+  
       try {
         const result = await getOwnerEquipment(session.id);
         if (result.success && result.data) {
-          const formattedUsers = result.data.map((equipment) => ({
+          const formattedEquipment = result.data.map((equipment) => ({
             id: equipment.id,
             name: equipment.name,
             description: equipment.description,
             equipmentType: equipment.equipmentType,
             status: equipment.status,
             price: equipment.price,
-            photoUrl: equipment.photoUrl,
+            photoUrl: equipment.photoUrl || undefined, // handle potential undefined
             ownerId: equipment.ownerId,
             ownerPhone: equipment.ownerPhone,
+            createdAt: equipment.createdAt.toDate(), // if coming from Firestore timestamp
+            updatedAt: equipment.updatedAt.toDate(), // if coming from Firestore timestamp
           }));
-          setEquipment(formattedUsers);
+          
+          setEquipment(formattedEquipment);
         } else {
           setError('فشل في تحميل بيانات المعدات');
         }
@@ -97,7 +100,7 @@ const EquipmentList = () => {
         setLoading(false);
       }
     };
-
+  
     fetchEquipment();
   }, [router]);
 

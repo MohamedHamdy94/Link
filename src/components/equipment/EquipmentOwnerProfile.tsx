@@ -26,7 +26,7 @@ const EquipmentOwnerProfile = () => {
   useEffect(() => {
     const fetchOwnerData = async () => {
       const session = getSession();
-      if (!session || session.userType !== 'equipmentOwner') {
+      if (!session || session.userType !== 'equipmentOwners') {
         router.push('/auth/login');
         return;
       }
