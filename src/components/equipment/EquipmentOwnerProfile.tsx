@@ -9,7 +9,6 @@ import { uploadDriverPhoto } from '@/lib/firebase/storage';
 import { getSession, logout } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { OwnerData } from '@/lib/interface';
-import { DocumentData } from 'firebase/firestore';
 
 const EquipmentOwnerProfile = () => {
   const router = useRouter();
@@ -31,18 +30,7 @@ const EquipmentOwnerProfile = () => {
         router.push('/auth/login');
         return;
       }
-     const toDriver = (id: string, data: DocumentData): OwnerData => ({
-        id,
-        name: data.name || '',
-        photoUrl: data.photoUrl || undefined,
-        phoneNumber: data.phoneNumber || '',
-        isVerified: data.isVerified || false,
-        userType:data.userType ,
-        createdAt:new Date(),
-        updatedAt: new Date(),
 
-
-      });
       try {
         const result = await getEquipmentOwner(session.id);
         if (result.success && result.data) {
