@@ -48,6 +48,8 @@ const DriverProfile = () => {
         phoneNumber: data.phoneNumber || '',
         isVerified: data.isVerified || false,
         userType:data.userType ,
+        updatedAt: new Date(),
+
       });
       try {
         const result = await getDriver(session.id);
@@ -133,6 +135,7 @@ const DriverProfile = () => {
       // تأكد من تضمين جميع الحقول المطلوبة
       phoneNumber: driverData?.phoneNumber || '', // احتفظ بالقيمة القديمة إذا لم تتغير
       isVerified: driverData?.isVerified || false,
+      updatedAt: new Date(),
 
     });
     
