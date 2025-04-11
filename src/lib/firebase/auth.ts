@@ -7,7 +7,7 @@ import { doc, getDoc } from 'firebase/firestore';
 let currentSession: {
   id: string;
   phoneNumber: string;
-  userType: 'drivers' | 'equipmentOwners' | 'admin';
+  userType: 'drivers' | 'equipmentOwners' | 'admins';
   role?: string;
 } | null = null;
 
@@ -54,10 +54,10 @@ export const loginUser = async (phoneNumber: string, password: string) => {
         currentSession = {
           id: phoneNumber,
           phoneNumber,
-          userType: 'admin',
+          userType: 'admins',
           role: 'admin'
         };
-        return { success: true, userType: 'admin' };
+        return { success: true, userType: 'admins' };
       }
     }
 
