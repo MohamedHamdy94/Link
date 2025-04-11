@@ -46,7 +46,8 @@ const DriverProfile = () => {
         hasLicense: data.hasLicense || false,
         photoUrl: data.photoUrl || undefined,
         phoneNumber: data.phoneNumber || '',
-        isVerified: data.isVerified || false
+        isVerified: data.isVerified || false,
+        userType:data.userType ,
       });
       try {
         const result = await getDriver(session.id);
@@ -126,10 +127,13 @@ const DriverProfile = () => {
       equipmentType: formData.equipmentType,
       isAvailable: formData.isAvailable,
       hasLicense: formData.hasLicense,
+      userType: 'drivers' ,
+
       photoUrl,
       // تأكد من تضمين جميع الحقول المطلوبة
       phoneNumber: driverData?.phoneNumber || '', // احتفظ بالقيمة القديمة إذا لم تتغير
-      isVerified: driverData?.isVerified || false
+      isVerified: driverData?.isVerified || false,
+
     });
     
     // معالجة نتيجة التحديث

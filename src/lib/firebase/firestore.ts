@@ -11,7 +11,7 @@ import {
   DocumentData
 } from 'firebase/firestore';
 import { db } from './config';
-import { Equipment,Driver,OwnerData } from '@/lib/interface';
+import { Equipment,Driver,OwnerData, UpdateResult } from '@/lib/interface';
 
 // User collections
 const DRIVERS_COLLECTION = 'drivers';
@@ -46,7 +46,7 @@ export const getDrivers = async () => {
     return { success: true, data: drivers };
   } catch (error) {
     console.error('Error getting drivers:', error);
-    return { success: false, error: error.message };
+    return { success: false, error:'Error getting drivers:' };
   }
 };
 
@@ -111,15 +111,39 @@ export const getEquipmentOwner = async (ownerId: string) => {
   }
 };
 
-export const updateEquipmentOwner = async (ownerId: string, ownerData: OwnerData) => {
+// في ملف firestore.ts أو wherever the function is defined
+
+
+export const updateEquipmentOwner = async (
+  ownerId: string,
+  data: Partial<OwnerData>
+): Promise<UpdateResult<OwnerData>> => {
   try {
-    await updateDoc(doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId), {
-      ...ownerData,
-      updatedAt: new Date()
-    });
-    return { success: true };
+    const ownerRef = doc(db, 'equipmentOwners', ownerId);
+    await updateDoc(ownerRef, data);
+    
+    // جلب البيانات المحدثة
+    const updatedDoc = await getDoc(ownerRef);
+    if (!updatedDoc.exists()) {
+      return { success: false, error: 'المستخدم غير موجود' };
+    }
+    
+    return {
+      success: true,
+      data: {
+        id: updatedDoc.id,
+        name: updatedDoc.data().name,
+        photoUrl: updatedDoc.data().photoUrl,
+        phoneNumber: updatedDoc.data().phoneNumber,
+        isVerified: updatedDoc.data().isVerified,
+        userType: updatedDoc.data().userType,
+        createdAt: updatedDoc.data().createdAt?.toDate() || new Date(),
+        equipmentDetails: updatedDoc.data().equipmentDetails,
+        updatedAt: updatedDoc.data().updatedAt?.toDate() || new Date(),
+
+      }
+    };
   } catch (error) {
-    console.error('Error updating equipment owner:', error);
     return { success: false, error };
   }
 };

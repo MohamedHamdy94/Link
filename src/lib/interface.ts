@@ -12,6 +12,8 @@ export interface Driver {
   userType: string;
   password?: string; // لا ينصح بتخزينه في الواجهة الأمامية
   createdAt?: Date;
+  updatedAt:Date;
+
 }
 export interface OwnerData {
   id?: string;
@@ -23,6 +25,7 @@ export interface OwnerData {
   userType: string;
   password?: string;
   createdAt: Date;
+  updatedAt:Date;
 }
 export interface User {
   id: string | undefined;
@@ -41,7 +44,7 @@ export interface User {
 
 }
 
-export interface UpdateResult<T = Driver> {
+export interface UpdateResult<T = Driver|OwnerData> {
   success: boolean;
   data?: T;
   error?: unknown;

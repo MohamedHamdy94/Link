@@ -51,7 +51,9 @@ const RegisterForm = () => {
           photoUrl,
           userType ,
           isVerified: false,
-          createdAt: new Date()
+          createdAt: new Date(),
+          updatedAt: new Date(),
+
         });
         
         if (result.success) {
@@ -69,7 +71,8 @@ const RegisterForm = () => {
           userType,
           photoUrl,
           isVerified: false,
-          createdAt: new Date()
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
         
         if (result.success) {
