@@ -63,7 +63,6 @@ export const getAllUsers = async (): Promise<{
 // Update user verification status
 export const updateUserVerificationStatus = async (userType:string, userId: string, isVerified: boolean) => {
   try {
-    console.log(userType)
     // First try to update in drivers collection
       const driverRef = doc(db, userType, userId);
       await updateDoc(driverRef, { isVerified });

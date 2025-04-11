@@ -22,27 +22,22 @@ let currentSession: Session | null = null;
 
 // Main authentication functions
 export const loginUser = async (phoneNumber: string, password: string): Promise<AuthResponse> => {
-  console.log('Attempting login for:', phoneNumber);
   try {
     const userTypes: UserType[] = ['drivers', 'equipmentOwners', 'admins'];
     
     for (const userType of userTypes) {
-      console.log(`Checking ${userType} collection`);
       const snapshot = await getDoc(doc(db, userType, phoneNumber));
       
       if (snapshot.exists()) {
-        console.log('User found in', userType);
         const userData = snapshot.data();
         
         if (userData.password === password) {
-          console.log('Password matches');
           currentSession = {
             id: phoneNumber,
             phoneNumber,
             userType,
             role: userType === 'admins' ? 'admins' : undefined
           };
-          console.log('Session created:', currentSession);
           return { success: true, userType };
         } else {
           console.log('Password does not match');
