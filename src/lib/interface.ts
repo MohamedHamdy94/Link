@@ -12,8 +12,7 @@ export interface Driver {
   userType: string;
   password?: string; // لا ينصح بتخزينه في الواجهة الأمامية
   createdAt?: Date;
-  updatedAt:Date;
-
+  updatedAt: Date;
 }
 export interface OwnerData {
   id?: string;
@@ -25,7 +24,7 @@ export interface OwnerData {
   userType: string;
   password?: string;
   createdAt: Date;
-  updatedAt:Date;
+  updatedAt: Date;
 }
 export interface User {
   id: string | undefined;
@@ -41,24 +40,25 @@ export interface User {
   hasLicense?: boolean;
   photoUrl?: string;
   isAvailable?: boolean;
-
 }
 
-export interface UpdateResult<T = Driver|OwnerData> {
+export interface UpdateResult<T = Driver | OwnerData> {
   success: boolean;
   data?: T;
   error?: unknown;
 }
 export interface Equipment {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   equipmentType: string;
   status: string;
   price: number;
-  photoUrl: string;
+  photoUrl?: string;
   ownerId: string;
   ownerPhone: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 export interface OwnerData {
   id?: string;

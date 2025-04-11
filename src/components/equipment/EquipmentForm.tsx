@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createEquipment } from '@/lib/firebase/firestore';
 import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
 import { getSession } from '@/lib/firebase/auth';
+import { Equipment } from '@/lib/interface';
 
 const EquipmentForm = () => {
   const router = useRouter();
@@ -65,6 +66,7 @@ const EquipmentForm = () => {
 
       // Create equipment record
       const equipmentData = {
+        id: session.id,
         name,
         description,
         equipmentType,
@@ -74,9 +76,13 @@ const EquipmentForm = () => {
         ownerId: session.id,
         ownerPhone: session.phoneNumber,
         createdAt: new Date(),
-      };
+        updatedAt: new Date(),
 
-      const result = await createEquipment(equipmentData);
+      };
+      if (!equipmentData.photoUrl) {
+        equipmentData.photoUrl = ''; 
+    }
+      const result = await createEquipment(equipmentData as Equipment);
 
       if (result.success) {
         setSuccess('تمت إضافة المعدة بنجاح');
