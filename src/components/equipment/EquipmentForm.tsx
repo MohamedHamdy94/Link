@@ -66,7 +66,6 @@ const EquipmentForm = () => {
 
       // Create equipment record
       const equipmentData = {
-        id: session.id,
         name,
         description,
         equipmentType,
@@ -79,6 +78,7 @@ const EquipmentForm = () => {
         updatedAt: new Date(),
 
       };
+      
       if (!equipmentData.photoUrl) {
         equipmentData.photoUrl = ''; 
     }

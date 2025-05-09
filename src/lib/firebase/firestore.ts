@@ -184,6 +184,9 @@ export const getEquipments = async () => {
     const equipmentSnapshot = await getDocs(collection(db, EQUIPMENT_COLLECTION));
     const equipments : object[] = [];
     equipmentSnapshot.forEach((doc) => {
+      console.log(doc.id)
+      console.log(doc)
+
       equipments.push({ id: doc.id, ...doc.data() });
     });
     return { success: true, data: equipments };

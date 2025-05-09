@@ -4,19 +4,17 @@ import React from 'react';
 
 // تعريف نوع البيانات الكامل للسائق
 
-
 const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
   return (
     <div className="bg-gray-10 dark:bg-gray-700 relative shadow-xl overflow-hidden hover:shadow-2xl group rounded-xl p-2 sm:px-2 transition-all duration-500 transform">
       <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-4">
         {/* صورة السائق */}
         <img
-  src={driver.photoUrl || '/images/imagesProfile.jpg'}
-  alt={driver.name || 'صورة المستخدم'}
-  className="w-full h-full object-cover bg-gray-200"
+          src={driver.photoUrl || '/images/imagesProfile.jpg'}
+          alt={driver.name || 'صورة المستخدم'}
+          className="w-full h-full object-cover bg-gray-200"
+        />
 
-/>
-        
         {/* معلومات السائق */}
         <div className="transition-all transform duration-500">
           <h1 className="text-gray-600 dark:text-gray-200 font-bold">

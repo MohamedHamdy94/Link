@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import FilterButtons from '../ui/FilterButtons';
 import { getEquipments } from '@/lib/firebase/firestore';
 import { Equipment } from '@/lib/interface';
+import EquipmentCard from './EquipmentCard';
 
 const EquipmentListPublic = () => {
   const [loading, setLoading] = useState(true);
@@ -43,7 +44,7 @@ const EquipmentListPublic = () => {
       </div>
     );
   }
-  
+  console.log(filteredEquipment)
   return (
     <div className="bg-white p-4 md:p-8 rounded-lg shadow-md max-w-6xl mx-auto">
       <h2 className="text-xl md:text-2xl font-bold text-gray-800 text-center md:text-right">
@@ -98,15 +99,15 @@ const EquipmentListPublic = () => {
           <p className="text-gray-500">لا توجد معدات متاحة حالياً</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredEquipment.map((item) => (
             <div key={item.id} className="bg-white overflow-hidden shadow-md rounded-lg flex flex-col h-full">
-              <div className="h-40 sm:h-48 w-full overflow-hidden">
+              <div className="h-full w-full overflow-hidden">
                 {item.photoUrl ? (
                   <img 
                     src={item.photoUrl} 
                     alt={item.name} 
-                    className="w-full h-full object-cover"
+                    className="w-50 h-50 object-cover"
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -158,6 +159,8 @@ const EquipmentListPublic = () => {
                 </div>
               </div>
             </div>
+                        // <EquipmentCard key={item.id} equipment={item} />
+            
           ))}
         </div>
       )}
