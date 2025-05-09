@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -28,19 +28,19 @@ const RegisterForm = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setphotoUrl('')
+    setphotoUrl('');
     // Validate passwords match
     if (password !== confirmPassword) {
       setError('كلمات المرور غير متطابقة');
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       if (userType === 'drivers') {
         // Create driver
-        const result = await createDriver( phoneNumber,{
+        const result = await createDriver(phoneNumber, {
           phoneNumber,
           password,
           name,
@@ -49,22 +49,21 @@ const RegisterForm = () => {
           isAvailable,
           hasLicense,
           photoUrl,
-          userType ,
+          userType,
           isVerified: false,
           createdAt: new Date(),
           updatedAt: new Date(),
-
         });
-        
+
         if (result.success) {
           setSuccess('تم إنشاء حساب السائق بنجاح');
           setWhatsAppLink(getWhatsAppGroupLink());
         } else {
-          setError( 'فشل في إنشاء الحساب');
+          setError('فشل في إنشاء الحساب');
         }
       } else {
         // Create equipment owner
-        const result = await createEquipmentOwner( phoneNumber,{
+        const result = await createEquipmentOwner(phoneNumber, {
           phoneNumber,
           password,
           name,
@@ -74,7 +73,7 @@ const RegisterForm = () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         });
-        
+
         if (result.success) {
           setSuccess('تم إنشاء حساب صاحب المعدات بنجاح');
           setWhatsAppLink(getWhatsAppGroupLink());
@@ -92,22 +91,24 @@ const RegisterForm = () => {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">إنشاء حساب جديد</h2>
-      
+      <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+        إنشاء حساب جديد
+      </h2>
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-right">
           {error}
         </div>
       )}
-      
+
       {success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-right">
           <p>{success}</p>
           <p className="mt-2">
             يرجى الانضمام إلى مجموعة الواتساب للتحقق من رقم هاتفك وتفعيل حسابك:
-            <a 
-              href={whatsAppLink} 
-              target="_blank" 
+            <a
+              href={whatsAppLink}
+              target="_blank"
               rel="noopener noreferrer"
               className="block mt-1 text-blue-600 hover:text-blue-800"
             >
@@ -122,7 +123,7 @@ const RegisterForm = () => {
           </button>
         </div>
       )}
-      
+
       {!success && (
         <>
           <div className="mb-6">
@@ -131,8 +132,8 @@ const RegisterForm = () => {
                 type="button"
                 onClick={() => setUserType('equipmentOwners')}
                 className={`px-4 py-2 rounded-md text-sm font-medium ${
-                  userType === 'equipmentOwners' 
-                    ? 'bg-blue-600 text-white' 
+                  userType === 'equipmentOwners'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-800'
                 }`}
               >
@@ -142,8 +143,8 @@ const RegisterForm = () => {
                 type="button"
                 onClick={() => setUserType('drivers')}
                 className={`px-4 py-2 rounded-md text-sm font-medium ${
-                  userType === 'drivers' 
-                    ? 'bg-blue-600 text-white' 
+                  userType === 'drivers'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-800'
                 }`}
               >
@@ -151,11 +152,14 @@ const RegisterForm = () => {
               </button>
             </div>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 text-right mb-1">
+                <label
+                  htmlFor="phoneNumber"
+                  className="block text-sm font-medium text-gray-700 text-right mb-1"
+                >
                   رقم الهاتف *
                 </label>
                 <input
@@ -168,9 +172,12 @@ const RegisterForm = () => {
                   dir="rtl"
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 text-right mb-1">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 text-right mb-1"
+                >
                   الاسم *
                 </label>
                 <input
@@ -183,9 +190,12 @@ const RegisterForm = () => {
                   dir="rtl"
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 text-right mb-1">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 text-right mb-1"
+                >
                   كلمة المرور *
                 </label>
                 <input
@@ -198,9 +208,12 @@ const RegisterForm = () => {
                   dir="rtl"
                 />
               </div>
-              
+
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 text-right mb-1">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 text-right mb-1"
+                >
                   تأكيد كلمة المرور *
                 </label>
                 <input
@@ -213,11 +226,14 @@ const RegisterForm = () => {
                   dir="rtl"
                 />
               </div>
-              
+
               {userType === 'drivers' ? (
                 <>
                   <div>
-                    <label htmlFor="age" className="block text-sm font-medium text-gray-700 text-right mb-1">
+                    <label
+                      htmlFor="age"
+                      className="block text-sm font-medium text-gray-700 text-right mb-1"
+                    >
                       السن *
                     </label>
                     <input
@@ -230,9 +246,12 @@ const RegisterForm = () => {
                       dir="rtl"
                     />
                   </div>
-                  
+
                   <div>
-                    <label htmlFor="equipmentType" className="block text-sm font-medium text-gray-700 text-right mb-1">
+                    <label
+                      htmlFor="equipmentType"
+                      className="block text-sm font-medium text-gray-700 text-right mb-1"
+                    >
                       نوع المعدة *
                     </label>
                     <select
@@ -244,16 +263,17 @@ const RegisterForm = () => {
                       dir="rtl"
                     >
                       <option value="">اختر نوع المعدة</option>
-                      <option value="حفار">حفار</option>
-                      <option value="جرافة">جرافة</option>
+                      <option value="مانلفت">مانلفت</option>
+                      <option value="فورك">فورك</option>
+                      <option value="سيزر">سيزر</option>
+                      <option value="ونش">ونش</option>
                       <option value="لودر">لودر</option>
-                      <option value="بلدوزر">بلدوزر</option>
-                      <option value="رافعة">رافعة</option>
-                      <option value="شاحنة نقل">شاحنة نقل</option>
-                      <option value="أخرى">أخرى</option>
+                      <option value="حفار">حفار</option>
+
+                      
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 text-right mb-1">
                       متاح للعمل حالياً؟ *
@@ -268,7 +288,10 @@ const RegisterForm = () => {
                           onChange={() => setIsAvailable(false)}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         />
-                        <label htmlFor="available-no" className="mr-2 block text-sm text-gray-700">
+                        <label
+                          htmlFor="available-no"
+                          className="mr-2 block text-sm text-gray-700"
+                        >
                           لا
                         </label>
                       </div>
@@ -281,13 +304,16 @@ const RegisterForm = () => {
                           onChange={() => setIsAvailable(true)}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         />
-                        <label htmlFor="available-yes" className="mr-2 block text-sm text-gray-700">
+                        <label
+                          htmlFor="available-yes"
+                          className="mr-2 block text-sm text-gray-700"
+                        >
                           نعم
                         </label>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 text-right mb-1">
                       يحمل رخصة أصلية؟ *
@@ -302,7 +328,10 @@ const RegisterForm = () => {
                           onChange={() => setHasLicense(false)}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         />
-                        <label htmlFor="license-no" className="mr-2 block text-sm text-gray-700">
+                        <label
+                          htmlFor="license-no"
+                          className="mr-2 block text-sm text-gray-700"
+                        >
                           لا
                         </label>
                       </div>
@@ -315,7 +344,10 @@ const RegisterForm = () => {
                           onChange={() => setHasLicense(true)}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         />
-                        <label htmlFor="license-yes" className="mr-2 block text-sm text-gray-700">
+                        <label
+                          htmlFor="license-yes"
+                          className="mr-2 block text-sm text-gray-700"
+                        >
                           نعم
                         </label>
                       </div>
@@ -326,7 +358,7 @@ const RegisterForm = () => {
                 ''
               )}
             </div>
-            
+
             <div>
               <button
                 type="submit"
@@ -339,11 +371,14 @@ const RegisterForm = () => {
               </button>
             </div>
           </form>
-          
+
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               لديك حساب بالفعل؟{' '}
-              <a href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
+              <a
+                href="/auth/login"
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
                 تسجيل الدخول
               </a>
             </p>

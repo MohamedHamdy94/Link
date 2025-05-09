@@ -10,14 +10,12 @@ const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
     <div className="bg-gray-10 dark:bg-gray-700 relative shadow-xl overflow-hidden hover:shadow-2xl group rounded-xl p-2 sm:px-2 transition-all duration-500 transform">
       <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-4">
         {/* صورة السائق */}
-        <Image
-          width={100}
-          height={100}
-          src={driver.photoUrl || "https://firebasestorage.googleapis.com/v0/b/manlift-36e37.appspot.com/o/project%2FimagesProfile.jpg?alt=media&token=f6213de6-0c3c-466c-adc2-3003d0da528e"}
-          className="w-32 h-32 object-center object-cover rounded-full transition-all duration-500 delay-500 transform"
-          alt="Avatar"
-          priority={!driver.photoUrl}
-        />
+        <img
+  src={driver.photoUrl || '/images/imagesProfile.jpg'}
+  alt={driver.name || 'صورة المستخدم'}
+  className="w-full h-full object-cover bg-gray-200"
+
+/>
         
         {/* معلومات السائق */}
         <div className="transition-all transform duration-500">

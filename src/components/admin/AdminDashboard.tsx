@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAllUsers, updateUserVerificationStatus } from '@/lib/firebase/admin';
 import { getSession, logout } from '@/lib/firebase/auth';
-import UserInfo from "./UserInfo";
 import { User } from '@/lib/interface';
+import Image from 'next/image';
 
 const AdminDashboard = () => {
   const router = useRouter();
@@ -37,6 +37,7 @@ const AdminDashboard = () => {
       if (result.success && result.data) {
         const formattedUsers: User[] = result.data.map(user => ({
           ...user,
+          photoUrl: user.photoUrl || '/default-avatar.png',
           name: user.name || 'غير محدد',
           phoneNumber: user.phoneNumber || 'غير محدد',
           userType: user.userType === 'drivers' ? 'drivers' : 'equipmentOwners',
@@ -196,21 +197,29 @@ const AdminDashboard = () => {
         />
       </div>
       
-      {/* Users List */}
-      {filteredUsers.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500">لا يوجد مستخدمين مطابقين للبحث</p>
-        </div>
-      ) : (
-        <div className="md:hidden">
+      {/* Mobile View - Cards with Images */}
+      <div className="md:hidden">
         <div className="grid grid-cols-2 gap-4">
           {filteredUsers.map((user) => (
-            <div key={user.phoneNumber} className="border rounded-lg p-3">
-              <div className="flex flex-col h-full">
-                <div className="flex justify-between items-start">
-                  <span className="font-medium text-sm truncate">
-                    {user.name || 'غير محدد'}
-                  </span>
+            <div key={user.phoneNumber} className="border rounded-lg p-3 shadow-sm flex flex-col h-full">
+              {/* صورة المستخدم magesProfile.jpg*/}
+              <div className="relative w-full h-32 mb-3">
+                <Image
+                  src={user.photoUrl || '/public/images/magesProfile.jpg'}
+                  alt={user.name || 'صورة المستخدم'}
+                  fill
+                  className="object-cover rounded-t-lg"
+                  quality={80}
+                  unoptimized={process.env.NODE_ENV !== 'production'}
+                />
+              </div>
+              
+              {/* محتوى البطاقة */}
+              <div className="flex-grow">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-sm font-medium text-gray-900 truncate">
+                    {user.name}
+                  </h3>
                   <span className={`px-2 py-1 text-xs rounded-full ${
                     user.isVerified ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
@@ -218,37 +227,106 @@ const AdminDashboard = () => {
                   </span>
                 </div>
                 
-                <div className="mt-2 text-xs text-gray-500 text-left dir-rtl truncate">
-                  {user.phoneNumber || 'غير محدد'}
-                </div>
+                <p className="text-xs text-gray-500 mb-1 dir-rtl truncate">
+                  {user.phoneNumber}
+                </p>
                 
-                <div className="mt-1 text-xs">
+                <p className="text-xs text-gray-500 mb-3">
                   {user.userType === 'drivers' ? 'سائق' : 'صاحب معدات'}
-                </div>
-                
-                <button
-                  onClick={() => handleToggleVerification(user.userType, user.phoneNumber, user.isVerified)}
-                  className={`mt-3 w-full py-1 rounded-md text-xs text-white ${
-                    user.isVerified ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
-                  }`}
-                >
-                  {user.isVerified ? 'إلغاء التفعيل' : 'تفعيل'}
-                </button>
+                </p>
               </div>
+              
+              {/* زر التفعيل/إلغاء التفعيل */}
+              <button
+                onClick={() => handleToggleVerification(user.userType, user.phoneNumber, user.isVerified)}
+                className={`w-full py-2 rounded-md text-xs font-medium text-white ${
+                  user.isVerified ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
+                }`}
+              >
+                {user.isVerified ? 'إلغاء التفعيل' : 'تفعيل'}
+              </button>
             </div>
           ))}
         </div>
       </div>
-      )}
 
-      {/* Desktop Table */}
-     {/* Mobile View - 2 Cards per Row */}
-
-
-{/* Desktop Table View */}
-<div className="hidden md:block overflow-x-auto">
-  {/* ... keep your existing table code ... */}
-</div>
+      {/* Desktop Table with Images */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                الصورة
+              </th>
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                الاسم
+              </th>
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                رقم الهاتف
+              </th>
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                نوع المستخدم
+              </th>
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                الحالة
+              </th>
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                الإجراءات
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {filteredUsers.map((user) => (
+              <tr key={user.phoneNumber}>
+                <td className="px-6 py-4 whitespace-nowrap">
+                <div className="relative h-10 w-10">
+                    <Image
+                      src={user.photoUrl || '/images/imagesProfile.jpg'}
+                      alt={user.name || 'صورة المستخدم'}
+                      fill
+                      className="object-cover rounded-full"
+                      quality={80}
+                      unoptimized={process.env.NODE_ENV !== 'production'}
+                    />
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
+                  <div className="text-sm font-medium text-gray-900">
+                    {user.name}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
+                  <div className="text-sm text-gray-500 dir-ltr text-right">
+                    {user.phoneNumber}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
+                  <div className="text-sm text-gray-500">
+                    {user.userType === 'drivers' ? 'سائق' : 'صاحب معدات'}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
+                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    user.isVerified ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {user.isVerified ? 'مفعل' : 'غير مفعل'}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button
+                    onClick={() => handleToggleVerification(user.userType, user.phoneNumber, user.isVerified)}
+                    className={`px-3 py-1 rounded-md text-xs text-white ${
+                      user.isVerified ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
+                    }`}
+                  >
+                    {user.isVerified ? 'إلغاء التفعيل' : 'تفعيل'}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

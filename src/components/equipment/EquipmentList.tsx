@@ -9,7 +9,7 @@ import { Equipment } from '@/lib/interface';
 
 const EquipmentCard = ({ equipment }: { equipment: Equipment }) => {
   return (
-    <div className="bg-white overflow-hidden shadow-md rounded-lg">
+    <div className="bg-white overflow-hidden shadow-md rounded-lg h-full flex flex-col">
       <div className="h-48 w-full overflow-hidden">
         {equipment.photoUrl ? (
           <img
@@ -23,7 +23,7 @@ const EquipmentCard = ({ equipment }: { equipment: Equipment }) => {
           </div>
         )}
       </div>
-      <div className="p-4">
+      <div className="p-4 flex-grow flex flex-col">
         <div className="flex justify-between items-start">
           <span
             className={`px-2 py-1 text-xs rounded-full ${
@@ -39,8 +39,8 @@ const EquipmentCard = ({ equipment }: { equipment: Equipment }) => {
           </h3>
         </div>
 
-        <div className="mt-2 text-right">
-          <p className="text-sm text-gray-600 line-clamp-2">
+        <div className="mt-2 text-right flex-grow">
+          <p className="text-sm text-gray-600 line-clamp-3">
             {equipment.description}
           </p>
         </div>
@@ -82,11 +82,11 @@ const EquipmentList = () => {
             equipmentType: equipment.equipmentType,
             status: equipment.status,
             price: equipment.price,
-            photoUrl: equipment.photoUrl || undefined, // handle potential undefined
+            photoUrl: equipment.photoUrl || undefined,
             ownerId: equipment.ownerId,
             ownerPhone: equipment.ownerPhone,
-            createdAt: equipment.createdAt.toDate(), // if coming from Firestore timestamp
-            updatedAt: equipment.updatedAt.toDate(), // if coming from Firestore timestamp
+            createdAt: equipment.createdAt.toDate(),
+            updatedAt: equipment.updatedAt.toDate(),
           }));
           
           setEquipment(formattedEquipment);
@@ -113,15 +113,17 @@ const EquipmentList = () => {
   }
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-md max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-white p-4 md:p-8 rounded-lg shadow-md max-w-6xl mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-800 text-center md:text-right">
+          المعدات الخاصة بك
+        </h2>
         <Link
           href="/equipment-owner/add-equipment"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           إضافة معدة جديدة
         </Link>
-        <h2 className="text-2xl font-bold text-gray-800">المعدات الخاصة بك</h2>
       </div>
 
       {error && (
@@ -141,7 +143,7 @@ const EquipmentList = () => {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 gap-4">
           {equipment.map((item) => (
             <EquipmentCard key={item.id} equipment={item} />
           ))}

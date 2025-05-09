@@ -1,21 +1,50 @@
-import React from 'react'
+import React from 'react';
 import { UserInfoProps } from '@/lib/interface';
 
 const UserInfo: React.FC<UserInfoProps> = ({ user, handleToggleVerification }) => {
+  console.log(user.photoUrl)
   return (
-    <tr >
-      <td className="px-6 py-4 whitespace-nowrap text-right">
-        <div className="text-sm font-medium text-gray-900">{user.name || 'غير محدد'}</div>
+    <tr>
+      {/* عمود الصورة */}
+      <td className="px-2 py-3 whitespace-nowrap">
+        <div className="flex items-center justify-center">
+          {user.photoUrl ? (
+            <img 
+              src={user.photoUrl}
+              alt={user.name || 'صورة المستخدم'}
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+              <span className="text-xs text-gray-500">لا يوجد</span>
+            </div>
+          )}
+        </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right">
-        <div className="text-sm text-gray-500 dir-ltr text-right">{user.phoneNumber || 'غير محدد'}</div>
+      
+      {/* عمود الاسم */}
+      <td className="px-3 py-4 whitespace-nowrap text-right">
+        <div className="text-sm font-medium text-gray-900">
+          {user.name || 'غير محدد'}
+        </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right">
+      
+      {/* عمود رقم الهاتف */}
+      <td className="px-3 py-4 whitespace-nowrap text-right">
+        <div className="text-sm text-gray-500 dir-ltr text-right">
+          {user.phoneNumber || 'غير محدد'}
+        </div>
+      </td>
+      
+      {/* عمود نوع المستخدم */}
+      <td className="px-3 py-4 whitespace-nowrap text-right">
         <div className="text-sm text-gray-500">
           {user.userType === 'drivers' ? 'سائق' : 'صاحب معدات'}
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right">
+      
+      {/* عمود حالة التفعيل */}
+      <td className="px-3 py-4 whitespace-nowrap text-right">
         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
           user.isVerified 
             ? 'bg-green-100 text-green-800' 
@@ -24,7 +53,9 @@ const UserInfo: React.FC<UserInfoProps> = ({ user, handleToggleVerification }) =
           {user.isVerified ? 'مفعل' : 'غير مفعل'}
         </span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+      
+      {/* عمود الإجراءات */}
+      <td className="px-3 py-4 whitespace-nowrap text-right text-sm font-medium">
         <button
           onClick={() => handleToggleVerification(user.userType, user.phoneNumber, user.isVerified)}
           className={`px-3 py-1 rounded-md text-xs text-white ${
@@ -39,4 +70,5 @@ const UserInfo: React.FC<UserInfoProps> = ({ user, handleToggleVerification }) =
     </tr>
   );
 };
-export default UserInfo
+
+export default UserInfo;
