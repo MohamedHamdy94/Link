@@ -154,10 +154,7 @@ export const createEquipment = async (equipmentData: Equipment) => {
   try {
     const equipmentRef = doc(collection(db, EQUIPMENT_COLLECTION));
     await setDoc(equipmentRef, {
-      ...equipmentData,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
+      ...equipmentData});
     return { success: true, id: equipmentRef.id };
   } catch (error) {
     console.error('Error creating equipment:', error);

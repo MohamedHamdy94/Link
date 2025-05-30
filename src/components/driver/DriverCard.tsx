@@ -2,7 +2,6 @@ import { Driver } from '@/lib/interface';
 import Image from 'next/image';
 import React from 'react';
 
-// تعريف نوع البيانات الكامل للسائق
 
 const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
   return (
