@@ -5,7 +5,7 @@ import FilterButtons from '../ui/FilterButtons';
 import { getEquipments } from '@/lib/firebase/firestore';
 import { Equipment } from '@/lib/interface';
 import EquipmentCard from './EquipmentCard';
-
+import Image from 'next/image'
 const EquipmentListPublic = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -50,7 +50,7 @@ const EquipmentListPublic = () => {
         المعدات المتاحة
       </h2>
 
-      <div className="my-4">
+      <div className="my-1">
         <FilterButtons filter={filter} setFilter={setFilter} />
       </div>
 
@@ -103,10 +103,12 @@ const EquipmentListPublic = () => {
             <div key={item.id} className="bg-white overflow-hidden shadow-md rounded-lg flex flex-col h-full">
               <div className="h-full w-full overflow-hidden">
                 {item.photoUrl ? (
-                  <img 
+                  <Image
+                  width={500}
+                  height={500}
                     src={item.photoUrl} 
                     alt={item.name} 
-                    className="w-100 h-100 object-cover"
+                    className="object-cover"
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
