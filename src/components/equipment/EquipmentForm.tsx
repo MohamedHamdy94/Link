@@ -385,15 +385,7 @@ const EquipmentForm = () => {
       const result = await createEquipment(equipmentData);
 
       if (result.success) {
-        setSuccess('تمت إضافة المعدة بنجاح');
-        // إعادة تعيين النموذج
-        setFormData({
-          name: '',
-          description: '',
-          equipmentType: '',
-          status: 'rent',
-          price: ''
-        });
+        setSuccess('تمت إضافة المعدة بنجاح');   
         setPhotoFile(null);
         setPhotoPreview('');
         
