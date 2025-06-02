@@ -354,12 +354,16 @@ const EquipmentForm = () => {
         photoFile
       );
       
-      if (!uploadResult.success) {
+      if (uploadResult && uploadResult.success) {
+        photoUrl  = uploadResult.url; // تعيين قيمة photoUrl إذا كان التحميل ناجحاً
+
+      }else{
+        photoUrl=''
         setError('فشل في رفع صورة المعدة');
         setLoading(false);
         return;
+
       }
-      photoUrl = uploadResult.url; // تعيين قيمة photoUrl إذا كان التحميل ناجحاً
     }
 
     // إنشاء كائن المعدة
