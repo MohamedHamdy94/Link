@@ -355,7 +355,7 @@ const EquipmentForm = () => {
       );
       
       if (uploadResult && uploadResult.success) {
-        photoUrl as string = uploadResult.url || 'فشل في رفع صورة المعدة'
+        photoUrl = uploadResult.url || 'فشل في رفع صورة المعدة';
 
       }else{
         photoUrl=''
