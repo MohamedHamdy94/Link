@@ -95,8 +95,8 @@ const EquipmentList = () => {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4">
-          {equipment.map((item) => (
-            <EquipmentCard key={item.id} equipment={item} />
+          {equipment.map((item : Equipment) => (
+            <EquipmentCard key={item.id} item={item} />
           ))}
         </div>
       )}
