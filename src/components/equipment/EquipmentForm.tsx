@@ -394,10 +394,10 @@ const EquipmentForm = () => {
           router.push('/equipment-owner/profile');
         }, 1500);
       } else {
-        throw new Error(result.error || 'فشل في إضافة المعدة');
+        throw new Error('فشل في إضافة المعدة');
       }
     } catch (err) {
-      setError(err.message || 'حدث خطأ أثناء إضافة المعدة');
+      setError('حدث خطأ أثناء إضافة المعدة');
       console.error(err);
     } finally {
       setLoading(false);
