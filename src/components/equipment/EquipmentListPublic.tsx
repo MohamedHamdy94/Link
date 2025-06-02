@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import FilterButtons from '../ui/FilterButtons';
 import { getEquipments } from '@/lib/firebase/firestore';
 import { Equipment } from '@/lib/interface';
-import EquipmentCard from './EquipmentCard';
+//import EquipmentCard from './EquipmentCard';
 import Image from 'next/image'
 const EquipmentListPublic = () => {
   const [loading, setLoading] = useState(true);

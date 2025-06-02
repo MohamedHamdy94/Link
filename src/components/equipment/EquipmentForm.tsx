@@ -297,7 +297,7 @@ import { useRouter } from 'next/navigation';
 import { createEquipment } from '@/lib/firebase/firestore';
 import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
 import { getSession } from '@/lib/firebase/auth';
-import { Equipment } from '@/lib/interface';
+//import { Equipment } from '@/lib/interface';
 import generateId from '@/lib/utils/generateId'
 
 const EquipmentForm = () => {
@@ -414,14 +414,7 @@ const EquipmentForm = () => {
     }
   };
 
-  // معالجة التغيير في حقول النموذج
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+
 
  return (
    <div className="bg-white p-8 rounded-lg shadow-md max-w-3xl mx-auto">
