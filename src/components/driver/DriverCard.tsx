@@ -35,8 +35,7 @@ const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
         </div>
       </div>
 
-      {/* حالة التوفر */}
-      <div className="absolute top-1 delay-300 -bottom-16 transition-all duration-500 lift-1 rounded-lg">
+      {driver.isAvailable &&       <div className="absolute top-1 delay-300 -bottom-16 transition-all duration-500 lift-1 rounded-lg">
         <div className="inline-flex flex-wrap gap-2">
           <div>
             <span className="py-1 px-2 inline-flex items-center gap-x-1 text-sm font-medium bg-green-600 text-teal-100 rounded-full">
@@ -59,7 +58,8 @@ const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
             </span>
           </div>
         </div>
-      </div>
+      </div>}
+
     </div>
   );
 };

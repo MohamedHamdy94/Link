@@ -10,8 +10,8 @@ export default function HomePage() {
               منصة لربط سائقي المعدات بأصحاب المعدات
             </h2>
             <p className="mt-4 text-xl text-gray-500">
-              سجل الآن كسائق معدات أو صاحب معدات واستفد من خدماتنا
-            </p>
+            سجل الآن كسائق معدات أو صاحب معدات 
+                        </p>
             <div className="mt-8 flex justify-center">
               <Link
                 href="/auth/register"
