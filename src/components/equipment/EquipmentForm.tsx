@@ -355,7 +355,7 @@ const EquipmentForm = () => {
       );
       
       if (uploadResult && uploadResult.success) {
-        photoUrl  = uploadResult.url; // تعيين قيمة photoUrl إذا كان التحميل ناجحاً
+        photoUrl as string = uploadResult.url; // تعيين قيمة photoUrl إذا كان التحميل ناجحاً
 
       }else{
         photoUrl=''
