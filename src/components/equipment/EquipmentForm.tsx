@@ -313,13 +313,7 @@ const EquipmentForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    equipmentType: '',
-    status: 'rent',
-    price: ''
-  });
+
 ;
 
   // استخدام useCallback لتحسين أداء معالجة الصور
