@@ -111,6 +111,34 @@ export const getEquipmentOwner = async (ownerId: string) => {
   }
 };
 
+
+export const getOwnerEquipments = async (ownerId: string) => {
+
+  
+  try {
+    const equipmentsRef = collection(db, EQUIPMENT_COLLECTION);
+    const q = query(equipmentsRef, where('ownerId', '==', ownerId));
+    const querySnapshot = await getDocs(q);
+
+    const equipments: Equipment[] = [];
+    querySnapshot.forEach((doc) => {
+      equipments.push({
+        fbId: doc.id,
+        ...doc.data()
+      } as Equipment);
+    });
+    return { 
+      success: true, 
+      data: equipments 
+    };
+  } catch (error) {
+    console.error('Error getting owner equipments:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to get equipments' 
+    };
+  }
+};
 // في ملف firestore.ts أو wherever the function is defined
 
 
@@ -162,16 +190,21 @@ export const createEquipment = async (equipmentData: Equipment) => {
   }
 };
 
-export const getEquipment = async (equipmentId: string) => {
+
+export const getEquipmentById = async (ownerId: string) => {
   try {
-    const equipmentDoc = await getDoc(doc(db, EQUIPMENT_COLLECTION, equipmentId));
-    if (equipmentDoc.exists()) {
-      return { success: true, data: equipmentDoc.data() };
+    const equipmentsRef = await getDoc(doc(db, EQUIPMENT_COLLECTION, ownerId));
+    if (equipmentsRef.exists()) {
+      return { success: true,
+          data: {
+        fbId: equipmentsRef.id,
+        ...equipmentsRef.data(),
+      },};
     } else {
       return { success: false, error: 'Equipment not found' };
     }
   } catch (error) {
-    console.error('Error getting equipment:', error);
+    console.error('Error getting Equipment:', error);
     return { success: false, error };
   }
 };
@@ -181,8 +214,7 @@ export const getEquipments = async () => {
     const equipmentSnapshot = await getDocs(collection(db, EQUIPMENT_COLLECTION));
     const equipments : object[] = [];
     equipmentSnapshot.forEach((doc) => {
-      console.log(doc.id)
-      console.log(doc)
+ 
 
       equipments.push({ id: doc.id, ...doc.data() });
     });
@@ -192,18 +224,22 @@ export const getEquipments = async () => {
     return { success: false, error };
   }
 };
+
+
 export const updateEquipment = async (equipmentId: string, equipmentData: Equipment) => {
   try {
-    await updateDoc(doc(db, EQUIPMENT_COLLECTION, equipmentId), {
+      await updateDoc(doc(db, EQUIPMENT_COLLECTION, equipmentId), {
       ...equipmentData,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
+
     return { success: true };
   } catch (error) {
-    console.error('Error updating equipment:', error);
+    console.error("❌ Update error:", error);
     return { success: false, error };
   }
 };
+
 
 export const getOwnerEquipment = async (ownerId: string) => {
   try {

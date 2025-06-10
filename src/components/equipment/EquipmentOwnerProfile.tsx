@@ -1,78 +1,93 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  getEquipmentOwner,
-  updateEquipmentOwner,
-} from '@/lib/firebase/firestore';
+import { getEquipmentOwner, updateEquipmentOwner, getOwnerEquipments } from '@/lib/firebase/firestore';
 import { uploadDriverPhoto } from '@/lib/firebase/storage';
 import { getSession, logout } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
-import { OwnerData } from '@/lib/interface';
+import { OwnerData, Equipment } from '@/lib/interface';
+import Image from 'next/image';
+import Link from 'next/link';
 
 const EquipmentOwnerProfile = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [equipmentLoading, setEquipmentLoading] = useState(true);
   const [error, setError] = useState('');
+  const [ownerError, setOwnerError] = useState('');
+  const [equipmentError, setEquipmentError] = useState('');
   const [success, setSuccess] = useState('');
-  const [ownerData, setOwnerData] = useState<OwnerData| null>(null);
+  const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-
-  // Form state
   const [name, setName] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState('');
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
 
   useEffect(() => {
-    const fetchOwnerData = async () => {
-      const session = getSession();
-      if (!session || session.userType !== 'equipmentOwners') {
-        router.push('/auth/login');
-        return;
-      }
+    const session = getSession();
+    if (!session || session.userType !== 'equipmentOwners' ) {
+      router.push('/auth/login');
+      return;
+    }
+
+    const fetchData = async () => {
+      setLoading(true);
+      setEquipmentLoading(true);
+      setError('');
+      setOwnerError('');
+      setEquipmentError('');
 
       try {
-        const result = await getEquipmentOwner(session.id);
-        if (result.success && result.data) {
-          setOwnerData({
-            id:result.data.id,
-            name: result.data.name || '',
-            photoUrl: result.data.photoUrl || undefined,
-            phoneNumber: result.data.phoneNumber || '',
-            isVerified: result.data.isVerified || false,
-            userType:result.data.userType ,
-            createdAt:new Date(),
-            updatedAt: new Date(),
+        const [ownerResult, equipmentResult] = await Promise.all([
+          getEquipmentOwner(session.id),
+          getOwnerEquipments(session.id)
 
-          } );
-          // Initialize form state
-          setName(result.data?.name || '');
-          setPhotoPreview(result.data?.photoUrl || '');
+        ]);
+
+        if (ownerResult.success && ownerResult.data) {
+          setOwnerData({
+            id: ownerResult.data.id,
+            name: ownerResult.data.name || '',
+            photoUrl: ownerResult.data.photoUrl || undefined,
+            phoneNumber: ownerResult.data.phoneNumber || '',
+            isVerified: ownerResult.data.isVerified || false,
+            userType: ownerResult.data.userType,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+          setName(ownerResult.data?.name || '');
+          setPhotoPreview(ownerResult.data?.photoUrl || '');
         } else {
-          setError('فشل في تحميل بيانات صاحب المعدات');
+          setOwnerError('فشل في تحميل بيانات صاحب المعدات');
+        }
+
+        if (equipmentResult.success) {
+          setEquipment(equipmentResult.data as Equipment[]);
+        } else {
+          setEquipmentError('فشل في تحميل بيانات المعدات');
         }
       } catch (err) {
         setError('حدث خطأ أثناء تحميل البيانات');
         console.error(err);
       } finally {
         setLoading(false);
+        setEquipmentLoading(false);
       }
     };
 
-    fetchOwnerData();
+    fetchData();
   }, [router]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
   
-    // التحقق من نوع الملف
     if (!file.type.match('image.*')) {
       setError('يجب أن يكون الملف من نوع صورة');
       return;
     }
   
-    // التحقق من حجم الملف (2MB كحد أقصى)
     if (file.size > 2 * 1024 * 1024) {
       setError('يجب أن يكون حجم الصورة أقل من 2MB');
       return;
@@ -101,25 +116,22 @@ const EquipmentOwnerProfile = () => {
     try {
       let photoUrl = ownerData?.photoUrl;
   
-      // Upload new photo if selected
       if (photoFile) {
         const uploadResult = await uploadDriverPhoto(session.id, photoFile);
         if (!uploadResult.success || !uploadResult.url) {
-          setError( 'فشل في رفع الصورة');
+          setError('فشل في رفع الصورة');
           setLoading(false);
           return;
         }
         photoUrl = uploadResult.url;
       }
   
-      // تحضير البيانات للتحديث
       const updateData: Partial<OwnerData> = {
         name,
         ...(photoUrl && { photoUrl }),
         updatedAt: new Date()
       };
   
-      // Update owner data
       const updateResult = await updateEquipmentOwner(session.id, updateData);
       
       if (updateResult.success && updateResult.data) {
@@ -248,8 +260,6 @@ const EquipmentOwnerProfile = () => {
                   dir="rtl"
                 />
               </div>
-
-              
             </div>
           </div>
 
@@ -318,18 +328,17 @@ const EquipmentOwnerProfile = () => {
                   <dt className="text-gray-500 font-medium">حالة الحساب</dt>
                 </div>
               </dl>
-
-             
             </div>
           </div>
 
           <div className="mt-6 flex justify-end space-x-4 rtl:space-x-reverse">
             <button
               onClick={navigateToAddEquipment}
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+              className="px-4 me-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
             >
               إضافة معدات جديدة
             </button>
+        
             <button
               onClick={() => setIsEditing(true)}
               className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
@@ -339,6 +348,91 @@ const EquipmentOwnerProfile = () => {
           </div>
         </div>
       )}
+
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4 text-right">
+          أحدث المعدات المضافة
+        </h3>
+        
+        {equipmentLoading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {equipment.slice(0, 3).map((item) => (
+              <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div className="h-40 relative overflow-hidden">
+                  {item.photoUrl ? (
+                    <Image
+                      src={item.photoUrl}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-500 text-sm">لا توجد صورة</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="p-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-base font-semibold text-gray-900">
+                      {item.name}
+                    </h3>
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      item.status === 'rent' 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : item.status === 'sale' 
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {item.status === 'rent' ? 'للإيجار' : item.status === 'sale' ? 'للبيع' : 'تعمل'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-900">
+                      {item.price} ريال {item.status === 'rent' ? '/ يوم' : ''}
+                    </span>
+                    <Link 
+                      href={`/equipment-owner/edit-equipment/${item.fbId}`}
+                      className="text-xs text-blue-600 hover:text-blue-800"
+                    >
+                      تعديل
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {equipment.length === 0 && !equipmentLoading && (
+          <div className="text-center py-6">
+            <p className="text-gray-500 mb-4">لا توجد معدات مسجلة</p>
+            <button
+              onClick={navigateToAddEquipment}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            >
+              إضافة معدات جديدة
+            </button>
+          </div>
+        )}
+
+        {equipment.length > 3 && (
+          <div className="mt-4 text-center">
+            <Link 
+              href="/equipment-owner/full-equipment-list" 
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              عرض جميع المعدات ({equipment.length})
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

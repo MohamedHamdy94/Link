@@ -118,13 +118,13 @@ const EquipmentListPublic = () => {
               </div>
               <div className="p-3 md:p-4 flex-grow flex flex-col">
                 <div className="flex justify-between items-start">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
+              {!item.status === 'work' && <span className={`px-2 py-1 text-xs rounded-full ${
                     item.status === 'rent' 
                       ? 'bg-blue-100 text-blue-800' 
                       : 'bg-green-100 text-green-800'
                   }`}>
                     {item.status === 'rent' ? 'للإيجار' : 'للبيع'}
-                  </span>
+                  </span>}    
                   <h3 className="text-base md:text-lg font-semibold text-gray-900 text-right">
                     {item.name}
                   </h3>
