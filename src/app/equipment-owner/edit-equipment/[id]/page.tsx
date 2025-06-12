@@ -30,7 +30,6 @@ export default function EditEquipmentPage({ params }: PageProps) {
   const [price, setPrice] = useState('');
   const [status, setStatus] = useState<'rent' | 'sale' | 'work'>('rent');
   const [equipmentType, setEquipmentType] = useState('');
-  const [fbId, setFbId] = useState('');
 
   useEffect(() => {
     const session = getSession();
