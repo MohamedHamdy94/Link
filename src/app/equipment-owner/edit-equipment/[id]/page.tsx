@@ -7,12 +7,12 @@ import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
 import { getSession } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Equipment } from '@/lib/interface';
-interface EditEquipmentPageProps {
-  params: {
-    id: string;
-  };
+interface Props {
+  params: { id: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
-const EditEquipmentPage: React.FC<EditEquipmentPageProps> = ({ params }) => {
+
+export default function EditEquipmentPage({ params }: Props) {
   const resolvedParams = 'then' in params ? use(params) : params;
   const { id } = resolvedParams;
 
@@ -334,4 +334,3 @@ const EditEquipmentPage: React.FC<EditEquipmentPageProps> = ({ params }) => {
   );
 }
 
-export default EditEquipmentPage;
