@@ -1,21 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { use } from 'react';
 import { getEquipmentById, updateEquipment } from '@/lib/firebase/firestore';
 import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
 import { getSession } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Equipment } from '@/lib/interface';
+
 interface PageProps {
   params: {
     id: string;
   };
 }
 
-export default async function EditEquipmentPage({ params }: PageProps) {
+export default function EditEquipmentPage({ params }: PageProps) {
   const { id } = params;
-
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -31,6 +30,7 @@ export default async function EditEquipmentPage({ params }: PageProps) {
   const [price, setPrice] = useState('');
   const [status, setStatus] = useState<'rent' | 'sale' | 'work'>('rent');
   const [equipmentType, setEquipmentType] = useState('');
+  const [fbId, setFbId] = useState('');
 
   useEffect(() => {
     const session = getSession();
@@ -54,11 +54,8 @@ export default async function EditEquipmentPage({ params }: PageProps) {
           setPrice(eq.price.toString());
           setStatus(eq.status);
           setFbId(eq.fbId);
-
           setEquipmentType(eq.equipmentType);
           setPhotoPreview(eq.photoUrl || '');
-         
-
         } else {
           setError('فشل في تحميل بيانات المعدة');
         }
