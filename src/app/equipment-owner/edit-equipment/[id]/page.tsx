@@ -7,8 +7,12 @@ import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
 import { getSession } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Equipment } from '@/lib/interface';
-
-export default function EditEquipmentPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
+interface DriversListProps {
+  params: {
+    id: string;
+  };
+}
+const EditEquipmentPage: React.FC<EditEquipmentPageProps> = ({ params }) => {
   const resolvedParams = 'then' in params ? use(params) : params;
   const { id } = resolvedParams;
 
@@ -329,3 +333,5 @@ export default function EditEquipmentPage({ params }: { params: { id: string } |
     </div>
   );
 }
+
+export default EditEquipmentPage;
