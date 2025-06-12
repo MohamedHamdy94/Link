@@ -60,12 +60,14 @@ const EquipmentOwnerProfile = () => {
           setPhotoPreview(ownerResult.data?.photoUrl || '');
         } else {
           setOwnerError('فشل في تحميل بيانات صاحب المعدات');
+          console.log(ownerError)
         }
 
         if (equipmentResult.success) {
           setEquipment(equipmentResult.data as Equipment[]);
         } else {
           setEquipmentError('فشل في تحميل بيانات المعدات');
+          console.log(equipmentError)
         }
       } catch (err) {
         setError('حدث خطأ أثناء تحميل البيانات');
@@ -167,6 +169,7 @@ const EquipmentOwnerProfile = () => {
   }
 
   return (
+
     <div className="bg-gray-50 p-8 rounded-lg shadow-md max-w-3xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <button

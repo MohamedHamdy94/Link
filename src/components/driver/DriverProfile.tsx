@@ -7,7 +7,7 @@ import { getSession, logout } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { DocumentData } from 'firebase/firestore';
-import { Driver, UpdateResult } from '@/lib/interface';
+import { Driver } from '@/lib/interface';
 // import { UpdateResult, Drive } from '@/lib/interface';
 
 

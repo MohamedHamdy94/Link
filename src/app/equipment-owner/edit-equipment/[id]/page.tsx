@@ -7,7 +7,6 @@ import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
 import { getSession } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Equipment } from '@/lib/interface';
-import Image from 'next/image';
 
 export default function EditEquipmentPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
   const resolvedParams = 'then' in params ? use(params) : params;
@@ -21,7 +20,6 @@ export default function EditEquipmentPage({ params }: { params: { id: string } |
   const [equipment, setEquipment] = useState<Equipment | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState('');
-  const [fbId, setFbId] = useState('');
 
   // الحقول القابلة للتعديل
   const [name, setName] = useState('');
