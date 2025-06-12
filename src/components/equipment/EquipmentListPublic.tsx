@@ -26,7 +26,7 @@ const EquipmentListPublic = () => {
       },
       work: { 
         text: 'في العمل', 
-        bgColor: 'bg-yellow-600',
+        bgColor: 'bg-yellow-500',
       }
     };
 

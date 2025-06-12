@@ -3,7 +3,14 @@ import Image from 'next/image';
 import React from 'react';
 
 const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
-  return (
+  if (!driver.isAvailable) {
+    return (
+      <div className=" text-center  py-12">
+        <p className="text-center text-gray-500">لا يوجد سائقين متاحين حالياً</p>
+      </div>
+    ); // أو يمكنك إرجاع بديل آخر
+  }
+  return driver.isVerified && (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700">
       {/* صورة السائق بأبعاد ثابتة */}
       <div className="relative w-full h-48">
@@ -47,8 +54,8 @@ const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
   
         <a href={`tel:${driver.phoneNumber}`} className="text-blue-600 dark:text-blue-400 hover:underline">
 
-          <div className=" flex items-center  w-full mt-4 bg-green-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors duration-300">
-      <div>         اتصل الآن </div>      <svg className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className=" flex items-center  w-full mt-4 bg-green-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors duration-300">
+      <div>         اتصل  الآن </div>      <svg className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
           </svg>   </div>
           </a>
