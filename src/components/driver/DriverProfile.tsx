@@ -65,12 +65,16 @@ const DriverProfile = () => {
             isAvailable: result.data.isAvailable || false,
             hasLicense: result.data.hasLicense || false,
           });
+
+
+
           setPhotoPreview(result.data.photoUrl || '');
+
         } else {
           setError('فشل في تحميل بيانات السائق');
         }
       } catch (err) {
-        setError('حدث خطأ أثناء تحميل البيانات');
+        setError('حدث خطأ أثناء تحميل البيانات',err);
         console.error(err);
       } finally {
         setLoading(false);
@@ -115,49 +119,50 @@ const DriverProfile = () => {
     }
     
     try {
-      const photoUrl = driverData?.photoUrl || '';
-      
+      let newPhotoUrl = driverData?.photoUrl || '';
+  
       // Upload new photo if selected
       if (photoFile) {
-       await uploadDriverPhoto(session.id, photoFile);
-     
+        const uploadResult = await uploadDriverPhoto(session.id, photoFile);
+        
+        if (!uploadResult.success) {
+          setError(uploadResult.error?.toString() || 'فشل في رفع الصورة');
+          setLoading(false);
+          return;
+        }
+        
+        newPhotoUrl = uploadResult.url;
+        setPhotoPreview(newPhotoUrl);
       }
       
       // Update driver data
-      const updateResult: UpdateResult<Driver> = await updateDriver(session.id, {
-      name: formData.name,
-      age: parseInt(formData.age),
-      equipmentType: formData.equipmentType,
-      isAvailable: formData.isAvailable,
-      hasLicense: formData.hasLicense,
-      userType: 'drivers' ,
-
-      photoUrl,
-      // تأكد من تضمين جميع الحقول المطلوبة
-      phoneNumber: driverData?.phoneNumber || '', // احتفظ بالقيمة القديمة إذا لم تتغير
-      isVerified: driverData?.isVerified || false,
-      updatedAt: new Date(),
-
-    });
-    
-    // معالجة نتيجة التحديث
-    if (updateResult.success && updateResult.data) {
-      setSuccess('تم تحديث البيانات بنجاح');
-      setDriverData(updateResult.data); // لن يكون هناك خطأ الآن
-      setIsEditing(false);
-    } else {
-      setError(
-        updateResult.error?.toString() || 
-        'فشل في تحديث البيانات: لا توجد بيانات مرجعة'
-      );
+      const updateResult = await updateDriver(session.id, {
+        name: formData.name,
+        age: parseInt(formData.age),
+        equipmentType: formData.equipmentType,
+        isAvailable: formData.isAvailable,
+        hasLicense: formData.hasLicense,
+        userType: 'drivers',
+        photoUrl: newPhotoUrl, // استخدم الرابط الجديد هنا
+        phoneNumber: driverData?.phoneNumber || '',
+        isVerified: driverData?.isVerified || false,
+        updatedAt: new Date(),
+      });
+  
+      if (updateResult.success) {
+        setSuccess('تم تحديث البيانات بنجاح');
+        setDriverData(updateResult.data);
+        setIsEditing(false);
+      } else {
+        setError(updateResult.error?.toString() || 'فشل في تحديث البيانات');
+      }
+    } catch (err) {
+      setError(`حدث خطأ غير متوقع: ${err instanceof Error ? err.message : String(err)}`);
+      console.error('Error updating driver:', err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    setError(`حدث خطأ غير متوقع: ${err instanceof Error ? err.message : String(err)}`);
-    console.error('Error updating driver:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   
   const handleLogout = () => {
@@ -400,13 +405,12 @@ const EditForm = ({
           onChange={handleInputChange}
           options={[
             { value: '', label: 'اختر نوع المعدة' },
-            { value: 'حفار', label: 'حفار' },
-            { value: 'جرافة', label: 'جرافة' },
+            { value: 'مانلفت', label: 'مانلفت' },
+            { value: 'فورك', label: 'فورك' },
+            { value: 'سيزر', label: 'سيزر' },
+            { value: 'ونش', label: 'ونش' },
             { value: 'لودر', label: 'لودر' },
-            { value: 'بلدوزر', label: 'بلدوزر' },
-            { value: 'رافعة', label: 'رافعة' },
-            { value: 'شاحنة نقل', label: 'شاحنة نقل' },
-            { value: 'أخرى', label: 'أخرى' },
+            { value: 'حفار', label: 'حفار' },
           ]}
         />
         

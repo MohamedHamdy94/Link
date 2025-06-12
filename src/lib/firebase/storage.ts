@@ -14,6 +14,18 @@ const EQUIPMENT_PHOTOS_PATH = 'equipment-photos';
  */
 export const uploadDriverPhoto = async (driverId: string, file: File) => {
   try {
+    // التحقق من نوع الملف
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      throw new Error('نوع الملف غير مدعوم. يرجى استخدام صورة من نوع JPEG أو PNG أو WebP');
+    }
+
+    // التحقق من حجم الملف (5MB كحد أقصى)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new Error('حجم الصورة كبير جداً. الحد الأقصى المسموح به هو 5MB');
+    }
+
     const fileExtension = file.name.split('.').pop();
     const fileName = `${driverId}_${Date.now()}.${fileExtension}`;
     const storageRef = ref(storage, `${DRIVER_PHOTOS_PATH}/${fileName}`);
@@ -24,7 +36,10 @@ export const uploadDriverPhoto = async (driverId: string, file: File) => {
     return { success: true, url: downloadURL };
   } catch (error) {
     console.error('Error uploading driver photo:', error);
-    return { success: false, error };
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'حدث خطأ أثناء رفع الصورة'
+    }; 
   }
 };
 

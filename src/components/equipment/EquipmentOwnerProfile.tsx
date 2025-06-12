@@ -167,7 +167,7 @@ const EquipmentOwnerProfile = () => {
   }
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-md max-w-3xl mx-auto">
+    <div className="bg-gray-50 p-8 rounded-lg shadow-md max-w-3xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <button
           onClick={handleLogout}

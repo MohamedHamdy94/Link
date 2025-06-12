@@ -4,14 +4,55 @@ import React, { useState, useEffect } from 'react';
 import FilterButtons from '../ui/FilterButtons';
 import { getEquipments } from '@/lib/firebase/firestore';
 import { Equipment } from '@/lib/interface';
-//import EquipmentCard from './EquipmentCard';
-import Image from 'next/image'
+import Image from 'next/image';
+
 const EquipmentListPublic = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [filterType, setFilterType] = useState('all'); 
   const [filter, setFilter] = useState('مانلفت');
+
+  // مكون البادج المعدل
+  const StatusBadge = ({ status }: { status: string }) => {
+    const statusConfig = {
+      rent: { 
+        text: 'للإيجار', 
+        bgColor: 'bg-blue-600',
+      },
+      sale: { 
+        text: 'للبيع', 
+        bgColor: 'bg-green-600',
+      },
+      work: { 
+        text: 'في العمل', 
+        bgColor: 'bg-yellow-600',
+      }
+    };
+
+    const config = statusConfig[status as keyof typeof statusConfig];
+    
+    if (!config) return null;
+
+    return (
+      <div className="absolute top-3 left-3 z-10">
+        <span className={`py-1 px-3 inline-flex items-center gap-x-1 text-sm font-medium ${config.bgColor} text-white rounded-full`}>
+          <CheckIcon />
+          {config.text}
+        </span>
+      </div>
+    );
+  };
+
+  // أيقونة البادج
+  function CheckIcon() {
+    return (
+      <svg className="shrink-0 size-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+        <path d="m9 12 2 2 4-4"></path>
+      </svg>
+    );
+  }
 
   useEffect(() => {
     const fetchEquipment = async () => {
@@ -44,8 +85,9 @@ const EquipmentListPublic = () => {
       </div>
     );
   }
+
   return (
-    <div className="bg-white p-4 md:p-8 rounded-lg shadow-md max-w-6xl mx-auto">
+    <div className="bg-gray-50 p-4 md:p-8 rounded-lg shadow-md max-w-6xl mx-auto">
       <h2 className="text-xl md:text-2xl font-bold text-gray-800 text-center md:text-right">
         المعدات المتاحة
       </h2>
@@ -55,36 +97,19 @@ const EquipmentListPublic = () => {
       </div>
 
       <div className="flex flex-wrap gap-2 my-4">
-        <button
-          onClick={() => setFilterType('all')}
-          className={`px-3 py-1 rounded-md text-xs md:text-sm ${
-            filterType === 'all' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 text-gray-800'
-          }`}
-        >
-          الكل
-        </button>
-        <button
-          onClick={() => setFilterType('rent')}
-          className={`px-3 py-1 rounded-md text-xs md:text-sm ${
-            filterType === 'rent' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 text-gray-800'
-          }`}
-        >
-          للإيجار
-        </button>
-        <button
-          onClick={() => setFilterType('sale')}
-          className={`px-3 py-1 rounded-md text-xs md:text-sm ${
-            filterType === 'sale' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 text-gray-800'
-          }`}
-        >
-          للبيع
-        </button>
+        {['all', 'rent', 'sale','work'].map((type) => (
+          <button
+            key={type}
+            onClick={() => setFilterType(type)}
+            className={`px-3 py-1 rounded-md text-xs md:text-sm ${
+              filterType === type 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-200 text-gray-800'
+            }`}
+          >
+            {type === 'all' ? 'الكل' : type === 'rent' ? 'للإيجار' :type === 'sale' ? 'للبيع':'في العمل'}
+          </button>
+        ))}
       </div>
       
       {error && (
@@ -98,17 +123,19 @@ const EquipmentListPublic = () => {
           <p className="text-gray-500">لا توجد معدات متاحة حالياً</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-3 gap-4">
           {filteredEquipment.map((item) => (
-            <div key={item.id} className="bg-white overflow-hidden shadow-md rounded-lg flex flex-col h-full">
-              <div className="h-full w-full overflow-hidden">
+            <div key={item.id} className="bg-white relative overflow-hidden shadow-md rounded-lg flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
+              <StatusBadge status={item.status} />
+              
+              <div className="h-48 w-full overflow-hidden">
                 {item.photoUrl ? (
                   <Image
-                  width={500}
-                  height={500}
+                    width={500}
+                    height={500}
                     src={item.photoUrl} 
                     alt={item.name} 
-                    className="object-cover"
+                    className="object-cover w-full h-full"
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -116,15 +143,9 @@ const EquipmentListPublic = () => {
                   </div>
                 )}
               </div>
+              
               <div className="p-3 md:p-4 flex-grow flex flex-col">
                 <div className="flex justify-between items-start">
-              {!item.status === 'work' && <span className={`px-2 py-1 text-xs rounded-full ${
-                    item.status === 'rent' 
-                      ? 'bg-blue-100 text-blue-800' 
-                      : 'bg-green-100 text-green-800'
-                  }`}>
-                    {item.status === 'rent' ? 'للإيجار' : 'للبيع'}
-                  </span>}    
                   <h3 className="text-base md:text-lg font-semibold text-gray-900 text-right">
                     {item.name}
                   </h3>
@@ -160,8 +181,6 @@ const EquipmentListPublic = () => {
                 </div>
               </div>
             </div>
-                    //    <EquipmentCard key={item.id} item={item} className="bg-white overflow-hidden shadow-md rounded-lg flex flex-col h-full"/>
-            
           ))}
         </div>
       )}

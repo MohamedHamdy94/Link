@@ -209,7 +209,7 @@ const EquipmentForm = () => {
               <label className="block text-sm font-medium text-gray-700 text-right mb-1">
                 حالة المعدة *
               </label>
-              <div className="flex space-x-4 rtl:space-x-reverse">
+              <div className="flex  rtl:space-x-reverse">
                 <div className="flex items-center">
                   <input
                     id="rent"
@@ -232,7 +232,7 @@ const EquipmentForm = () => {
                     value="sale"
                     checked={status === 'sale'}
                     onChange={() => setStatus('sale')}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    className="h-4 w-4 mr-1 text-blue-600 focus:ring-blue-500 border-gray-300"
                   />
                   <label htmlFor="sale" className="mr-2 block text-sm text-gray-700">
                     للبيع
@@ -246,11 +246,10 @@ const EquipmentForm = () => {
                     value="work"
                     checked={status === 'work'}
                     onChange={() => setStatus('work')}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    className="h-4 w-4  text-blue-600 focus:ring-blue-500 border-gray-300"
                   />
                   <label htmlFor="work" className="mr-2 block text-sm text-gray-700">
-                    غير متاح
-                  </label>
+في العمل                 </label>
                 </div>
               </div>
             </div>

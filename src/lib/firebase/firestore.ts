@@ -70,7 +70,7 @@ export const updateDriver = async (driverId: string, driverData: Driver) => {
       ...driverData,
       updatedAt: new Date()
     });
-    return { success: true };
+    return {data:driverData, success: true };
   } catch (error) {
     console.error('Error updating driver:', error);
     return { success: false, error };
