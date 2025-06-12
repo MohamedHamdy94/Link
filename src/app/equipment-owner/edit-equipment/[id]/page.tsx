@@ -7,14 +7,14 @@ import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
 import { getSession } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Equipment } from '@/lib/interface';
-interface Props {
-  params: { id: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+interface PageProps {
+  params: {
+    id: string;
+  };
 }
 
-export default function EditEquipmentPage({ params }: Props) {
-  const resolvedParams = 'then' in params ? use(params) : params;
-  const { id } = resolvedParams;
+export default async function EditEquipmentPage({ params }: PageProps) {
+  const { id } = params;
 
   const router = useRouter();
   const [loading, setLoading] = useState(true);
