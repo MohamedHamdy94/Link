@@ -328,25 +328,32 @@
 //   );
 // }
 
- import EditEquipmentClient from './EditEquipmentClient';
 
 // interface PageProps {
-//   params: { id: string };
-// }
+  //   params: { id: string };
+  // }
+  
+  // export default function EditEquipmentPage({ params }: PageProps) {
+    //   return <EditEquipmentClient id={params.id} />;
+    // }
 
-// export default function EditEquipmentPage({ params }: PageProps) {
-//   return <EditEquipmentClient id={params.id} />;
-// }
-import type { Metadata } from 'next'
- 
-type Props = {
-  params: Promise<{ id: string }>
+
+import EditEquipmentClient from './EditEquipmentClient';
+import type { Metadata } from 'next';
+
+interface PageProps {
+  params: { id: string };
 }
- 
-export async function EditEquipmentPage(
-  { params}: Props
-): Promise<Metadata> {
-  // read route params
-  const { id } = await params
-  return <EditEquipmentClient id={id} />;
-   }
+
+// تعريف Metadata منفصل
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  return {
+    title: `تعديل المعدة ${params.id}`,
+    description: `صفحة تعديل بيانات المعدة ${params.id}`,
+  };
+}
+
+// الصفحة الرئيسية
+export default function EditEquipmentPage({ params }: PageProps) {
+  return <EditEquipmentClient id={params.id} />;
+}
