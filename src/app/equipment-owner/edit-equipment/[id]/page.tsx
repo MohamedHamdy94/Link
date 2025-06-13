@@ -7,14 +7,12 @@ import { getSession } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Equipment } from '@/lib/interface';
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
+import { useParams } from 'next/navigation';
 
-export default function EditEquipmentPage({ params }: PageProps) {
-  const { id } = params;
+  
+  export default async function EditEquipmentPage({ params }: PageProps) {
+  const params = useParams();
+  const id = params?.id as string;
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
