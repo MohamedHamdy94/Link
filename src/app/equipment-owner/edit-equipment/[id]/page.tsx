@@ -344,7 +344,7 @@ type Props = {
 }
  
 export async function EditEquipmentPage(
-  { params, searchParams }: Props
+  { params}: Props
 ): Promise<Metadata> {
   // read route params
   const { id } = await params
