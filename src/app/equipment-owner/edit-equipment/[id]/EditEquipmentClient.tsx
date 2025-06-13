@@ -51,6 +51,7 @@ export default function EditEquipmentClient({ id }: Props) {
           setPhotoPreview(eq.photoUrl || '');
         } else {
           setError('فشل في تحميل بيانات المعدة');
+          console.log(error)
         }
       } catch (err) {
         setError('حدث خطأ أثناء تحميل البيانات');
@@ -124,6 +125,7 @@ export default function EditEquipmentClient({ id }: Props) {
 
       if (updateResult.success) {
         setSuccess('تم تحديث بيانات المعدة بنجاح');
+        console.log(success)
         setEquipment({ ...equipment, ...updateData });
       } else {
         setError(updateResult.error?.toString() || 'فشل في تحديث البيانات');
