@@ -339,23 +339,10 @@
 
 // src/app/equipment-owner/edit-equipment/[id]/page.tsx
 import EditEquipmentClient from './EditEquipmentClient';
-import type { Metadata } from 'next';
 // Define interface Params
-interface Params {
-  id: string;
-}
-// Define Props for the page
-interface PageProps {
-  params: Params; // Ensure that this is not a promise unless intended
-}
-// Define Metadata (optional)
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  return {
-    title: `تعديل المعدة ${params.id}`,
-    description: `صفحة تعديل بيانات المعدة ${params.id}`
-  };
-}
+
+
 // Main component
-export default function EditEquipmentPage({ params }: PageProps) {
+export default function Page({ params }: { params: { id: string } }) {
   return <EditEquipmentClient id={params.id} />;
 }
