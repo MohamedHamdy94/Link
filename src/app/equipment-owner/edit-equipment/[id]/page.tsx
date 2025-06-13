@@ -328,12 +328,27 @@
 //   );
 // }
 
-import EditEquipmentClient from './EditEquipmentClient';
+// import EditEquipmentClient from './EditEquipmentClient';
 
-interface PageProps {
-  params: { id: string };
+// interface PageProps {
+//   params: { id: string };
+// }
+
+// export default function EditEquipmentPage({ params }: PageProps) {
+//   return <EditEquipmentClient id={params.id} />;
+// }
+import type { Metadata, ResolvingMetadata } from 'next'
+ 
+type Props = {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
-
-export default function EditEquipmentPage({ params }: PageProps) {
+ 
+export async function EditEquipmentPage(
+  { params, searchParams }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  // read route params
+  const { id } = await params
   return <EditEquipmentClient id={params.id} />;
-}
+   }
