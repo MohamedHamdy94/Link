@@ -4,9 +4,11 @@ import { Equipment } from '@/lib/interface';
 
 
 
-export default async function EditEquipmentPage({ params }: { params: { id: string } }) {
+export default async function EditEquipmentPage({ params }: { params: Promise<{ id: string }> }) {
   // استخراج id من params بشكل صحيح
-  const { id } = await params
+  //const { id } = await params
+  const id = (await params).id;
+
   const equipmentData = await getEquipmentById(id);
 
   if (!equipmentData.success || !equipmentData.data) {
