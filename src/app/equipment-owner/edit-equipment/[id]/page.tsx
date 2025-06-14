@@ -7,7 +7,6 @@ import { Equipment } from '@/lib/interface';
 export default async function EditEquipmentPage({ params }: { params: { id: string } }) {
   // استخراج id من params بشكل صحيح
   const { id } = await params
-console.log(id)
   const equipmentData = await getEquipmentById(id);
 
   if (!equipmentData.success || !equipmentData.data) {
@@ -22,5 +21,5 @@ console.log(id)
     createdAt: data.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
   };
 
-  return <EditEquipmentClient id={id} initialData={serializedData} />;
+  return <EditEquipmentClient  initialData={serializedData} />;
 }

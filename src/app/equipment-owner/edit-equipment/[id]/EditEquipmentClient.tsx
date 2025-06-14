@@ -7,7 +7,7 @@ import { getSession } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Equipment } from '@/lib/interface';
 
-export default function EditEquipmentClient({ id, initialData }: { id: string; initialData: Equipment }) {
+export default function EditEquipmentClient({  initialData }: {  initialData: Equipment }) {
  console.log(initialData)
   const router = useRouter();
   const [loading, setLoading] = useState(!initialData);
