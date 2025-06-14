@@ -48,6 +48,7 @@ export interface UpdateResult<T = Driver | OwnerData> {
   error?: unknown;
 }
 export interface Equipment {
+  fbId?:string;
   id?: string;
   name: string;
   description: string;
@@ -60,6 +61,8 @@ export interface Equipment {
   createdAt: Date;
   updatedAt: Date;
 }
+
+
 export interface OwnerData {
   id?: string;
   photoUrl?: string; // Optional string for the photo URL

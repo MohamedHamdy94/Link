@@ -17,6 +17,7 @@ export default async function EditEquipmentPage({ params }: { params: Promise<{ 
 
   // تحويل البيانات بشكل آمن
   const data = equipmentData.data;
+  
   const serializedData: Equipment = {
     ...data,
     updatedAt: data.updatedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
