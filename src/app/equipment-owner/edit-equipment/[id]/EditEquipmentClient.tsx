@@ -1,31 +1,29 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getEquipmentById, updateEquipment } from '@/lib/firebase/firestore';
+import { updateEquipment } from '@/lib/firebase/firestore';
 import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
 import { getSession } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Equipment } from '@/lib/interface';
 
-interface Props {
-  id: string;
-}
-
-export default function EditEquipmentClient({ id }: Props) {
+export default function EditEquipmentClient({ id, initialData }: { id: string; initialData: Equipment }) {
+ console.log(initialData)
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [equipment, setEquipment] = useState<Equipment | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState('');
+  const [photoPreview, setPhotoPreview] = useState(initialData?.photoUrl || '');
 
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const [status, setStatus] = useState<'rent' | 'sale' | 'work'>('rent');
-  const [equipmentType, setEquipmentType] = useState('');
+  const [formData, setFormData] = useState({
+    name: initialData?.name || '',
+    description: initialData?.description || '',
+    price: initialData?.price.toString() || '',
+    status: initialData?.status || 'rent',
+    equipmentType: initialData?.equipmentType || '',
+  });
 
   useEffect(() => {
     const session = getSession();
@@ -34,35 +32,11 @@ export default function EditEquipmentClient({ id }: Props) {
       return;
     }
 
-    const fetchEquipment = async () => {
-      setLoading(true);
-      setError('');
-
-      try {
-        const result = await getEquipmentById(id);
-        if (result.success && result.data) {
-          const eq = result.data as Equipment;
-          setEquipment(eq);
-          setName(eq.name);
-          setDescription(eq.description);
-          setPrice(eq.price.toString());
-          setStatus(eq.status);
-          setEquipmentType(eq.equipmentType);
-          setPhotoPreview(eq.photoUrl || '');
-        } else {
-          setError('فشل في تحميل بيانات المعدة');
-          console.log(error)
-        }
-      } catch (err) {
-        setError('حدث خطأ أثناء تحميل البيانات');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEquipment();
-  }, [id, router]);
+    if (!initialData) {
+      setError('فشل في تحميل بيانات المعدة');
+      setLoading(false);
+    }
+  }, [initialData, router]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -86,6 +60,14 @@ export default function EditEquipmentClient({ id }: Props) {
     reader.readAsDataURL(file);
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -93,16 +75,16 @@ export default function EditEquipmentClient({ id }: Props) {
     setSaving(true);
 
     const session = getSession();
-    if (!session || !equipment) {
+    if (!session || !initialData) {
       router.push('/auth/login');
       return;
     }
 
     try {
-      let photoUrl = equipment.photoUrl;
+      let photoUrl = initialData.photoUrl;
 
       if (photoFile) {
-        const uploadResult = await uploadEquipmentPhoto(equipment.fbId, photoFile);
+        const uploadResult = await uploadEquipmentPhoto(initialData.ownerId,initialData.fbId, photoFile);
         if (!uploadResult.success || !uploadResult.url) {
           setError('فشل في رفع الصورة');
           setSaving(false);
@@ -112,21 +94,20 @@ export default function EditEquipmentClient({ id }: Props) {
       }
 
       const updateData: Partial<Equipment> = {
-        name,
-        description,
-        price: parseFloat(price),
-        status,
-        equipmentType,
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        status: formData.status as 'rent' | 'sale' | 'work',
+        equipmentType: formData.equipmentType,
         ...(photoUrl && { photoUrl }),
         updatedAt: new Date(),
       };
 
-      const updateResult = await updateEquipment(equipment.fbId, updateData);
+      const updateResult = await updateEquipment(initialData.fbId, updateData);
 
       if (updateResult.success) {
         setSuccess('تم تحديث بيانات المعدة بنجاح');
-        console.log(success)
-        setEquipment({ ...equipment, ...updateData });
+        setTimeout(() => setSuccess(''), 3000);
       } else {
         setError(updateResult.error?.toString() || 'فشل في تحديث البيانات');
       }
@@ -146,7 +127,7 @@ export default function EditEquipmentClient({ id }: Props) {
     );
   }
 
-  if (!equipment) {
+  if (!initialData) {
     return (
       <div className="bg-white p-8 rounded-lg shadow-md max-w-3xl mx-auto text-center">
         <p className="text-red-500 mb-4">لم يتم العثور على المعدة</p>
@@ -162,13 +143,23 @@ export default function EditEquipmentClient({ id }: Props) {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md max-w-3xl mx-auto">
-   
-       <form onSubmit={handleSubmit} className="space-y-6">
-         <div className="flex flex-col md:flex-row gap-6">
-           <div className="md:w-1/3">
-             <div className="relative w-full h-48 mx-auto overflow-hidden rounded-lg bg-gray-100">
-               {photoPreview ? (
-                 <img
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+          {success}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="md:w-1/3">
+            <div className="relative w-full h-48 mx-auto overflow-hidden rounded-lg bg-gray-100">
+              {photoPreview ? (
+                <img
                   src={photoPreview}
                   alt="صورة المعدة"
                   className="w-full h-full object-cover"
@@ -202,10 +193,11 @@ export default function EditEquipmentClient({ id }: Props) {
               </label>
               <input
                 type="text"
+                name="name"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={formData.name}
+                onChange={handleChange}
                 dir="rtl"
               />
             </div>
@@ -215,10 +207,11 @@ export default function EditEquipmentClient({ id }: Props) {
                 الوصف
               </label>
               <textarea
+                name="description"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
                 rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={formData.description}
+                onChange={handleChange}
                 dir="rtl"
               />
             </div>
@@ -230,10 +223,11 @@ export default function EditEquipmentClient({ id }: Props) {
                 </label>
                 <input
                   type="number"
+                  name="price"
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  value={formData.price}
+                  onChange={handleChange}
                   dir="rtl"
                 />
               </div>
@@ -243,9 +237,10 @@ export default function EditEquipmentClient({ id }: Props) {
                   حالة المعدة
                 </label>
                 <select
+                  name="status"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as 'rent' | 'sale' | 'work')}
+                  value={formData.status}
+                  onChange={handleChange}
                 >
                   <option value="rent">للإيجار</option>
                   <option value="sale">للبيع</option>
@@ -260,10 +255,11 @@ export default function EditEquipmentClient({ id }: Props) {
               </label>
               <select
                 id="equipmentType"
+                name="equipmentType"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                value={equipmentType}
-                onChange={(e) => setEquipmentType(e.target.value)}
+                value={formData.equipmentType}
+                onChange={handleChange}
                 dir="rtl"
               >
                 <option value="">اختر نوع المعدة</option>
@@ -275,8 +271,6 @@ export default function EditEquipmentClient({ id }: Props) {
                 <option value="فورك"> فورك </option>
               </select>
             </div>
-
-         
           </div>
         </div>
 
