@@ -48,7 +48,7 @@ export interface UpdateResult<T = Driver | OwnerData> {
   error?: unknown;
 }
 export interface Equipment {
-  fbId?:string;
+  fbId?:string | undefined;
   id?: string;
   name: string;
   description: string;
