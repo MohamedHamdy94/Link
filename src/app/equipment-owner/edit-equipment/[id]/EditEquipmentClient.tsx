@@ -81,9 +81,9 @@ export default function EditEquipmentClient({  initialData }: {  initialData: Eq
 
     try {
       let photoUrl = initialData.photoUrl;
-console.log(initialData.fbId && typeof initialData.fbId ==="string" )
-      if (photoFile ) {
-        const uploadResult = await uploadEquipmentPhoto(initialData.ownerId,initialData.fbId, photoFile);
+console.log(initialData.fbId )
+if (photoFile && initialData.ownerId && typeof initialData.fbId === 'string') {
+  const uploadResult = await uploadEquipmentPhoto(initialData.ownerId,initialData.fbId, photoFile);
         if (!uploadResult.success || !uploadResult.url) {
           setError('فشل في رفع الصورة');
           setSaving(false);
