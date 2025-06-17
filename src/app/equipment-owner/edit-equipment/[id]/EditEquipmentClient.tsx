@@ -425,8 +425,8 @@ export default function EditEquipmentClient({ initialData }: EditEquipmentClient
       let photoUrl = initialData.photoUrl || '';
   
       if (photoFile) {
-        const uploadResult = await uploadEquipmentPhoto(initialData.fbId, photoFile);
-        if (!uploadResult.success || !uploadResult.url) {
+   const uploadResult = await uploadEquipmentPhoto(initialData.ownerId,initialData.fbId, photoFile);
+if (!uploadResult.success || !uploadResult.url) {
           setError('فشل في رفع الصورة');
           setSaving(false);
           return;
