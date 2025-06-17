@@ -104,15 +104,16 @@ if (photoFile && initialData.ownerId && typeof initialData.fbId === 'string') {
       if (typeof initialData.fbId === 'string') {
 
       const updateResult = await updateEquipment(initialData.fbId, updateData);
-    } else {
-      setError(updateResult.error?.toString() || 'فشل في تحديث البيانات');
-    }
-      if (updateResult.success) {
+       if (updateResult.success) {
         setSuccess('تم تحديث بيانات المعدة بنجاح');
         setTimeout(() => setSuccess(''), 3000);
       } else {
         setError(updateResult.error?.toString() || 'فشل في تحديث البيانات');
-      }
+      } 
+    } else {
+      setError(updateResult.error?.toString() || 'فشل في تحديث البيانات');
+    }
+    
     } catch (err) {
       setError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
       console.error(err);
