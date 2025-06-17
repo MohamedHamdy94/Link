@@ -101,9 +101,12 @@ if (photoFile && initialData.ownerId && typeof initialData.fbId === 'string') {
         ...(photoUrl && { photoUrl }),
         updatedAt: new Date(),
       };
+      if (typeof initialData.fbId === 'string') {
 
       const updateResult = await updateEquipment(initialData.fbId, updateData);
-
+    } else {
+      setError(updateResult.error?.toString() || 'فشل في تحديث البيانات');
+    }
       if (updateResult.success) {
         setSuccess('تم تحديث بيانات المعدة بنجاح');
         setTimeout(() => setSuccess(''), 3000);
