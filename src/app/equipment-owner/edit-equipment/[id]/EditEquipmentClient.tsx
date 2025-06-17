@@ -101,7 +101,7 @@ if (photoFile && initialData.ownerId && typeof initialData.fbId === 'string') {
         ...(photoUrl && { photoUrl }),
         updatedAt: new Date(),
       };
-      if (typeof initialData.fbId === 'string') {
+      if (updateData.name && typeof initialData.fbId === 'string') {
 
       const updateResult = await updateEquipment(initialData.fbId, updateData);
        if (updateResult.success) {
