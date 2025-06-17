@@ -18,9 +18,9 @@ export default async function EditEquipmentPage({ params }: { params: Promise<{ 
   // تحويل البيانات بشكل آمن
   const data = equipmentData.data;
 
-    const serializedData: Equipment = {
+  const serializedData: Equipment = {
     fbId: data.fbId,
-    id: data.id,
+    id: params.id, // استخدام id من params بدلاً من data.id
     name: data.name,
     description: data.description || '',
     price: data.price,
