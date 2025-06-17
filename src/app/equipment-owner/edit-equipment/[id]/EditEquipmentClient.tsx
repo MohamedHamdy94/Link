@@ -92,18 +92,23 @@ if (photoFile && initialData.ownerId && typeof initialData.fbId === 'string') {
         photoUrl = uploadResult.url;
       }
 
-      const updateData: Partial<Equipment> = {
+      const updateData: Equipment = {
+        fbId: initialData.fbId,
+        id: initialData.id,
         name: formData.name,
-        description: formData.description,
+        description: formData.description || '', // قيمة افتراضية إذا كانت فارغة
         price: parseFloat(formData.price),
         status: formData.status as 'rent' | 'sale' | 'work',
         equipmentType: formData.equipmentType,
-        ...(photoUrl && { photoUrl }),
+        photoUrl: photoUrl || '', // قيمة افتراضية إذا كانت فارغة
+        ownerId: initialData.ownerId,
+        ownerPhone: initialData.ownerPhone || '',
+        createdAt: initialData.createdAt,
         updatedAt: new Date(),
       };
-      if (updateData.name && typeof initialData.fbId === 'string') {
-
+  
       const updateResult = await updateEquipment(initialData.fbId, updateData);
+  
        if (updateResult.success) {
         setSuccess('تم تحديث بيانات المعدة بنجاح');
         setTimeout(() => setSuccess(''), 3000);
