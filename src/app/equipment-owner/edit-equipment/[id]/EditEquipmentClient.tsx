@@ -406,20 +406,26 @@ export default function EditEquipmentClient({ initialData }: EditEquipmentClient
     if (!validateForm()) {
       return;
     }
-
+  
+    // التحقق من وجود fbId
+    if (!initialData.fbId) {
+      setError('معرف المعدة غير موجود');
+      return;
+    }
+  
     setSaving(true);
-
+  
     const session = getSession();
-    if (!session || !initialData) {
+    if (!session) {
       router.push('/auth/login');
       return;
     }
-
+  
     try {
-      let photoUrl = initialData.photoUrl;
-
-     if (photoFile && initialData.ownerId && typeof initialData.fbId === 'string') {
-     const uploadResult = await uploadEquipmentPhoto(initialData.ownerId,initialData.fbId, photoFile);
+      let photoUrl = initialData.photoUrl || '';
+  
+      if (photoFile) {
+        const uploadResult = await uploadEquipmentPhoto(initialData.fbId, photoFile);
         if (!uploadResult.success || !uploadResult.url) {
           setError('فشل في رفع الصورة');
           setSaving(false);
@@ -427,7 +433,7 @@ export default function EditEquipmentClient({ initialData }: EditEquipmentClient
         }
         photoUrl = uploadResult.url;
       }
-
+  
       const updateData: Equipment = {
         ...initialData,
         name: formData.name,
@@ -435,12 +441,13 @@ export default function EditEquipmentClient({ initialData }: EditEquipmentClient
         price: parseFloat(formData.price),
         status: formData.status as 'rent' | 'sale' | 'work',
         equipmentType: formData.equipmentType,
-        photoUrl: photoUrl || '',
+        photoUrl,
         updatedAt: new Date(),
       };
-
+  
+      // نعلم TypeScript أن fbId موجود لأنه تم التحقق منه مسبقاً
       const updateResult = await updateEquipment(initialData.fbId, updateData);
-
+  
       if (updateResult.success) {
         setSuccess('تم تحديث بيانات المعدة بنجاح');
         setTimeout(() => setSuccess(''), 3000);
