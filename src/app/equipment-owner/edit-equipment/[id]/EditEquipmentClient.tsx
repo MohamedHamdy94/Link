@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation';
 import { Equipment } from '@/lib/interface';
 
 export default function EditEquipmentClient({  initialData }: {  initialData: Equipment }) {
- console.log(initialData)
   const router = useRouter();
   const [loading, setLoading] = useState(!initialData);
   const [saving, setSaving] = useState(false);
@@ -82,8 +81,8 @@ export default function EditEquipmentClient({  initialData }: {  initialData: Eq
 
     try {
       let photoUrl = initialData.photoUrl;
-
-      if (photoFile) {
+console.log(initialData.fbId && typeof initialData.fbId ==="string" )
+      if (photoFile ) {
         const uploadResult = await uploadEquipmentPhoto(initialData.ownerId,initialData.fbId, photoFile);
         if (!uploadResult.success || !uploadResult.url) {
           setError('فشل في رفع الصورة');
