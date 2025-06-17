@@ -17,11 +17,20 @@ export default async function EditEquipmentPage({ params }: { params: Promise<{ 
 
   // تحويل البيانات بشكل آمن
   const data = equipmentData.data;
-  
-  const serializedData: Equipment = {
-    ...data,
-    updatedAt: data.updatedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+
+    const serializedData: Equipment = {
+    fbId: data.fbId,
+    id: data.id,
+    name: data.name,
+    description: data.description || '',
+    price: data.price,
+    status: data.status,
+    equipmentType: data.equipmentType,
+    photoUrl: data.photoUrl || '',
+    ownerId: data.ownerId,
+    ownerPhone: data.ownerPhone || '',
     createdAt: data.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+    updatedAt: data.updatedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
   };
 
   return <EditEquipmentClient  initialData={serializedData} />;
