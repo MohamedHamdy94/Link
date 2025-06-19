@@ -21,7 +21,7 @@ console.log(equipmentData)
 
   const serializedData: Equipment = {
     fbId: data.fbId || '',
-    id: id || '', // استخدام id من params بدلاً من data.id
+    id:data.id || '', // استخدام id من params بدلاً من data.id
     name: data.name || '',
     description: data.description || '',
     price: data.price || 0,
