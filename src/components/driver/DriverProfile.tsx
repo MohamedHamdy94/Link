@@ -74,7 +74,7 @@ const DriverProfile = () => {
           setError('فشل في تحميل بيانات السائق');
         }
       } catch (err) {
-        setError('حدث خطأ أثناء تحميل البيانات',err);
+        setError('حدث خطأ أثناء تحميل البيانات');
         console.error(err);
       } finally {
         setLoading(false);
