@@ -20,16 +20,7 @@ console.log(equipmentData)
   console.log(data)
 
   const serializedData: Equipment = {
-    fbId: data.fbId || '',
-    id:data.id || '', // استخدام id من params بدلاً من data.id
-    name: data.name || '',
-    description: data.description || '',
-    price: data.price || 0,
-    status: data.status || '',
-    equipmentType: data.equipmentType || '',
-    photoUrl: data.photoUrl || '',
-    ownerId: data.ownerId || '',
-    ownerPhone: data.ownerPhone || '',
+...data,
     createdAt: data.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
     updatedAt: data.updatedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
   };
