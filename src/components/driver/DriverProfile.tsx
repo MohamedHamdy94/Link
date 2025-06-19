@@ -130,9 +130,11 @@ const DriverProfile = () => {
           setLoading(false);
           return;
         }
-        
-        newPhotoUrl = uploadResult.url;
+          if (uploadResult.success && uploadResult.url) {
+         newPhotoUrl = uploadResult.url;
         setPhotoPreview(newPhotoUrl);
+        }
+      
       }
       
       // Update driver data
