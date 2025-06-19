@@ -30,8 +30,9 @@ const serializedData: Equipment = {
   photoUrl: data.photoUrl || '',
   ownerId: data.ownerId,
   ownerPhone: data.ownerPhone || '',
-  createdAt: data.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
-  updatedAt: data.updatedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+  createdAt: data.createdAt?.toISOString() ?? new Date().toISOString(),
+updatedAt: data.updatedAt?.toISOString() ?? new Date().toISOString(),
+
 };
 
 
