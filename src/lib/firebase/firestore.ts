@@ -193,12 +193,22 @@ export const createEquipment = async (equipmentData: Equipment) => {
 
 export const getEquipmentById = async (ownerId: string) => {
   try {
-    const equipmentsRef = await getDoc(doc(db, EQUIPMENT_COLLECTION, ownerId));
-    if (equipmentsRef.exists()) {
+    const docSnap = await getDoc(doc(db, EQUIPMENT_COLLECTION, ownerId));
+    if (docSnap.exists()) {
       return { success: true,
           data: {
-        fbId: equipmentsRef.id,
-        ...equipmentsRef.data(),
+        fbId: docSnap.id,
+        id: docSnap.id,
+        name: data.name,
+        description: data.description || '',
+        price: data.price,
+        status: data.status,
+        equipmentType: data.equipmentType,
+        photoUrl: data.photoUrl || '',
+        ownerId: data.ownerId,
+        ownerPhone: data.ownerPhone || '',
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
       },};
     } else {
       return { success: false, error: 'Equipment not found' };
