@@ -191,12 +191,21 @@ export const createEquipment = async (equipmentData: Equipment) => {
 };
 
 
-export const getEquipmentById = async (ownerId: string) => {
+
+export const getEquipmentById = async (id: string): Promise<{ success: boolean; data?: Equipment; error?: string }> => {
   try {
-    const docSnap = await getDoc(doc(db, EQUIPMENT_COLLECTION, ownerId));
-    if (docSnap.exists()) {
-      return { success: true,
-          data: {
+    const docRef = doc(db, EQUIPMENT_COLLECTION, id);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return { success: false, error: 'Equipment not found' };
+    }
+
+    const data = docSnap.data();
+
+    return {
+      success: true,
+      data: {
         fbId: docSnap.id,
         id: docSnap.id,
         name: data.name,
@@ -209,15 +218,21 @@ export const getEquipmentById = async (ownerId: string) => {
         ownerPhone: data.ownerPhone || '',
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
-      },};
-    } else {
-      return { success: false, error: 'Equipment not found' };
-    }
+      }
+    };
   } catch (error) {
     console.error('Error getting Equipment:', error);
-    return { success: false, error };
+    return { success: false, error: 'حدث خطأ أثناء جلب البيانات' };
   }
 };
+
+
+
+
+
+
+
+
 
 export const getEquipments = async () => {
   try {

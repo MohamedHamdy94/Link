@@ -19,11 +19,21 @@ console.log(equipmentData)
   const data = equipmentData.data;
   console.log(data)
 
-  const serializedData: Equipment = {
-...data,
-    createdAt: data.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
-    updatedAt: data.updatedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
-  };
+const serializedData: Equipment = {
+  fbId: data.fbId,
+  id: data.id,
+  name: data.name,
+  description: data.description || '',
+  price: data.price,
+  status: data.status,
+  equipmentType: data.equipmentType,
+  photoUrl: data.photoUrl || '',
+  ownerId: data.ownerId,
+  ownerPhone: data.ownerPhone || '',
+  createdAt: data.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+  updatedAt: data.updatedAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+};
+
 
   return <EditEquipmentClient  initialData={serializedData} />;
 }
