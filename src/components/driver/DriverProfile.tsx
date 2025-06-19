@@ -151,7 +151,7 @@ const DriverProfile = () => {
         updatedAt: new Date(),
       });
   
-      if (updateResult.success) {
+      if (updateResult.success && updateResult.data) {
         setSuccess('تم تحديث البيانات بنجاح');
         setDriverData(updateResult.data);
         setIsEditing(false);
