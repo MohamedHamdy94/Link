@@ -46,7 +46,6 @@ export const getDrivers = async () => {
     const drivers: Driver[] = [];
     querySnapshot.forEach((doc) => {
       drivers.push({
-        fbId: doc.id,
         ...doc.data()
       } as Driver);
 
