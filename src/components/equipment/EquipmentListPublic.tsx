@@ -97,7 +97,7 @@ const EquipmentListPublic = () => {
       </div>
 
       <div className="flex flex-wrap gap-2 my-4">
-        {['all', 'rent', 'sale','work'].map((type) => (
+        {['all', 'rent', 'sale'].map((type) => (
           <button
             key={type}
             onClick={() => setFilterType(type)}
@@ -107,7 +107,7 @@ const EquipmentListPublic = () => {
                 : 'bg-gray-200 text-gray-800'
             }`}
           >
-            {type === 'all' ? 'الكل' : type === 'rent' ? 'للإيجار' :type === 'sale' ? 'للبيع':'في العمل'}
+            {type === 'all' ? 'الكل' : type === 'rent' ? 'للإيجار' : 'للبيع' }
           </button>
         ))}
       </div>

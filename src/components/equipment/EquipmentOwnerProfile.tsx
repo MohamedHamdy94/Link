@@ -199,7 +199,7 @@ const EquipmentOwnerProfile = () => {
         <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4 text-right">
           <p className="font-bold">الحساب غير مفعل</p>
           <p>
-            يرجى الانضمام إلى مجموعة الواتساب وإرسال رقم هاتفك لتفعيل حسابك.
+            يرجى الانضمام إلى مجموعة الواتساب وإرسال رقم هاتفك لتفعيل حسابك لتتمكن من إيضافة معداتك
           </p>
           <a
             href="https://chat.whatsapp.com/example-group-link"
@@ -333,14 +333,14 @@ const EquipmentOwnerProfile = () => {
               </dl>
             </div>
           </div>
-
           <div className="mt-6 flex justify-end space-x-4 rtl:space-x-reverse">
-            <button
+     {ownerData?.isVerified &&       <button
               onClick={navigateToAddEquipment}
               className="px-4 me-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
             >
               إضافة معدات جديدة
-            </button>
+            </button> }
+      
         
             <button
               onClick={() => setIsEditing(true)}
@@ -363,7 +363,7 @@ const EquipmentOwnerProfile = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {equipment.slice(0, 3).map((item) => (
+            {equipment.map((item) => (
               <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
                 <div className="h-40 relative overflow-hidden">
                   {item.photoUrl ? (
@@ -413,7 +413,7 @@ const EquipmentOwnerProfile = () => {
           </div>
         )}
 
-        {equipment.length === 0 && !equipmentLoading && (
+        {equipment.length === 0 && !equipmentLoading && ownerData?.isVerified && (
           <div className="text-center py-6">
             <p className="text-gray-500 mb-4">لا توجد معدات مسجلة</p>
             <button

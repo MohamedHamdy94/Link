@@ -38,11 +38,21 @@ export const createDriver = async (driverId: string, driverData: Driver) => {
 
 export const getDrivers = async () => {
   try {
-    const driversSnapshot = await getDocs(collection(db, DRIVERS_COLLECTION));
-    const drivers : object[] = [];
-    driversSnapshot.forEach((doc) => {
-      drivers.push({ id: doc.id, ...doc.data() });
+
+    const driversSnapshot = collection(db, DRIVERS_COLLECTION);
+    const q = query(driversSnapshot, where('isVerified', '==', true));
+    const querySnapshot = await getDocs(q);
+
+    const drivers: Driver[] = [];
+    querySnapshot.forEach((doc) => {
+      drivers.push({
+        fbId: doc.id,
+        ...doc.data()
+      } as Driver);
+
     });
+
+    console.log(drivers)
     return { success: true, data: drivers };
   } catch (error) {
     console.error('Error getting drivers:', error);
@@ -235,18 +245,29 @@ export const getEquipmentById = async (id: string): Promise<{ success: boolean; 
 
 
 export const getEquipments = async () => {
+  
   try {
-    const equipmentSnapshot = await getDocs(collection(db, EQUIPMENT_COLLECTION));
-    const equipments : object[] = [];
-    equipmentSnapshot.forEach((doc) => {
- 
+    const equipmentsRef = collection(db, EQUIPMENT_COLLECTION);
+    const q = query(equipmentsRef, where('status', '!=', 'work'));
+    const querySnapshot = await getDocs(q);
 
-      equipments.push({ id: doc.id, ...doc.data() });
+    const equipments: Equipment[] = [];
+    querySnapshot.forEach((doc) => {
+      equipments.push({
+        fbId: doc.id,
+        ...doc.data()
+      } as Equipment);
     });
-    return { success: true, data: equipments };
+    return { 
+      success: true, 
+      data: equipments 
+    };
   } catch (error) {
-    console.error('Error getting equipment:', error);
-    return { success: false, error };
+    console.error('Error getting owner equipments:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to get equipments' 
+    };
   }
 };
 
