@@ -45,11 +45,12 @@ export const getDrivers = async () => {
 
     const drivers: Driver[] = [];
     querySnapshot.forEach((doc) => {
+      const { password, ...rest } = doc.data();
       drivers.push({
-        ...doc.data()
+        ...rest
       } as Driver);
-
     });
+
 
     console.log(drivers)
     return { success: true, data: drivers };

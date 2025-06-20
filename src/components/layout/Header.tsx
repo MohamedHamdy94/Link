@@ -49,15 +49,11 @@ const Header = () => {
   const renderNavLink = (href: string, label: string, mobile = false) => (
     <Link
       href={href}
-      className={`${
-        mobile 
-          ? 'block w-full text-right py-3 px-4 text-base font-medium hover:bg-gray-50'
-          : 'px-4 py-2 text-sm font-medium hover:bg-gray-100 rounded-md mx-1'
-      } ${
+      className={`${mobile ? 'block pr-3 pl-4 py-2 border-r-4 text-base' : 'inline-flex items-center px-1 pt-1 border-b-2 text-sm'} font-medium ${
         pathname === href
-          ? 'text-blue-600 bg-blue-50 font-semibold'
-          : 'text-gray-700 hover:text-blue-600'
-      } transition-colors duration-200`}
+          ? `${mobile ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-blue-500 text-gray-900'}`
+          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+      }`}
       onClick={() => setIsMenuOpen(false)}
     >
       {label}
@@ -68,10 +64,10 @@ const Header = () => {
   const renderAuthButtons = (mobile = false) => {
     if (isLoggedIn) {
       return (
-        <div className={`flex ${mobile ? 'flex-col space-y-2' : 'space-x-2 rtl:space-x-reverse'}`}>
+        <>
           <Link
             href={getProfileLink()}
-            className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors duration-200"
+            className={`${mobile ? 'block' : 'inline-flex'} items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100`}
             onClick={() => setIsMenuOpen(false)}
           >
             الملف الشخصي
@@ -79,7 +75,7 @@ const Header = () => {
           {userType === 'equipmentOwners' && (
             <Link
               href="/equipment-owner/add-equipment"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors duration-200"
+              className={`${mobile ? 'block' : 'inline-flex'} items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700`}
               onClick={() => setIsMenuOpen(false)}
             >
               إضافة معدة
@@ -87,81 +83,82 @@ const Header = () => {
           )}
           <button
             onClick={handleLogout}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-md transition-colors duration-200"
+            className={`${mobile ? 'block w-full text-right' : 'inline-flex'} items-center px-3 py-2 border ${mobile ? 'border-r-4 border-transparent' : 'border-gray-300'} text-sm font-medium rounded-md text-gray-700 ${mobile ? 'hover:bg-gray-50' : 'bg-white hover:bg-gray-50'}`}
           >
             تسجيل الخروج
           </button>
-        </div>
+        </>
       );
     }
     return (
-      <div className={`flex ${mobile ? 'flex-col space-y-2' : 'space-x-2 rtl:space-x-reverse'}`}>
+      <>
         <Link
           href="/auth/login"
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 border border-gray-300 rounded-md transition-colors duration-200"
+          className={`${mobile ? 'block' : 'inline-flex'} items-center px-3 py-2 border ${mobile ? 'border-r-4 border-transparent' : 'border-gray-300'} text-sm font-medium rounded-md text-gray-700 ${mobile ? 'hover:bg-gray-50' : 'bg-white hover:bg-gray-50'}`}
           onClick={() => setIsMenuOpen(false)}
         >
           تسجيل الدخول
         </Link>
         <Link
           href="/auth/register"
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors duration-200"
+          className={`${mobile ? 'block' : 'inline-flex'} items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700`}
           onClick={() => setIsMenuOpen(false)}
         >
           إنشاء حساب
         </Link>
-      </div>
+      </>
     );
   };
 
   return (
-    <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+    <header className="bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="text-xl font-bold text-blue-600 flex-shrink-0">
-           Link
-          </Link>
+        <div className="flex justify-between h-16">
+          {/* Logo and desktop nav */}
+          <div className="flex">
+            <div className="flex-shrink-0 flex items-center">
+              <Link href="/" className="text-xl font-bold text-blue-600 flex-shrink-0 me-4">
+               Link
+              </Link>
                   <div className="flex justify-between items-center ">
 
-          <Link href="/equipment" className="text-xl font-bold pe-4 hover:bg-gray-50 text-blue-600 ">
+              <Link href="/equipment" className="text-xl font-bold px-4 hover:bg-gray-50 text-blue-600 ">
            المعدات
-          </Link>
-          <Link href="/drivers" className="text-xl font-bold hover:bg-gray-50 text-blue-600 ">
+                 </Link>
+              <Link href="/drivers" className="text-xl font-bold hover:bg-gray-50 text-blue-600 ">
            السائقين
-          </Link>
+           </Link>
                       </div>
-
-          {/* Desktop Navigation - Visible on all screens */}
-          <nav className="hidden md:flex flex-1 justify-center">
-            <div className="flex space-x-1 rtl:space-x-reverse">
-              {navItems.map((item) => (
-                <div key={item.href}>
-                  {renderNavLink(item.href, item.label)}
-                </div>
-              ))}
             </div>
-          </nav>
+            <nav className="hidden md:mr-10 md:flex md:space-x-8 rtl:space-x-reverse">
+  {navItems.map((item) => (
+    <React.Fragment key={item.href}>
+      {renderNavLink(item.href, item.label)}
+    </React.Fragment>
+  ))}
+</nav>
+          </div>
 
           {/* Desktop auth buttons */}
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex md:items-center md:space-x-4 rtl:space-x-reverse">
             {renderAuthButtons()}
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-md text-gray-500 hover:text-gray-600 hover:bg-gray-100 focus:outline-none"
-              aria-label="قائمة التنقل"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              aria-expanded="false"
             >
+              <span className="sr-only">فتح القائمة</span>
               {isMenuOpen ? (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               )}
             </button>
@@ -171,15 +168,15 @@ const Header = () => {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200 fixed top-16 left-0 right-0 shadow-lg">
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            {navItems.map((item) => (
-              <div key={item.href} className="w-full">
-                {renderNavLink(item.href, item.label, true)}
-              </div>
-            ))}
-          </div>
-          <div className="px-2 py-3 border-t border-gray-200">
+        <div className="md:hidden">
+       <div className="pt-2 pb-3 space-y-1">
+  {navItems.map((item) => (
+    <React.Fragment key={item.href}>
+      {renderNavLink(item.href, item.label, true)}
+    </React.Fragment>
+  ))}
+</div>
+          <div className="pt-4 pb-3 border-t border-gray-200 space-y-1">
             {renderAuthButtons(true)}
           </div>
         </div>
