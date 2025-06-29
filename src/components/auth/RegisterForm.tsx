@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createDriver, createEquipmentOwner } from '@/lib/firebase/firestore';
 import { getWhatsAppGroupLink } from '@/lib/firebase/auth';
+import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import { auth } from '@/lib/firebase/config'; 
 
 type UserType = 'drivers' | 'equipmentOwners';
 
@@ -19,11 +21,13 @@ const RegisterForm = () => {
   const [isAvailable, setIsAvailable] = useState(true);
   const [hasLicense, setHasLicense] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [erroor, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [whatsAppLink, setWhatsAppLink] = useState('');
   const [photoUrl, setphotoUrl] = useState('');
 
+
+ const [createUserWithEmailAndPassword ] = useCreateUserWithEmailAndPassword(auth);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -54,7 +58,10 @@ const RegisterForm = () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         });
+    const fakeEmail = `${phoneNumber}@app.com`;
 
+const userCredential = await createUserWithEmailAndPassword( fakeEmail, password);
+    console.log(userCredential)
         if (result.success) {
           setSuccess('تم إنشاء حساب السائق بنجاح');
           setWhatsAppLink(getWhatsAppGroupLink());
@@ -73,6 +80,10 @@ const RegisterForm = () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         });
+    const fakeEmail = `${phoneNumber}@app.com`;
+
+const userCredential = await createUserWithEmailAndPassword( fakeEmail, password);
+        console.log(userCredential)
 
         if (result.success) {
           setSuccess('تم إنشاء حساب صاحب المعدات بنجاح');
@@ -95,9 +106,9 @@ const RegisterForm = () => {
         إنشاء حساب جديد
       </h2>
 
-      {error && (
+      {erroor && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-right">
-          {error}
+          {erroor}
         </div>
       )}
 

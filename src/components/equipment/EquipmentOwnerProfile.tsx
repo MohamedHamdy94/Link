@@ -3,31 +3,46 @@
 import React, { useState, useEffect } from 'react';
 import { getEquipmentOwner, updateEquipmentOwner, getOwnerEquipments } from '@/lib/firebase/firestore';
 import { uploadDriverPhoto } from '@/lib/firebase/storage';
-import { getSession, logout } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { OwnerData, Equipment } from '@/lib/interface';
+import { auth } from '@/lib/firebase/config'; 
+import { useAuthState } from 'react-firebase-hooks/auth';
 import Image from 'next/image';
 import Link from 'next/link';
+import { logout } from '@/lib/firebase/auth';
 
 const EquipmentOwnerProfile = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [equipmentLoading, setEquipmentLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [ownerError, setOwnerError] = useState('');
-  const [equipmentError, setEquipmentError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [user, loading] = useAuthState(auth);
+
   const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState('');
-  const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [error, setError] = useState('');
+  const [ownerError, setOwnerError] = useState('');
+  const [equipmentError, setEquipmentError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [looading, setLoading] = useState(true);
+  const [equipmentLoading, setEquipmentLoading] = useState(true);
+  const [id, setId] = useState('');
 
   useEffect(() => {
-    const session = getSession();
-    if (!session || session.userType !== 'equipmentOwners' ) {
+    if (!loading && !user) {
       router.push('/auth/login');
+    }
+  }, [user, loading, router]);
+
+  useEffect(() => {
+    if (loading || !user) return;
+
+    const match = user.email?.match(/^(\d+)@/);
+    const phoneNumber = match ? match[1] : null;
+  if(phoneNumber) setId(phoneNumber)
+    if (!phoneNumber) {
+      setError('رقم الجوال غير صالح');
       return;
     }
 
@@ -40,24 +55,24 @@ const EquipmentOwnerProfile = () => {
 
       try {
         const [ownerResult, equipmentResult] = await Promise.all([
-          getEquipmentOwner(session.id),
-          getOwnerEquipments(session.id)
-
+          getEquipmentOwner(id),
+          getOwnerEquipments(id),
         ]);
 
         if (ownerResult.success && ownerResult.data) {
+          const data = ownerResult.data;
           setOwnerData({
-            id: ownerResult.data.id,
-            name: ownerResult.data.name || '',
-            photoUrl: ownerResult.data.photoUrl || undefined,
-            phoneNumber: ownerResult.data.phoneNumber || '',
-            isVerified: ownerResult.data.isVerified || false,
-            userType: ownerResult.data.userType,
+            id: data.id,
+            name: data.name || '',
+            photoUrl: data.photoUrl || undefined,
+            phoneNumber: data.phoneNumber || '',
+            isVerified: data.isVerified || false,
+            userType: data.userType,
             createdAt: new Date(),
             updatedAt: new Date(),
           });
-          setName(ownerResult.data?.name || '');
-          setPhotoPreview(ownerResult.data?.photoUrl || '');
+          setName(data.name || '');
+          setPhotoPreview(data.photoUrl || '');
         } else {
           setOwnerError('فشل في تحميل بيانات صاحب المعدات');
           console.log(ownerError)
@@ -79,8 +94,7 @@ const EquipmentOwnerProfile = () => {
     };
 
     fetchData();
-  }, [router]);
-
+  }, [user, loading]);
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -109,8 +123,7 @@ const EquipmentOwnerProfile = () => {
     setSuccess('');
     setLoading(true);
   
-    const session = getSession();
-    if (!session) {
+    if (!user) {
       router.push('/auth/login');
       return;
     }
@@ -119,7 +132,7 @@ const EquipmentOwnerProfile = () => {
       let photoUrl = ownerData?.photoUrl;
   
       if (photoFile) {
-        const uploadResult = await uploadDriverPhoto(session.id, photoFile);
+        const uploadResult = await uploadDriverPhoto(id, photoFile);
         if (!uploadResult.success || !uploadResult.url) {
           setError('فشل في رفع الصورة');
           setLoading(false);
@@ -134,14 +147,15 @@ const EquipmentOwnerProfile = () => {
         updatedAt: new Date()
       };
   
-      const updateResult = await updateEquipmentOwner(session.id, updateData);
-      
+      const updateResult = await updateEquipmentOwner(id, updateData);
+       
+
       if (updateResult.success && updateResult.data) {
         setSuccess('تم تحديث البيانات بنجاح');
         setOwnerData(updateResult.data);
         setIsEditing(false);
       } else {
-        setError(updateResult.error?.toString() || 'فشل في تحديث البيانات');
+        setError( 'فشل في تحديث البيانات');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
@@ -160,7 +174,7 @@ const EquipmentOwnerProfile = () => {
     router.push('/equipment-owner/add-equipment');
   };
 
-  if (loading && !ownerData) {
+  if (looading && !ownerData) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -174,12 +188,12 @@ const EquipmentOwnerProfile = () => {
       <div className="flex justify-between items-center mb-6">
         <button
           onClick={handleLogout}
-          className="text-sm text-gray-600 hover:text-gray-800"
+          className="text-sm text-red-700 hover:text-gray-800"
         >
           تسجيل الخروج
         </button>
         <h2 className="text-2xl font-bold text-gray-800">
-          الملف الشخصي لصاحب المعدات
+          الملف الشخصي
         </h2>
       </div>
 
@@ -276,12 +290,12 @@ const EquipmentOwnerProfile = () => {
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={looading}
               className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 ${
-                loading ? 'opacity-70 cursor-not-allowed' : ''
+                looading ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >
-              {loading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+              {looading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
             </button>
           </div>
         </form>

@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { loginUser } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
+import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import { auth } from '@/lib/firebase/config'; // تأكد من استيراد auth و db من ملف الإعداد
 
 const LoginForm = () => {
   const router = useRouter();
@@ -10,7 +12,8 @@ const LoginForm = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
+ const [signInWithEmailAndPassword] =
+    useSignInWithEmailAndPassword(auth); 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -18,7 +21,9 @@ const LoginForm = () => {
 
     try {
       const result = await loginUser(phoneNumber, password);
-      
+          const email = `${phoneNumber}@app.com`;
+      await signInWithEmailAndPassword(email, password);
+
       if (result.success) {
         if (result.userType === 'drivers') {
           router.push('/driver/profile');

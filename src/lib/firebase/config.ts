@@ -2,9 +2,9 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAuth } from 'firebase/auth'; // ← 👈 إضافة
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// App 1: قاعدة البيانات والمصادقة
 const firebaseConfig = {
   apiKey: "AIzaSyD7r6P3ydH7RA6m-G49CKK-4l0DciEW_vk",
   authDomain: "manlift-612fa.firebaseapp.com",
@@ -15,6 +15,7 @@ const firebaseConfig = {
   measurementId: "G-JS35DN9NRG"
 };
 
+// App 2: التخزين فقط
 const firebaseConfig2 = {
   apiKey: "AIzaSyDttPdopekjqxZd1jgikyAYHeMq-FWmp0Q",
   authDomain: "manlift-36e37.firebaseapp.com",
@@ -26,15 +27,13 @@ const firebaseConfig2 = {
   measurementId: "G-KWXVK0MSW1"
 };
 
-// تهيئة التطبيق الأساسي
-const app1 = initializeApp(firebaseConfig);
+// تهيئة التطبيقات
+const app1 = initializeApp(firebaseConfig); // ← قاعدة البيانات والمصادقة
+const app2 = initializeApp(firebaseConfig2, 'app2'); // ← التخزين فقط
 
-// تهيئة التطبيق الثاني باسم مختلف
-const app2 = initializeApp(firebaseConfig2, 'app2');
-
-// الحصول على الخدمات لكل تطبيق
+// الحصول على الخدمات
 const db = getFirestore(app1);
-
+const auth = getAuth(app1); // ← 👈 تهيئة Firebase Auth
 const storage = getStorage(app2);
 
-export { db, storage };
+export { db, auth, storage };

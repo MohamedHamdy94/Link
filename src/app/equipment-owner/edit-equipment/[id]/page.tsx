@@ -19,23 +19,24 @@ console.log(equipmentData)
   const data = equipmentData.data;
   console.log(data)
 
-const serializedData: Equipment = {
-  fbId: data.fbId,
-  id: data.id,
-  name: data.name,
-  description: data.description || '',
-  price: data.price,
-  status: data.status,
-  equipmentType: data.equipmentType,
-  photoUrl: data.photoUrl || '',
-  ownerId: data.ownerId,
-  ownerPhone: data.ownerPhone || '',
- createdAt: data.createdAt ?? new Date(),
-updatedAt: data.updatedAt ?? new Date(),
-
-
+const serializeEquipment = (data:Equipment): Equipment => {
+  return {
+    fbId: data.fbId,
+    id: data.id,
+    name: data.name,
+    description: data.description || '',
+    price: data.price,
+    status: data.status,
+    equipmentType: data.equipmentType,
+    photoUrl: data.photoUrl || '',
+    ownerId: data.ownerId,
+    ownerPhone: data.ownerPhone || '',
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt
+  };
 };
 
 
-  return <EditEquipmentClient  initialData={serializedData} />;
+const serializedData = serializeEquipment(data);
+return <EditEquipmentClient initialData={serializedData} />;
 }

@@ -5,10 +5,10 @@ import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createEquipment } from '@/lib/firebase/firestore';
 import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
-import { getSession } from '@/lib/firebase/auth';
 //import { Equipment } from '@/lib/interface';
 import generateId from '@/lib/utils/generateId'
-
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@/lib/firebase/config';
 const EquipmentForm = () => {
   const router = useRouter();
     generateId()
@@ -19,11 +19,13 @@ const EquipmentForm = () => {
   const [price, setPrice] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [looading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+ const [user, loading] = useAuthState(auth);
+  const [id, setId] = useState('');
+// ;  const [fbId, setId] = useState('');
 
-;
 
   // استخدام useCallback لتحسين أداء معالجة الصور
   const handlePhotoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,11 +47,15 @@ const EquipmentForm = () => {
     setSuccess('');
     setLoading(true);
 
-    const session = getSession();
-    if (!session || session.userType !== 'equipmentOwners') {
+    if (!loading && !user) {
       router.push('/auth/login');
-      return;
     }
+    
+    if (loading || !user) return;
+    const match = user.email?.match(/^(\d+)@/);
+    const phone = match ? match[1] : null;
+  if(phone) setId(phone)
+
 
     try {
      
@@ -58,7 +64,7 @@ const EquipmentForm = () => {
     // تحميل الصورة فقط إذا كانت موجودة
     if (photoFile) {
       const uploadResult = await uploadEquipmentPhoto(
-        session.id,
+      id,
         `${Date.now()}`,
         photoFile
       );
@@ -84,15 +90,14 @@ const EquipmentForm = () => {
       status,
       price: parseFloat(price),
       photoUrl, // استخدام المتغير photoUrl الذي تم تعريفه مسبقاً
-      ownerId: session.id,
-      ownerPhone: session.phoneNumber,
+      ownerId: id,
+      ownerPhone: id,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
       // إرسال البيانات إلى Firebase
       const result = await createEquipment(equipmentData);
-
       if (result.success) {
         setSuccess('تمت إضافة المعدة بنجاح');   
         setPhotoFile(null);
@@ -298,12 +303,12 @@ const EquipmentForm = () => {
           </button>
           <button
             type="submit"
-            disabled={loading}
+            disabled={looading}
             className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 ${
-              loading ? 'opacity-70 cursor-not-allowed' : ''
+              looading ? 'opacity-70 cursor-not-allowed' : ''
             }`}
           >
-            {loading ? 'جاري الإضافة...' : 'إضافة المعدة'}
+            {looading ? 'جاري الإضافة...' : 'إضافة المعدة'}
           </button>
         </div>
       </form>

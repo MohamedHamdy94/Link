@@ -1,34 +1,40 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getEquipmentOwner } from '@/lib/firebase/firestore';
-import { getSession } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Equipment } from '@/lib/interface';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getEquipmentsByOwner } from '@/lib/firebase/firestore';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@/lib/firebase/config'; 
 
 const FullEquipmentList = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [looading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [user, loading] = useAuthState(auth);
+  const [id, setId] = useState('');
 
   useEffect(() => {
-    const session = getSession();
-    if (!session || session.userType !== 'equipmentOwners') {
+    if (!loading && !user) {
       router.push('/auth/login');
-      return;
     }
+    
+    if (loading || !user) return;
+    const match = user.email?.match(/^(\d+)@/);
+    const phone = match ? match[1] : null;
+  if(phone) setId(phone)
 
     const fetchEquipment = async () => {
       setLoading(true);
       setError('');
 
       try {
-        const result = await getEquipmentOwner(session.id);
+const result = await getEquipmentsByOwner(id);
         
-        if (result.success) {
+        if (result.success&& result.data) {
           setEquipment(result.data as Equipment[]);
         } else {
           setError('فشل في تحميل بيانات المعدات');
@@ -44,7 +50,7 @@ const FullEquipmentList = () => {
     fetchEquipment();
   }, [router]);
 
-  if (loading) {
+  if (looading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>

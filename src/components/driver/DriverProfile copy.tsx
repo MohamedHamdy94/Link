@@ -9,20 +9,18 @@ import Image from 'next/image';
 import { DocumentData } from 'firebase/firestore';
 import { Driver } from '@/lib/interface';
 // import { UpdateResult, Drive } from '@/lib/interface';
-
-import { auth } from '@/lib/firebase/config'; 
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@/lib/firebase/config'; 
+
 
 const DriverProfile = () => {
   const router = useRouter();
-    const [user, loading] = useAuthState(auth);
-
   const [looading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [driverData, setDriverData] = useState<Driver | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-    const [phoneNumber, setIsPhoneNumber] = useState<string>('');
+    const [id, setId] = useState('');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -34,22 +32,18 @@ const DriverProfile = () => {
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState('');
+  const [user, loading] = useAuthState(auth);
+
   useEffect(() => {
+    const fetchDriverData = async () => {
     if (!loading && !user) {
       router.push('/auth/login');
     }
-  }, [user, loading, router]);
-  useEffect(() => {
-    const fetchDriverData = async () => {
+    
     if (loading || !user) return;
-
     const match = user.email?.match(/^(\d+)@/);
-    const id = match ? match[1] : null;
-    if (id){setIsPhoneNumber(id);} 
-    if (!phoneNumber) {
-      setError('رقم الجوال غير صالح');
-      return;
-    }
+    const phone = match ? match[1] : null;
+  if(phone) setId(phone)
       const toDriver = (id: string, data: DocumentData): Driver => ({
         id,
         name: data.name || '',
@@ -65,10 +59,10 @@ const DriverProfile = () => {
 
       });
       try {
-        const result = await getDriver(phoneNumber);
+        const result = await getDriver(id);
         if (result.success && result.data) {
           // تحويل DocumentData إلى Driver
-          const driver = toDriver(phoneNumber, result.data);
+          const driver = toDriver(id, result.data);
           setDriverData(driver)
           setFormData({
             name: result.data.name || '',
@@ -134,7 +128,8 @@ const DriverProfile = () => {
   
       // Upload new photo if selected
       if (photoFile) {
-        const uploadResult = await uploadDriverPhoto(phoneNumber, photoFile);
+
+        const uploadResult = await uploadDriverPhoto(id, photoFile);
         
         if (!uploadResult.success) {
           setError(uploadResult.error?.toString() || 'فشل في رفع الصورة');
@@ -149,7 +144,7 @@ const DriverProfile = () => {
       }
       
       // Update driver data
-      const updateResult = await updateDriver(phoneNumber, {
+      const updateResult = await updateDriver(id, {
         name: formData.name,
         age: parseInt(formData.age),
         equipmentType: formData.equipmentType,

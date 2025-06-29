@@ -18,7 +18,7 @@ export interface OwnerData {
   id?: string;
   photoUrl?: string; // Optional string for the photo URL
   name?: string; // Optional string for the owner's name
-  phoneNumber?: string; // Optional string for the phone number
+  phoneNumber: string; // Optional string for the phone number
   isVerified?: boolean; // Optional boolean for the verification status
   equipmentDetails?: string; // Optional string for the equipment details
   userType: string;
@@ -47,33 +47,25 @@ export interface UpdateResult<T = Driver | OwnerData> {
   data?: T;
   error?: unknown;
 }
+
+
 export interface Equipment {
-  fbId?:string | undefined;
-  id?: string;
+  fbId?: string;
+  id: string;
   name: string;
   description: string;
-  equipmentType: string;
-  status: string;
   price: number;
-  photoUrl?: string;
+  status: string;
+  equipmentType: string;
+  photoUrl: string;
   ownerId: string;
   ownerPhone: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date; 
+  updatedAt: Date; // <== يجب أن يكون string
 }
 
 
-export interface OwnerData {
-  id?: string;
-  photoUrl?: string; // Optional string for the photo URL
-  name?: string; // Optional string for the owner's name
-  phoneNumber?: string; // Optional string for the phone number
-  isVerified?: boolean; // Optional boolean for the verification status
-  equipmentDetails?: string; // Optional string for the equipment details
-  userType: string;
-  password?: string;
-  createdAt: Date;
-}
+
 
 // في ملف types/userTypes.ts أو أعلى الملف
 export interface UserInfoProps {

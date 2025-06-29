@@ -3,13 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAllUsers, updateUserVerificationStatus } from '@/lib/firebase/admin';
-import { getSession, logout } from '@/lib/firebase/auth';
+import {  logout } from '@/lib/firebase/auth';
 import { User } from '@/lib/interface';
 import Image from 'next/image';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@/lib/firebase/config'; 
 
 const AdminDashboard = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [looading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [users, setUsers] = useState<User[]>([]);
@@ -17,14 +19,17 @@ const AdminDashboard = () => {
   const [filter, setFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [userType, setUserType] = useState<'all' | 'drivers' | 'equipmentOwners'>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const [user, loading] = useAuthState(auth);
 
   useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth/login');
+    }
+  }, [user, loading, router]);
+  useEffect(() => {
     const checkAdminAccess = async () => {
-      const session = getSession();
-      if (!session || session.role !== 'admins') {
-        router.push('/auth/login');
-        return;
-      }
+
       fetchUsers();
     };
     checkAdminAccess();
@@ -99,7 +104,7 @@ const AdminDashboard = () => {
     router.push('/auth/login');
   };
 
-  if (loading) {
+  if (looading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
