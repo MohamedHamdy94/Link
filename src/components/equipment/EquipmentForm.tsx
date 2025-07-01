@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { createEquipment } from '@/lib/firebase/firestore';
 import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
@@ -53,7 +54,7 @@ const EquipmentForm = () => {
     
     if (loading || !user) return;
     const match = user.email?.match(/^(\d+)@/);
-    const phone = match ? match[1] : null;
+    const phone = match ? match[1] : '';
   if(phone) setId(phone)
 
 
@@ -90,8 +91,8 @@ const EquipmentForm = () => {
       status,
       price: parseFloat(price),
       photoUrl, // استخدام المتغير photoUrl الذي تم تعريفه مسبقاً
-      ownerId: id,
-      ownerPhone: id,
+      ownerId: phone,
+      ownerPhone: phone,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -144,9 +145,11 @@ const EquipmentForm = () => {
             <div className="mb-4">
               <div className="relative w-full h-60 mx-auto overflow-hidden rounded-md bg-gray-100">
                 {photoPreview ? (
-                  <img 
+                  <Image 
                     src={photoPreview} 
                     alt="صورة المعدة" 
+                    width={500}
+                    height={500}
                     className="w-full h-full object-cover"
                   />
                 ) : (

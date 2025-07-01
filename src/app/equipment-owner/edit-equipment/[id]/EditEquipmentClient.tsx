@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import React, { useState, useEffect } from 'react';
 import { updateEquipment } from '@/lib/firebase/firestore';
 import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
@@ -198,9 +200,11 @@ if (!uploadResult.success || !uploadResult.url) {
           <div className="md:w-1/3">
             <div className="relative w-full h-48 mx-auto overflow-hidden rounded-lg bg-gray-100">
               {photoPreview ? (
-                <img
+                <Image
                   src={photoPreview}
                   alt="صورة المعدة"
+                  width={500}
+                  height={500}
                   className="w-full h-full object-cover"
                 />
               ) : (

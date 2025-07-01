@@ -84,6 +84,7 @@ const userCredential = await createUserWithEmailAndPassword( fakeEmail, password
 
 const userCredential = await createUserWithEmailAndPassword( fakeEmail, password);
         console.log(userCredential)
+        console.log(result)
 
         if (result.success) {
           setSuccess('تم إنشاء حساب صاحب المعدات بنجاح');

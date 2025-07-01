@@ -15,7 +15,6 @@ const FullEquipmentList = () => {
   const [error, setError] = useState('');
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [user, loading] = useAuthState(auth);
-  const [id, setId] = useState('');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -25,20 +24,20 @@ const FullEquipmentList = () => {
     if (loading || !user) return;
     const match = user.email?.match(/^(\d+)@/);
     const phone = match ? match[1] : null;
-  if(phone) setId(phone)
 
     const fetchEquipment = async () => {
       setLoading(true);
       setError('');
 
       try {
-const result = await getEquipmentsByOwner(id);
+if(phone) {
+      const result = await getEquipmentsByOwner(phone);
         
         if (result.success&& result.data) {
           setEquipment(result.data as Equipment[]);
         } else {
           setError('فشل في تحميل بيانات المعدات');
-        }
+        }}
       } catch (err) {
         setError('حدث خطأ أثناء تحميل البيانات');
         console.error(err);
@@ -48,7 +47,7 @@ const result = await getEquipmentsByOwner(id);
     };
 
     fetchEquipment();
-  }, [router]);
+  }, [user, loading, router]);
 
   if (looading) {
     return (

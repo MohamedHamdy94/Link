@@ -418,6 +418,7 @@ export const getEquipmentById = async (id: string): Promise<{ success: boolean; 
 
 
 export const getEquipmentOwner = async (ownerId: string) => {
+  console.log(ownerId)
   try {
     const ownerDoc = await getDoc(doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId));
     if (ownerDoc.exists()) {

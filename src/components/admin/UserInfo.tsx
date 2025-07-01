@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { UserInfoProps } from '@/lib/interface';
 
 const UserInfo: React.FC<UserInfoProps> = ({ user, handleToggleVerification }) => {
@@ -9,9 +10,11 @@ const UserInfo: React.FC<UserInfoProps> = ({ user, handleToggleVerification }) =
       <td className="px-2 py-3 whitespace-nowrap">
         <div className="flex items-center justify-center">
           {user.photoUrl ? (
-            <img 
+            <Image 
               src={user.photoUrl}
               alt={user.name || 'صورة المستخدم'}
+              width={40}
+              height={40}
               className="h-10 w-10 rounded-full object-cover"
             />
           ) : (

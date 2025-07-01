@@ -1,4 +1,5 @@
 import { Equipment } from '@/lib/interface';
+import Image from 'next/image';
 
 
 const EquipmentCard = ({ item }: { item: Equipment }) => {
@@ -51,9 +52,11 @@ const EquipmentCard = ({ item }: { item: Equipment }) => {
 
    <div className="h-full w-full overflow-hidden">
                  {item.photoUrl ? (
-                   <img 
+                   <Image 
                      src={item.photoUrl} 
                      alt={item.name} 
+                     width={200}
+                     height={200}
                      className="w-50 h-50 object-cover"
                    />
                  ) : (

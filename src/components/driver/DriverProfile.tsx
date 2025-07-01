@@ -39,62 +39,58 @@ const DriverProfile = () => {
       router.push('/auth/login');
     }
   }, [user, loading, router]);
-  useEffect(() => {
-    const fetchDriverData = async () => {
+ useEffect(() => {
+  const fetchDriverData = async () => {
     if (loading || !user) return;
 
     const match = user.email?.match(/^(\d+)@/);
-    const id = match ? match[1] : null;
-    if (id){setIsPhoneNumber(id);} 
-    if (!phoneNumber) {
-      setError('رقم الجوال غير صالح');
-      return;
-    }
-      const toDriver = (id: string, data: DocumentData): Driver => ({
-        id,
-        name: data.name || '',
-        age: data.age || 0,
-        equipmentType: data.equipmentType || '',
-        isAvailable: data.isAvailable || false,
-        hasLicense: data.hasLicense || false,
-        photoUrl: data.photoUrl || undefined,
-        phoneNumber: data.phoneNumber || '',
-        isVerified: data.isVerified || false,
-        userType:data.userType ,
-        updatedAt: new Date(),
-
-      });
-      try {
-        const result = await getDriver(phoneNumber);
-        if (result.success && result.data) {
-          // تحويل DocumentData إلى Driver
-          const driver = toDriver(phoneNumber, result.data);
-          setDriverData(driver)
-          setFormData({
-            name: result.data.name || '',
-            age: result.data.age?.toString() || '',
-            equipmentType: result.data.equipmentType || '',
-            isAvailable: result.data.isAvailable || false,
-            hasLicense: result.data.hasLicense || false,
-          });
+    const id = match ? match[1] :'';
 
 
+    setIsPhoneNumber(id);
 
-          setPhotoPreview(result.data.photoUrl || '');
+    try {
+      const result = await getDriver(id);
 
-        } else {
-          setError('فشل في تحميل بيانات السائق');
-        }
-      } catch (err) {
-        setError('حدث خطأ أثناء تحميل البيانات');
-        console.error(err);
-      } finally {
-        setLoading(false);
+      if (result.success && result.data) {
+        const toDriver = (id: string, data: DocumentData): Driver => ({
+          id,
+          name: data.name || '',
+          age: data.age || 0,
+          equipmentType: data.equipmentType || '',
+          isAvailable: data.isAvailable || false,
+          hasLicense: data.hasLicense || false,
+          photoUrl: data.photoUrl || undefined,
+          phoneNumber: data.phoneNumber || '',
+          isVerified: data.isVerified || false,
+          userType: data.userType,
+          updatedAt: new Date(),
+        });
+
+        const driver = toDriver(id, result.data);
+        setDriverData(driver);
+        setFormData({
+          name: driver.name,
+          age: driver.age.toString(),
+          equipmentType: driver.equipmentType,
+          isAvailable: driver.isAvailable,
+          hasLicense: driver.hasLicense,
+        });
+        setPhotoPreview(driver.photoUrl || '');
+      } else {
+        setError('فشل في تحميل بيانات السائق');
       }
-    };
-    
-    fetchDriverData();
-  }, [router]);
+    } catch (err) {
+      setError('حدث خطأ أثناء تحميل البيانات');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchDriverData();
+}, [loading, user]);
+
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

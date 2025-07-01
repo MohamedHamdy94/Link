@@ -52,11 +52,12 @@ const EquipmentOwnerProfile = () => {
       setError('');
       setOwnerError('');
       setEquipmentError('');
+console.log (phoneNumber)
 
       try {
         const [ownerResult, equipmentResult] = await Promise.all([
-          getEquipmentOwner(id),
-          getOwnerEquipments(id),
+          getEquipmentOwner(phoneNumber),
+          getOwnerEquipments(phoneNumber),
         ]);
 
         if (ownerResult.success && ownerResult.data) {
