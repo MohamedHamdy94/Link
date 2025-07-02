@@ -26,8 +26,6 @@ const EquipmentForm = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
  const [user, loading] = useAuthState(auth);
-  const [id, setId] = useState('');
-// ;  const [fbId, setId] = useState('');
 
 
   // استخدام useCallback لتحسين أداء معالجة الصور
@@ -68,7 +66,6 @@ const EquipmentForm = () => {
     if (loading || !user) return;
     const match = user.email?.match(/^(\d+)@/);
     const phone = match ? match[1] : '';
-  if(phone) setId(phone)
 
 
     try {

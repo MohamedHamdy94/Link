@@ -16,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'موقع سائقي المعدات وأصحاب المعدات',
+  title: 'موقع Link',
   description: 'منصة لربط سائقي المعدات بأصحاب المعدات',
 };
 
