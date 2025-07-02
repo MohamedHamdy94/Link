@@ -65,7 +65,7 @@ const EquipmentForm = () => {
     // تحميل الصورة فقط إذا كانت موجودة
     if (photoFile) {
       const uploadResult = await uploadEquipmentPhoto(
-      id,
+      phone,
         `${Date.now()}`,
         photoFile
       );
