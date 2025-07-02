@@ -10,7 +10,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="md:flex md:items-center md:justify-between">
           <div className="text-center md:text-right">
-            <h3 className="text-lg font-medium text-gray-900">موقع سائقي المعدات وأصحاب المعدات</h3>
+            <h3 className="text-lg font-medium text-gray-900">موقع Link</h3>
             <p className="mt-2 text-sm text-gray-500">
               منصة لربط سائقي المعدات بأصحاب المعدات
             </p>

@@ -159,7 +159,7 @@ const EquipmentListPublic = () => {
                 
                 <div className="mt-3 flex justify-between items-center">
                   <span className="text-xs md:text-sm font-medium text-gray-900">
-                    {item.price} ريال {item.status === 'rent' ? '/ يوم' : ''}
+                    {item.price} جنيه {item.status === 'rent' ? '/ يوم' : ''}
                   </span>
                   <span className="text-xs md:text-sm text-gray-500">
                     {item.equipmentType}

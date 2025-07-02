@@ -413,7 +413,7 @@ console.log (phoneNumber)
                   
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-900">
-                      {item.price} ريال {item.status === 'rent' ? '/ يوم' : ''}
+                      {item.price} جنيه {item.status === 'rent' ? '/ يوم' : ''}
                     </span>
                     <Link 
                       href={`/equipment-owner/edit-equipment/${item.fbId}`}
