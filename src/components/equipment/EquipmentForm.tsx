@@ -10,6 +10,8 @@ import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
 import generateId from '@/lib/utils/generateId'
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase/config';
+import imageCompression from 'browser-image-compression';
+
 const EquipmentForm = () => {
   const router = useRouter();
     generateId()
@@ -29,15 +31,26 @@ const EquipmentForm = () => {
 
 
   // استخدام useCallback لتحسين أداء معالجة الصور
-  const handlePhotoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setPhotoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
       };
-      reader.readAsDataURL(file);
+      try {
+        const compressedFile = await imageCompression(file, options);
+        setPhotoFile(compressedFile);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPhotoPreview(reader.result as string);
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error(error);
+        setError('حدث خطأ أثناء ضغط الصورة.');
+      }
     }
   }, []);
 
