@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createDriver, createEquipmentOwner } from '@/lib/firebase/firestore';
+import { setCustomClaimsForUser } from '@/app/auth/actions';
 import { getWhatsAppGroupLink } from '@/lib/firebase/auth';
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase/config'; 
@@ -24,15 +25,14 @@ const RegisterForm = () => {
   const [erroor, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [whatsAppLink, setWhatsAppLink] = useState('');
-  const [photoUrl, setphotoUrl] = useState('');
 
 
  const [createUserWithEmailAndPassword ] = useCreateUserWithEmailAndPassword(auth);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setphotoUrl('');
     // Validate passwords match
     if (password !== confirmPassword) {
       setError('كلمات المرور غير متطابقة');
@@ -41,64 +41,64 @@ const RegisterForm = () => {
 
     setLoading(true);
 
-    try {
-      if (userType === 'drivers') {
-        // Create driver
-        const result = await createDriver(phoneNumber, {
-          phoneNumber,
-          password,
-          name,
-          age: parseInt(age),
-          equipmentType,
-          isAvailable,
-          hasLicense,
-          photoUrl,
-          userType,
-          isVerified: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-    const fakeEmail = `${phoneNumber}@app.com`;
+ try {
+  const fakeEmail = `${phoneNumber}@app.com`;
 
-const userCredential = await createUserWithEmailAndPassword( fakeEmail, password);
-    console.log(userCredential)
-        if (result.success) {
-          setSuccess('تم إنشاء حساب السائق بنجاح');
-          setWhatsAppLink(getWhatsAppGroupLink());
-        } else {
-          setError('فشل في إنشاء الحساب');
-        }
-      } else {
-        // Create equipment owner
-        const result = await createEquipmentOwner(phoneNumber, {
-          phoneNumber,
-          password,
-          name,
-          userType,
-          photoUrl,
-          isVerified: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-    const fakeEmail = `${phoneNumber}@app.com`;
+  // 1. أنشئ المستخدم أولًا في Firebase Auth
+  const userCredential = await createUserWithEmailAndPassword(fakeEmail, password);
 
-const userCredential = await createUserWithEmailAndPassword( fakeEmail, password);
-        console.log(userCredential)
-        console.log(result)
+  if (!userCredential || !userCredential.user) {
+    setError('فشل في إنشاء المستخدم في Firebase');
+    return;
+  }
 
-        if (result.success) {
-          setSuccess('تم إنشاء حساب صاحب المعدات بنجاح');
-          setWhatsAppLink(getWhatsAppGroupLink());
-        } else {
-          setError('فشل في إنشاء الحساب');
-        }
-      }
-    } catch (err) {
-      setError('حدث خطأ أثناء إنشاء الحساب');
-      console.error(err);
-    } finally {
-      setLoading(false);
+  const uid = userCredential.user.uid;
+
+  // 2. ثم خزّن البيانات في Firestore
+  const commonData = {
+    uid,
+    phoneNumber,
+    name,
+    userType,
+    isVerified: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    password, // Add password here
+  };
+
+  let result;
+
+  if (userType === 'drivers') {
+    result = await createDriver(phoneNumber, {
+      ...commonData,
+  age: Number.isNaN(parseInt(age)) ? 0 : parseInt(age),
+      equipmentType,
+      isAvailable,
+      hasLicense,
+    });
+  } else {
+    result = await createEquipmentOwner(phoneNumber, commonData);
+  }
+
+  if (result.success) {
+    // Set custom claims after successful Firestore data save
+    const claimsResult = await setCustomClaimsForUser(uid, phoneNumber, userType);
+    if (!claimsResult.success) {
+      setError(claimsResult.error || 'فشل في تعيين المطالبات المخصصة');
+      return;
     }
+    setSuccess(`تم إنشاء حساب ${userType === 'drivers' ? 'السائق' : 'صاحب المعدات'} بنجاح`);
+    setWhatsAppLink(getWhatsAppGroupLink());
+  } else {
+    setError('فشل في حفظ بيانات الحساب في Firestore');
+  }
+} catch (err) {
+  setError('حدث خطأ أثناء إنشاء الحساب');
+  console.error(err);
+} finally {
+  setLoading(false);
+}
+
   };
 
   return (

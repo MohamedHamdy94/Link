@@ -1,58 +1,87 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
-import { loginUser } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
-import { auth } from '@/lib/firebase/config'; // تأكد من استيراد auth و db من ملف الإعداد
+import { auth } from '@/lib/firebase/config';
 
 const LoginForm = () => {
   const router = useRouter();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
- const [signInWithEmailAndPassword] =
-    useSignInWithEmailAndPassword(auth); 
+  const [customError, setCustomError] = useState('');
+
+  const [
+    signInWithEmailAndPassword,
+    user,
+    loading,
+    error,
+  ] = useSignInWithEmailAndPassword(auth);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    setCustomError('');
+
+    const email = `${phoneNumber}@app.com`;
 
     try {
-      const result = await loginUser(phoneNumber, password);
-          const email = `${phoneNumber}@app.com`;
       await signInWithEmailAndPassword(email, password);
 
+      if (!user) {
+        setCustomError('فشل في تسجيل الدخول عبر Firebase');
+        return;
+      }
+
+      const token = await user.user?.getIdToken(true);
+
+      if (!token) {
+        setCustomError('فشل في جلب التوكن');
+        return;
+      }
+
+      // ✅ إرسال التوكن إلى API Route للتحقق من نوع المستخدم
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+
       if (result.success) {
-        if (result.userType === 'drivers') {
-          router.push('/driver/profile');
-        } else if (result.userType === 'equipmentOwners') {
-          router.push('/equipment-owner/profile');
-        } else if (result.userType === 'admins') {
-          router.push('/admin/dashboard');
+        switch (result.userType) {
+          case 'drivers':
+            router.push('/driver/profile');
+            break;
+          case 'equipmentOwners':
+            router.push('/equipment-owner/profile');
+            break;
+          case 'admins':
+            router.push('/admin/dashboard');
+            break;
+          default:
+            setCustomError('نوع المستخدم غير معروف');
         }
       } else {
-        setError(result.error || 'فشل في تسجيل الدخول');
+        setCustomError(result.error || 'فشل في تسجيل الدخول');
       }
+
     } catch (err) {
-      setError('حدث خطأ أثناء تسجيل الدخول');
-      console.error(err);
-    } finally {
-      setLoading(false);
+      setCustomError(err instanceof Error ? err.message : 'حدث خطأ أثناء تسجيل الدخول');
     }
   };
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md max-w-md mx-auto">
       <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">تسجيل الدخول</h2>
-      
-      {error && (
+
+      {(customError || error) && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-right">
-          {error}
+          {customError || error?.message}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 text-right mb-1">
@@ -68,7 +97,7 @@ const LoginForm = () => {
             dir="rtl"
           />
         </div>
-        
+
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 text-right mb-1">
             كلمة المرور
@@ -83,7 +112,7 @@ const LoginForm = () => {
             dir="rtl"
           />
         </div>
-        
+
         <div>
           <button
             type="submit"
@@ -96,10 +125,10 @@ const LoginForm = () => {
           </button>
         </div>
       </form>
-      
+
       <div className="mt-4 text-center">
         <p className="text-sm text-gray-600">
-          ليس لديك حساب؟{' '}
+          ليس لديك حساب؟ 
           <a href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
             إنشاء حساب جديد
           </a>

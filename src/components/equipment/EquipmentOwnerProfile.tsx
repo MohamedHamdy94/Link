@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { getEquipmentOwner, updateEquipmentOwner, getOwnerEquipments } from '@/lib/firebase/firestore';
+import React, { useState, useEffect, useCallback } from 'react';
+import { getEquipmentsByOwner, updateEquipmentOwner, getEquipmentOwner } from '@/lib/firebase/firestore';
 import { uploadDriverPhoto } from '@/lib/firebase/storage';
 import { useRouter } from 'next/navigation';
 import { OwnerData, Equipment } from '@/lib/interface';
-import { auth } from '@/lib/firebase/config'; 
+import { auth } from '@/lib/firebase/config';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -13,7 +13,7 @@ import { logout } from '@/lib/firebase/auth';
 
 const EquipmentOwnerProfile = () => {
   const router = useRouter();
-  const [user, loading] = useAuthState(auth);
+  const [user, loadingUser] = useAuthState(auth);
 
   const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -21,47 +21,46 @@ const EquipmentOwnerProfile = () => {
   const [name, setName] = useState('');
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState('');
-  const [error, setError] = useState('');
-  const [ownerError, setOwnerError] = useState('');
-  const [equipmentError, setEquipmentError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [looading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [equipmentLoading, setEquipmentLoading] = useState(true);
-  const [id, setId] = useState('');
+  const [ownerPhoneNumber, setOwnerPhoneNumber] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loadingUser && !user) {
       router.push('/auth/login');
     }
-  }, [user, loading, router]);
+  }, [user, loadingUser, router]);
 
   useEffect(() => {
-    if (loading || !user) return;
+    if (loadingUser || !user) return;
 
     const match = user.email?.match(/^(\d+)@/);
     const phoneNumber = match ? match[1] : null;
-  if(phoneNumber) setId(phoneNumber)
+
     if (!phoneNumber) {
       setError('رقم الجوال غير صالح');
+      setIsLoading(false);
+      setEquipmentLoading(false);
       return;
     }
+    setOwnerPhoneNumber(phoneNumber);
 
     const fetchData = async () => {
-      setLoading(true);
+      setIsLoading(true);
       setEquipmentLoading(true);
-      setError('');
-      setOwnerError('');
-      setEquipmentError('');
-console.log (phoneNumber)
+      setError(null);
+      setSuccess(null);
 
       try {
-        const [ownerResult, equipmentResult] = await Promise.all([
+        const [equipmentListResult, ownerProfileResult] = await Promise.all([
+          getEquipmentsByOwner(phoneNumber),
           getEquipmentOwner(phoneNumber),
-          getOwnerEquipments(phoneNumber),
         ]);
 
-        if (ownerResult.success && ownerResult.data) {
-          const data = ownerResult.data;
+        if (ownerProfileResult.success && ownerProfileResult.data) {
+          const data = ownerProfileResult.data;
           setOwnerData({
             id: data.id,
             name: data.name || '',
@@ -69,113 +68,111 @@ console.log (phoneNumber)
             phoneNumber: data.phoneNumber || '',
             isVerified: data.isVerified || false,
             userType: data.userType,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: data.createdAt?.toDate() || new Date(),
+            updatedAt: data.updatedAt?.toDate() || new Date(),
           });
           setName(data.name || '');
           setPhotoPreview(data.photoUrl || '');
         } else {
-          setOwnerError('فشل في تحميل بيانات صاحب المعدات');
-          console.log(ownerError)
+          setError('فشل في تحميل بيانات صاحب المعدات: ' + (ownerProfileResult.error || ''));
         }
 
-        if (equipmentResult.success) {
-          setEquipment(equipmentResult.data as Equipment[]);
+        if (equipmentListResult.success) {
+          setEquipment(equipmentListResult.data as Equipment[]);
         } else {
-          setEquipmentError('فشل في تحميل بيانات المعدات');
-          console.log(equipmentError)
+          setError('فشل في تحميل بيانات المعدات: ' + (equipmentListResult.error || ''));
         }
       } catch (err) {
         setError('حدث خطأ أثناء تحميل البيانات');
-        console.error(err);
+        console.error('Fetch data error:', err);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
         setEquipmentLoading(false);
       }
     };
 
     fetchData();
-  }, [user, loading]);
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  }, [user, loadingUser]);
+
+  const handlePhotoChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-  
+
     if (!file.type.match('image.*')) {
       setError('يجب أن يكون الملف من نوع صورة');
       return;
     }
-  
+
     if (file.size > 2 * 1024 * 1024) {
       setError('يجب أن يكون حجم الصورة أقل من 2MB');
       return;
     }
-  
+
     setPhotoFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
       setPhotoPreview(reader.result as string);
     };
     reader.readAsDataURL(file);
-  };
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true);
-  
-    if (!user) {
+    setError(null);
+    setSuccess(null);
+    setIsLoading(true);
+
+    if (!user || !ownerPhoneNumber) {
       router.push('/auth/login');
       return;
     }
-  
+
     try {
       let photoUrl = ownerData?.photoUrl;
-  
+
       if (photoFile) {
-        const uploadResult = await uploadDriverPhoto(id, photoFile);
+        const uploadResult = await uploadDriverPhoto(ownerPhoneNumber, photoFile);
         if (!uploadResult.success || !uploadResult.url) {
           setError('فشل في رفع الصورة');
-          setLoading(false);
+          setIsLoading(false);
           return;
         }
         photoUrl = uploadResult.url;
       }
-  
+
       const updateData: Partial<OwnerData> = {
         name,
         ...(photoUrl && { photoUrl }),
         updatedAt: new Date()
       };
-  
-      const updateResult = await updateEquipmentOwner(id, updateData);
-       
+
+      const updateResult = await updateEquipmentOwner(ownerPhoneNumber, updateData);
 
       if (updateResult.success && updateResult.data) {
         setSuccess('تم تحديث البيانات بنجاح');
         setOwnerData(updateResult.data);
         setIsEditing(false);
       } else {
-        setError( 'فشل في تحديث البيانات');
+        setError('فشل في تحديث البيانات: ' + (updateResult.error || ''));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
-      console.error(err);
+      console.error('Submit error:', err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
+  }, [user, ownerPhoneNumber, ownerData, photoFile, name, router]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     router.push('/auth/login');
-  };
+  }, [router]);
 
-  const navigateToAddEquipment = () => {
+  const navigateToAddEquipment = useCallback(() => {
     router.push('/equipment-owner/add-equipment');
-  };
+  }, [router]);
 
-  if (looading && !ownerData) {
+  if (isLoading && !ownerData) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -184,7 +181,6 @@ console.log (phoneNumber)
   }
 
   return (
-
     <div className="bg-gray-50 p-8 rounded-lg shadow-md max-w-3xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <button
@@ -291,12 +287,12 @@ console.log (phoneNumber)
             </button>
             <button
               type="submit"
-              disabled={looading}
+              disabled={isLoading}
               className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 ${
-                looading ? 'opacity-70 cursor-not-allowed' : ''
+                isLoading ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >
-              {looading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+              {isLoading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
             </button>
           </div>
         </form>
@@ -349,14 +345,20 @@ console.log (phoneNumber)
             </div>
           </div>
           <div className="mt-6 flex justify-end space-x-4 rtl:space-x-reverse">
-     {ownerData?.isVerified &&       <button
-              onClick={navigateToAddEquipment}
-              className="px-4 me-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+            {ownerData?.isVerified && (
+              <button
+                onClick={navigateToAddEquipment}
+                className="px-4 me-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+              >
+                إضافة معدات جديدة
+              </button>
+            )}
+            <button
+              onClick={() => router.push('/auth/update-password')}
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700"
             >
-              إضافة معدات جديدة
-            </button> }
-      
-        
+              تعديل الرقم السري
+            </button>
             <button
               onClick={() => setIsEditing(true)}
               className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
@@ -371,60 +373,66 @@ console.log (phoneNumber)
         <h3 className="text-xl font-semibold text-gray-800 mb-4 text-right">
           أحدث المعدات المضافة
         </h3>
-        
+
         {equipmentLoading ? (
           <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {equipment.map((item) => (
-              <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="h-40 relative overflow-hidden">
-                  {item.photoUrl ? (
-                    <Image
-                      src={item.photoUrl}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-500 text-sm">لا توجد صورة</span>
+            {equipment.map((item) => {
+              if (!item.fbId) {
+                console.warn('Skipping equipment item due to missing fbId:', item);
+                return null; // لا تعرض العنصر إذا كان fbId مفقودًا
+              }
+              return (
+                <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <div className="h-40 relative overflow-hidden">
+                    {item.photoUrl ? (
+                      <Image
+                        src={item.photoUrl}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500 text-sm">لا توجد صورة</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-base font-semibold text-gray-900">
+                        {item.name}
+                      </h3>
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        item.status === 'rent'
+                          ? 'bg-blue-100 text-blue-800'
+                          : item.status === 'sale'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {item.status === 'rent' ? 'للإيجار' : item.status === 'sale' ? 'للبيع' : 'تعمل'}
+                      </span>
                     </div>
-                  )}
-                </div>
-                
-                <div className="p-3">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-base font-semibold text-gray-900">
-                      {item.name}
-                    </h3>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      item.status === 'rent' 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : item.status === 'sale' 
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {item.status === 'rent' ? 'للإيجار' : item.status === 'sale' ? 'للبيع' : 'تعمل'}
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-900">
-                      {item.price} جنيه {item.status === 'rent' ? '/ يوم' : ''}
-                    </span>
-                    <Link 
-                      href={`/equipment-owner/edit-equipment/${item.fbId}`}
-                      className="text-xs text-blue-600 hover:text-blue-800"
-                    >
-                      تعديل
-                    </Link>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-900">
+                        {item.price} جنيه {item.status === 'rent' ? '/ يوم' : ''}
+                      </span>
+                      <Link
+                        href={`/equipment-owner/edit-equipment/${item.fbId}`}
+                        className="text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        تعديل
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -442,8 +450,8 @@ console.log (phoneNumber)
 
         {equipment.length > 3 && (
           <div className="mt-4 text-center">
-            <Link 
-              href="/equipment-owner/full-equipment-list" 
+            <Link
+              href="/equipment-owner/full-equipment-list"
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
               عرض جميع المعدات ({equipment.length})

@@ -1,6 +1,33 @@
+import { initializeApp, cert, getApps, getApp } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import { User } from '../interface';
 import { db } from './config';
 import { collection, getDocs, doc, updateDoc,  } from 'firebase/firestore';
+
+let adminAuthInstance: ReturnType<typeof getAuth> | undefined;
+
+try {
+  const serviceAccountConfig = process.env.FIREBASE_ADMIN_SDK_CONFIG;
+
+  if (!serviceAccountConfig) {
+    throw new Error('Environment variable FIREBASE_ADMIN_SDK_CONFIG is not set.');
+  }
+
+  const serviceAccount = JSON.parse(serviceAccountConfig);
+
+  if (!getApps().length) {
+    initializeApp({
+      credential: cert(serviceAccount)
+    });
+  }
+
+  adminAuthInstance = getAuth();
+
+} catch (error) {
+  console.error('Error loading service account key or initializing Firebase Admin SDK:', error);
+}
+
+export const adminAuth = adminAuthInstance;
 
 // Get all users (both drivers and equipment owners)
 export const getAllUsers = async (): Promise<{
@@ -63,10 +90,21 @@ export const getAllUsers = async (): Promise<{
 // Update user verification status
 export const updateUserVerificationStatus = async (userType:string, userId: string, isVerified: boolean) => {
   try {
-    // First try to update in drivers collection
-      const driverRef = doc(db, userType, userId);
-      await updateDoc(driverRef, { isVerified });
-      return { success: true };
+    // تحديث حالة isVerified في Firestore
+    const userRef = doc(db, userType, userId);
+    await updateDoc(userRef, { isVerified });
+
+    // تحديث المطالبات المخصصة في Firebase Authentication
+    if (adminAuth) {
+      const userRecord = await adminAuth.getUser(userId);
+      const currentCustomClaims = userRecord.customClaims || {};
+      await adminAuth.setCustomUserClaims(userId, { ...currentCustomClaims, isVerified });
+      
+      // إبطال توكنات التحديث لإجبار العميل على الحصول على توكن جديد
+      await adminAuth.revokeRefreshTokens(userId);
+    }
+
+    return { success: true };
 
   } catch (error) {
     console.error('Error updating user verification status:', error);

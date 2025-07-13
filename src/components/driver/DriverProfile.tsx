@@ -6,6 +6,7 @@ import { uploadDriverPhoto } from '@/lib/firebase/storage';
 import {  logout } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link'; // Added Link import
 import { DocumentData } from 'firebase/firestore';
 import { Driver } from '@/lib/interface';
 // import { UpdateResult, Drive } from '@/lib/interface';
@@ -160,7 +161,7 @@ const DriverProfile = () => {
   
       if (updateResult.success && updateResult.data) {
         setSuccess('تم تحديث البيانات بنجاح');
-        setDriverData(updateResult.data);
+        setDriverData(updateResult.data  as Driver);
         setIsEditing(false);
       } else {
         setError(updateResult.error?.toString() || 'فشل في تحديث البيانات');
@@ -302,7 +303,13 @@ const ProfileView = ({ driverData, onEdit }: ProfileViewProps) => (
       </div>
     </div>
     
-    <div className="mt-6 flex justify-end">
+    <div className="mt-6 flex justify-end space-x-4 rtl:space-x-reverse">
+      <Link
+        href="/auth/update-password"
+        className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+      >
+        تعديل كلمة المرور
+      </Link>
       <button
         onClick={onEdit}
         className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"

@@ -3,14 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { getSession, logout, getUserType } from '@/lib/firebase/auth';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@/lib/firebase/config';
+import { logout } from '@/lib/firebase/auth';
 
 type UserType = 'drivers' | 'equipmentOwners' | 'admins';
 
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, loading] = useAuthState(auth);
   const [userType, setUserType] = useState<UserType | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -21,12 +23,18 @@ const Header = () => {
     { href: '/drivers', label: 'السائقين' },
   ];
 
-  // Auth check effect
+  // Auth state and user type effect
   useEffect(() => {
-    const session = getSession();
-    setIsLoggedIn(!!session);
-    setUserType(getUserType());
-  }, [pathname]);
+    const unsubscribe = auth.onIdTokenChanged(async (currentUser) => {
+      if (currentUser) {
+        const idTokenResult = await currentUser.getIdTokenResult();
+        setUserType(idTokenResult.claims.userType as UserType || null);
+      } else {
+        setUserType(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -40,6 +48,8 @@ const Header = () => {
         return '/driver/profile';
       case 'equipmentOwners':
         return '/equipment-owner/profile';
+      case 'admins':
+        return '/admin/dashboard'; // Assuming an admin dashboard link
       default:
         return '/auth/login';
     }
@@ -62,7 +72,11 @@ const Header = () => {
 
   // Render auth buttons
   const renderAuthButtons = (mobile = false) => {
-    if (isLoggedIn) {
+    if (loading) {
+      return null; // Show nothing or a loading spinner while auth state is loading
+    }
+
+    if (user) {
       return (
         <>
           <Link
@@ -72,15 +86,6 @@ const Header = () => {
           >
             الملف الشخصي
           </Link>
-          {userType === 'equipmentOwners' && (
-            <Link
-              href="/equipment-owner/add-equipment"
-              className={`${mobile ? 'block' : 'inline-flex'} items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              إضافة معدة
-            </Link>
-          )}
           <button
             onClick={handleLogout}
             className={`${mobile ? 'block w-full text-right' : 'inline-flex'} items-center px-3 py-2 border ${mobile ? 'border-r-4 border-transparent' : 'border-gray-300'} text-sm font-medium rounded-md text-gray-700 ${mobile ? 'hover:bg-gray-50' : 'bg-white hover:bg-gray-50'}`}
