@@ -15,10 +15,12 @@ export async function POST(req: NextRequest) {
     if (!adminAuth) {
       throw new Error('Authentication service is not initialized.');
     }
-    await adminAuth.setCustomUserClaims(uid, {
-      userType,
-      phoneNumber, // ← إضافة رقم الهاتف هنا
-    });
+
+   await adminAuth!.setCustomUserClaims(uid, {
+  userType,
+  phoneNumber,
+  });
+
 
     return NextResponse.json({ success: true, requiresTokenRefresh: true });
   } catch (error) {
