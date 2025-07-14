@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAllUsers, updateUserVerificationStatus } from '@/lib/firebase/admin';
-import {  logout } from '@/lib/firebase/auth';
+import { logout } from '@/lib/firebase/auth';
 import { User } from '@/lib/interface';
 import Image from 'next/image';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/lib/firebase/config'; 
+import { auth } from '@/lib/firebase/config';
 
 const AdminDashboard = () => {
   const router = useRouter();
@@ -19,7 +18,7 @@ const AdminDashboard = () => {
   const [filter, setFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [userType, setUserType] = useState<'all' | 'drivers' | 'equipmentOwners'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   const [user, loading] = useAuthState(auth);
 
   useEffect(() => {
@@ -27,34 +26,31 @@ const AdminDashboard = () => {
       router.push('/auth/login');
     }
   }, [user, loading, router]);
-  useEffect(() => {
-    const checkAdminAccess = async () => {
 
-      fetchUsers();
-    };
-    checkAdminAccess();
-  }, [router]);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const result = await getAllUsers();
-      if (result.success && result.data) {
-        const formattedUsers: User[] = result.data.map(user => ({
-          ...user,
-          photoUrl: user.photoUrl || '/default-avatar.png',
-          name: user.name || 'غير محدد',
-          phoneNumber: user.phoneNumber || 'غير محدد',
-          userType: user.userType === 'drivers' ? 'drivers' : 'equipmentOwners',
-          isVerified: user.isVerified || false,
-          createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
-          updatedAt: user.updatedAt ? new Date(user.updatedAt) : undefined,
-        }));
-        setUsers(formattedUsers);
-        setFilteredUsers(formattedUsers);
-      } else {
-        setError(result.error || 'فشل في تحميل بيانات المستخدمين');
+      const response = await fetch('/api/admin/users');
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
       }
+      const data = await response.json();
+      const formattedUsers: User[] = data.map((user: User) => ({
+        ...user,
+        photoUrl: user.photoUrl || '/default-avatar.png',
+        name: user.name || 'غير محدد',
+        phoneNumber: user.phoneNumber || 'غير محدد',
+        userType: user.userType === 'drivers' ? 'drivers' : 'equipmentOwners',
+        isVerified: user.isVerified || false,
+        createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
+        updatedAt: user.updatedAt ? new Date(user.updatedAt) : undefined,
+      }));
+      setUsers(formattedUsers);
+      setFilteredUsers(formattedUsers);
     } catch (err) {
       setError('حدث خطأ أثناء تحميل البيانات');
       console.error(err);
@@ -65,20 +61,20 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     let result = [...users];
-    
+
     if (filter === 'verified') result = result.filter(user => user.isVerified);
     else if (filter === 'unverified') result = result.filter(user => !user.isVerified);
-    
+
     if (userType === 'drivers') result = result.filter(user => user.userType === 'drivers');
     else if (userType === 'equipmentOwners') result = result.filter(user => user.userType === 'equipmentOwners');
-    
+
     if (searchTerm) {
-      result = result.filter(user => 
-        (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      result = result.filter(user =>
+        (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.phoneNumber?.includes(searchTerm))
       );
     }
-    
+
     setFilteredUsers(result);
   }, [filter, userType, searchTerm, users]);
 
@@ -86,13 +82,20 @@ const AdminDashboard = () => {
     setError('');
     setSuccess('');
     try {
-      const result = await updateUserVerificationStatus(userType, userId, !currentStatus);
-      if (result.success) {
-        setSuccess(`تم ${!currentStatus ? 'تفعيل' : 'إلغاء تفعيل'} الحساب بنجاح`);
-        setUsers(users.map(user => user.id === userId ? { ...user, isVerified: !currentStatus } : user));
-      } else {
-        setError(result.error || 'فشل في تحديث حالة الحساب');
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userType, userId, isVerified: !currentStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user status');
       }
+
+      setSuccess(`تم ${!currentStatus ? 'تفعيل' : 'إلغاء تفعيل'} الحساب بنجاح`);
+      setUsers(users.map(user => (user.id === userId ? { ...user, isVerified: !currentStatus } : user)));
     } catch (err) {
       setError('حدث خطأ أثناء تحديث حالة الحساب');
       console.error(err);
