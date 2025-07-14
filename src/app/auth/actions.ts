@@ -5,7 +5,7 @@ import { loginUser, logout } from '@/lib/firebase/auth';
 import { createDriver, createEquipmentOwner, updateDriver, verifyAndUpdateEquipmentOwner } from '@/lib/firebase/firestore';
 import { getUserProfileById } from '@/lib/firebase/firestore/utils';
 import { Driver, OwnerData } from '@/lib/interface';
-import { auth } from '@/lib/firebase/config'; // Import auth to get current user
+
 import { adminAuth } from '@/lib/firebase/admin';
 
 export async function login(prevState: string | undefined, formData: FormData) {
