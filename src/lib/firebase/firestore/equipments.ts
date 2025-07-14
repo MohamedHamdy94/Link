@@ -11,10 +11,9 @@ import {
   DocumentData
 } from 'firebase/firestore';
 import { db } from '../config';
-import { Equipment,Driver,OwnerData, UpdateResult } from '@/lib/interface';
+import { Equipment} from '@/lib/interface';
 
 // User collections
-const DRIVERS_COLLECTION = 'drivers';
 const EQUIPMENT_OWNERS_COLLECTION = 'equipmentOwners';
 const EQUIPMENT_COLLECTION = 'equipment';
 

@@ -2,13 +2,13 @@
 import { 
   collection, 
   doc, 
-  setDoc, 
+ 
   getDoc, 
   getDocs, 
-  updateDoc, 
+
   query, 
-  where,
-  DocumentData
+  where
+  
 } from 'firebase/firestore';
 import { db } from '../config';
 import { User } from '@/lib/interface';

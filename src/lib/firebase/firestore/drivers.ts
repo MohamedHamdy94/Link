@@ -7,17 +7,16 @@ import {
   getDocs, 
   updateDoc, 
   query, 
-  where,
-  DocumentData
+  where
+  
 } from 'firebase/firestore';
 import { db } from '../config';
-import { Equipment,Driver,OwnerData, UpdateResult } from '@/lib/interface';
+import { Driver } from '@/lib/interface';
 import { isPhoneTaken } from './utils';
 
 // User collections
 const DRIVERS_COLLECTION = 'drivers';
-const EQUIPMENT_OWNERS_COLLECTION = 'equipmentOwners';
-const EQUIPMENT_COLLECTION = 'equipment';
+
 
 // Driver functions
 import bcrypt from 'bcryptjs';
