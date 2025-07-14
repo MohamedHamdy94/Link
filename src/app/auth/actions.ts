@@ -2,7 +2,7 @@
 
 import { loginUser, logout } from '@/lib/firebase/auth';
 
-import { createDriver, createEquipmentOwner, updateDriver, verifyAndUpdateEquipmentOwner } from '@/lib/firebase/firestore';
+import {  updateDriver, verifyAndUpdateEquipmentOwner } from '@/lib/firebase/firestore';
 import { getUserProfileById } from '@/lib/firebase/firestore/utils';
 import { Driver, OwnerData } from '@/lib/interface';
 
@@ -46,48 +46,6 @@ export async function setCustomClaimsForUser(uid: string, phoneNumber: string, u
   } catch (error) {
     console.error('Error setting custom claims:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Failed to set custom claims' };
-  }
-}
-
-export async function registerDriver(prevState: string | undefined, formData: FormData) {
-  try {
-    const driverData: Driver = {
-      email: formData.get('email') as string,
-      password: formData.get('password') as string,
-      name: formData.get('name') as string,
-      phoneNumber: formData.get('phoneNumber') as string,
-      userType: 'drivers',
-      isVerified: false,
-    };
-    const result = await createDriver(driverData.email, driverData);
-    if (!result.success) {
-      return { success: false, message: result.error || 'Failed to register driver' };
-    }
-    return { success: true, message: 'Driver registered successfully' };
-  } catch (error) {
-    console.error('Error registering driver:', error);
-    return { success: false, message: 'Something went wrong during driver registration.' };
-  }
-}
-
-export async function registerEquipmentOwner(prevState: string | undefined, formData: FormData) {
-  try {
-    const ownerData: OwnerData = {
-      email: formData.get('email') as string,
-      password: formData.get('password') as string,
-      name: formData.get('name') as string,
-      phoneNumber: formData.get('phoneNumber') as string,
-      userType: 'equipmentOwners',
-      isVerified: false,
-    };
-    const result = await createEquipmentOwner(ownerData.email, ownerData);
-    if (!result.success) {
-      return { success: false, message: result.error || 'Failed to register equipment owner' };
-    }
-    return { success: true, message: 'Equipment owner registered successfully' };
-  } catch (error) {
-    console.error('Error registering equipment owner:', error);
-    return { success: false, message: 'Something went wrong during equipment owner registration.' };
   }
 }
 
