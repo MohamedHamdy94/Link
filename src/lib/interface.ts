@@ -13,8 +13,8 @@ export interface Driver {
   isVerified: boolean;
   userType: string;
   password?: string; // لا ينصح بتخزينه في الواجهة الأمامية
-  createdAt?: Date;
-  updatedAt: Date;
+  createdAt?: string;
+  updatedAt: string;
 }
 export interface OwnerData {
   id?: string;
@@ -25,8 +25,8 @@ export interface OwnerData {
   equipmentDetails?: string; // Optional string for the equipment details
   userType: string;
   password?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 export interface User {
   id: string | undefined;
@@ -34,8 +34,8 @@ export interface User {
   phoneNumber: string;
   userType: 'drivers' | 'equipmentOwners';
   isVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date | undefined;
+  createdAt: string;
+  updatedAt: string | undefined;
   password?: string;
   age?: number;
   equipmentType?: string;
@@ -62,8 +62,8 @@ export interface Equipment {
   photoUrl: string;
   ownerId: string;
   ownerPhone: string;
-  createdAt: Date; 
-  updatedAt: Date; // <== يجب أن يكون string
+  createdAt: string; 
+  updatedAt: string;
 }
 
 

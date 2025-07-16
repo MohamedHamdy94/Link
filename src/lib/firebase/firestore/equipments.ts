@@ -10,7 +10,8 @@ import {
   where,
   DocumentData
 } from 'firebase/firestore';
-import { db } from '../config';
+import { db } from '@/lib/firebase/config';
+import { getAdminDb } from '@/lib/firebase/admin';
 import { Equipment} from '@/lib/interface';
 
 // User collections
@@ -62,8 +63,8 @@ export const getEquipmentById = async (id: string): Promise<{ success: boolean; 
         photoUrl: data.photoUrl || '',
         ownerId: data.ownerId,
         ownerPhone: data.ownerPhone || '',
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
+        createdAt: data.createdAt?.toDate().toISOString(),
+        updatedAt: data.updatedAt?.toDate().toISOString(),
       }
     };
   } catch (error) {
@@ -83,16 +84,27 @@ export const getEquipmentById = async (id: string): Promise<{ success: boolean; 
 export const getEquipments = async () => {
   
   try {
-    const equipmentsRef = collection(db, EQUIPMENT_COLLECTION);
-    const q = query(equipmentsRef, where('status', '!=', 'work'));
+    const q = query(collection(db, EQUIPMENT_COLLECTION), where('status', '!=', 'work'));
     const querySnapshot = await getDocs(q);
 
     const equipments: Equipment[] = [];
     querySnapshot.forEach((doc) => {
-      equipments.push({
+      const data = doc.data();
+      const equipment: Equipment = {
         fbId: doc.id,
-        ...doc.data()
-      } as Equipment);
+        id: doc.id,
+        name: data.name,
+        description: data.description || '',
+        price: data.price,
+        status: data.status,
+        equipmentType: data.equipmentType,
+        photoUrl: data.photoUrl || '',
+        ownerId: data.ownerId,
+        ownerPhone: data.ownerPhone || '',
+        createdAt: data.createdAt?.toDate().toISOString(),
+        updatedAt: data.updatedAt?.toDate().toISOString(),
+      };
+      equipments.push(equipment);
     });
     return { 
       success: true, 

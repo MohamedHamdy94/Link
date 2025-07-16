@@ -1,10 +1,12 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore'; // Import Admin Firestore
 import { User } from '../interface';
 import { db } from './config';
 import { collection, getDocs, doc, updateDoc,  } from 'firebase/firestore';
 
 let adminAuthInstance: ReturnType<typeof getAuth> | undefined;
+let adminDbInstance: ReturnType<typeof getFirestore> | undefined; // Admin Firestore instance
 
 export const getAdminAuth = (): ReturnType<typeof getAuth> => {
   if (adminAuthInstance) {
@@ -32,6 +34,22 @@ export const getAdminAuth = (): ReturnType<typeof getAuth> => {
   } catch (error) {
     console.error('Error loading service account key or initializing Firebase Admin SDK:', error);
     throw new Error('Failed to initialize Firebase Admin SDK.');
+  }
+};
+
+export const getAdminDb = (): ReturnType<typeof getFirestore> => {
+  if (adminDbInstance) {
+    return adminDbInstance;
+  }
+
+  try {
+    // Ensure app is initialized before getting Firestore
+    getAdminAuth(); // This will initialize the app if not already
+    adminDbInstance = getFirestore();
+    return adminDbInstance;
+  } catch (error) {
+    console.error('Error initializing Firebase Admin Firestore:', error);
+    throw new Error('Failed to initialize Firebase Admin Firestore.');
   }
 };
 
