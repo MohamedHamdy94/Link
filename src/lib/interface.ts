@@ -1,4 +1,6 @@
 // تعريف نوع بيانات السائق
+export type UserType = 'drivers' | 'equipmentOwners' | 'admins';
+
 export interface Driver {
   id?: string;
   name: string;

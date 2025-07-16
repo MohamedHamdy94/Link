@@ -6,28 +6,34 @@ import { collection, getDocs, doc, updateDoc,  } from 'firebase/firestore';
 
 let adminAuthInstance: ReturnType<typeof getAuth> | undefined;
 
-try {
-  const serviceAccountConfig = process.env.FIREBASE_ADMIN_SDK_CONFIG;
-
-  if (!serviceAccountConfig) {
-    throw new Error('Environment variable FIREBASE_ADMIN_SDK_CONFIG is not set.');
+export const getAdminAuth = (): ReturnType<typeof getAuth> => {
+  if (adminAuthInstance) {
+    return adminAuthInstance;
   }
 
-  const serviceAccount = JSON.parse(serviceAccountConfig);
+  try {
+    const serviceAccountConfig = process.env.FIREBASE_ADMIN_SDK_CONFIG;
 
-  if (!getApps().length) {
-    initializeApp({
-      credential: cert(serviceAccount)
-    });
+    if (!serviceAccountConfig) {
+      throw new Error('Environment variable FIREBASE_ADMIN_SDK_CONFIG is not set.');
+    }
+
+    const serviceAccount = JSON.parse(serviceAccountConfig);
+
+    if (!getApps().length) {
+      initializeApp({
+        credential: cert(serviceAccount)
+      });
+    }
+
+    adminAuthInstance = getAuth();
+    return adminAuthInstance;
+
+  } catch (error) {
+    console.error('Error loading service account key or initializing Firebase Admin SDK:', error);
+    throw new Error('Failed to initialize Firebase Admin SDK.');
   }
-
-  adminAuthInstance = getAuth();
-
-} catch (error) {
-  console.error('Error loading service account key or initializing Firebase Admin SDK:', error);
-}
-
-export const adminAuth = adminAuthInstance;
+};
 
 // Get all users (both drivers and equipment owners)
 export const getAllUsers = async (): Promise<{
@@ -95,14 +101,13 @@ export const updateUserVerificationStatus = async (userType:string, userId: stri
     await updateDoc(userRef, { isVerified });
 
     // تحديث المطالبات المخصصة في Firebase Authentication
-    if (adminAuth) {
-      const userRecord = await adminAuth.getUser(userId);
-      const currentCustomClaims = userRecord.customClaims || {};
-      await adminAuth.setCustomUserClaims(userId, { ...currentCustomClaims, isVerified });
-      
-      // إبطال توكنات التحديث لإجبار العميل على الحصول على توكن جديد
-      await adminAuth.revokeRefreshTokens(userId);
-    }
+    const adminAuth = getAdminAuth(); // Get the initialized adminAuth instance
+    const userRecord = await adminAuth.getUser(userId);
+    const currentCustomClaims = userRecord.customClaims || {};
+    await adminAuth.setCustomUserClaims(userId, { ...currentCustomClaims, isVerified });
+    
+    // إبطال توكنات التحديث لإجبار العميل على الحصول على توكن جديد
+    await adminAuth.revokeRefreshTokens(userId);
 
     return { success: true };
 

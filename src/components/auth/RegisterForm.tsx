@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createDriver, createEquipmentOwner } from '@/lib/firebase/firestore';
+import { createDriverAction } from '@/app/driver/actions';
+import { createEquipmentOwnerAction } from '@/app/equipment-owner/actions';
 import { setCustomClaimsForUser } from '@/app/auth/actions';
 import { getWhatsAppGroupLink } from '@/lib/firebase/auth';
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
@@ -69,7 +70,7 @@ const RegisterForm = () => {
   let result;
 
   if (userType === 'drivers') {
-    result = await createDriver(phoneNumber, {
+    result = await createDriverAction(phoneNumber, {
       ...commonData,
   age: Number.isNaN(parseInt(age)) ? 0 : parseInt(age),
       equipmentType,
@@ -77,7 +78,7 @@ const RegisterForm = () => {
       hasLicense,
     });
   } else {
-    result = await createEquipmentOwner(phoneNumber, commonData);
+    result = await createEquipmentOwnerAction(phoneNumber, commonData);
   }
 
   if (result.success) {

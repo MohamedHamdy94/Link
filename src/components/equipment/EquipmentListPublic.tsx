@@ -1,16 +1,15 @@
 "use client";
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import FilterButtons from '../ui/FilterButtons';
-import { getEquipments } from '@/lib/firebase/firestore';
 import { Equipment } from '@/lib/interface';
 import Image from 'next/image';
 
-const EquipmentListPublic = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [equipment, setEquipment] = useState<Equipment[]>([]);
-  const [filterType, setFilterType] = useState('all'); 
+interface EquipmentListPublicProps {
+  equipments: Equipment[];
+}
+
+const EquipmentListPublic = ({ equipments }: EquipmentListPublicProps) => {
+  const [filterType, setFilterType] = useState('all');
   const [filter, setFilter] = useState('مانلفت');
 
   // مكون البادج المعدل
@@ -54,37 +53,9 @@ const EquipmentListPublic = () => {
     );
   }
 
-  useEffect(() => {
-    const fetchEquipment = async () => {
-      try {
-        const result = await getEquipments();
-        if (result.success) {
-          setEquipment(result.data as Equipment[]);
-        } else {
-          setError('فشل في تحميل بيانات المعدات');
-        }
-      } catch (err) {
-        setError('حدث خطأ أثناء تحميل البيانات');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchEquipment();
-  }, []);
-  
   const filteredEquipment = filterType === 'all' 
-    ? equipment.filter(item => item.equipmentType === filter)
-    : equipment.filter(item => item.status === filterType && item.equipmentType === filter);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+    ? equipments.filter(item => item.equipmentType === filter)
+    : equipments.filter(item => item.status === filterType && item.equipmentType === filter);
 
   return (
     <div className="bg-gray-50 p-4 md:p-8 rounded-lg shadow-md max-w-6xl mx-auto">
@@ -111,12 +82,6 @@ const EquipmentListPublic = () => {
           </button>
         ))}
       </div>
-      
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-right text-sm">
-          {error}
-        </div>
-      )}
       
       {filteredEquipment.length === 0 ? (
         <div className="text-center py-8">

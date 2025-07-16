@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase/admin'; // تأكد من إعداد admin
+import { getAdminAuth } from '@/lib/firebase/admin'; // تأكد من إعداد admin
 
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('authorization');
@@ -9,10 +9,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Token مفقود' }, { status: 401 });
   }
 
-  if (!adminAuth) {
-    console.error('API Login: adminAuth is not initialized.');
-    return NextResponse.json({ success: false, error: 'خطأ في تهيئة الخادم' }, { status: 500 });
-  }
+  const adminAuth = getAdminAuth();
 
   try {
     const decoded = await adminAuth.verifyIdToken(token);

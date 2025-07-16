@@ -1,49 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { getDrivers } from '@/lib/firebase/firestore';
-// import { getSession } from '@/lib/firebase/auth';
-// import Link from 'next/link';
+import React, { useState } from 'react';
 import DriverCard from './DriverCard';
 import FilterButtons from '../ui/FilterButtons';
 import { Driver } from '@/lib/interface';
 
-const DriversList = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [drivers, setDrivers] = useState([]);
+interface DriversListProps {
+  initialDrivers: Driver[];
+}
+
+const DriversList = ({ initialDrivers }: DriversListProps) => {
   const [filter, setFilter] = useState('مانلفت');
 
-  useEffect(() => {
-    const fetchDrivers = async () => {
-      try {
-        const result = await getDrivers();
-        if (result.success) {
-          setDrivers(result.data as []);
-          setLoading(false);
-        } else {
-          setError('فشل في تحميل بيانات السائق');
-        }
-      } catch (err) {
-        setError('حدث خطأ أثناء تحميل البيانات');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDrivers();
-  }, []);
-  const filteredDrivers = drivers.filter(
+  const filteredDrivers = initialDrivers.filter(
     (driver: Driver) => driver.equipmentType === filter && driver.isVerified && driver.isAvailable
   );
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white p-2 rounded-lg shadow-md max-w-6xl mx-auto">
@@ -54,12 +25,6 @@ const DriversList = () => {
       <FilterButtons filter={filter} setFilter={setFilter} />
 
       </div>
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-right">
-          {error}
-        </div>
-      )}
 
       {filteredDrivers.length === 0 ? (
         <div className="text-center py-12">

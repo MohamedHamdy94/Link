@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getDriver, updateDriver } from '@/lib/firebase/firestore';
+import { getDriver } from '@/lib/firebase/firestore';
+import { updateDriverAction } from '@/app/driver/actions';
 import { uploadDriverPhoto } from '@/lib/firebase/storage';
 import {  logout } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -146,7 +147,7 @@ const DriverProfile = () => {
       }
       
       // Update driver data
-      const updateResult = await updateDriver(phoneNumber, {
+      const updateResult = await updateDriverAction(phoneNumber, {
         name: formData.name,
         age: parseInt(formData.age),
         equipmentType: formData.equipmentType,
@@ -366,9 +367,11 @@ const EditForm = ({
         <div className="mb-4">
           <div className="relative w-40 h-40 mx-auto overflow-hidden rounded-full bg-gray-100">
             {photoPreview ? (
-              <img 
+              <Image 
                 src={photoPreview} 
                 alt="صورة السائق" 
+                width={160}
+                height={160}
                 className="w-full h-full object-cover"
               />
             ) : (

@@ -14,7 +14,7 @@ import { db } from '../config';
 import { Equipment} from '@/lib/interface';
 
 // User collections
-const EQUIPMENT_OWNERS_COLLECTION = 'equipmentOwners';
+
 const EQUIPMENT_COLLECTION = 'equipment';
 
 
@@ -76,20 +76,7 @@ export const getEquipmentById = async (id: string): Promise<{ success: boolean; 
 
 
 
-export const getEquipmentOwner = async (ownerId: string) => {
-  console.log(ownerId)
-  try {
-    const ownerDoc = await getDoc(doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId));
-    if (ownerDoc.exists()) {
-      return { success: true, data: ownerDoc.data() };
-    } else {
-      return { success: false, error: 'Equipment owner not found' };
-    }
-  } catch (error) {
-    console.error('Error getting equipment owner:', error);
-    return { success: false, error };
-  }
-};
+
 
 
 

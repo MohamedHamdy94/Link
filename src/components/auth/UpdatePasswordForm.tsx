@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { updatePassword } from '@/app/auth/actions';
+import { updatePasswordAction } from '@/app/auth/actions';
+import { UserType } from '@/lib/interface';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { auth } from '@/lib/firebase/config';
@@ -23,7 +24,7 @@ const UpdatePasswordForm = () => {
         try {
           const tokenResult = await getIdTokenResult(user);
           const userTypeFromClaims = tokenResult.claims.userType as string | undefined;
-          console.log(tokenResult)
+     
           setUserType(userTypeFromClaims || null);
         } catch (error) {
           console.error("حدث خطأ أثناء جلب userType:", error);
@@ -53,14 +54,14 @@ const UpdatePasswordForm = () => {
     const formData = new FormData(event.currentTarget);
 
     try {
-      const result = await updatePassword(
-        { message: '', success: false },
+      const result = await updatePasswordAction(
         user.uid,
-        userType as 'drivers' | 'equipmentOwners',
-        formData
+        userType as UserType,
+        formData.get('oldPassword') as string,
+        formData.get('newPassword') as string
       );
 
-      setMessage(result.message );
+      setMessage(result.message || 'حدث خطأ غير معروف');
       setSuccess(result.success);
     } catch (error) {
       console.error("خطأ أثناء تحديث كلمة المرور:", error);

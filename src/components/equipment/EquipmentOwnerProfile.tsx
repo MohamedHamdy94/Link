@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { getEquipmentsByOwner, updateEquipmentOwner, getEquipmentOwner } from '@/lib/firebase/firestore';
+import { getEquipmentsByOwner, getEquipmentOwner } from '@/lib/firebase/firestore';
+import { updateEquipmentOwnerAction } from '@/app/equipment-owner/actions';
 import { uploadDriverPhoto } from '@/lib/firebase/storage';
 import { useRouter } from 'next/navigation';
 import { OwnerData, Equipment } from '@/lib/interface';
@@ -146,7 +147,7 @@ const EquipmentOwnerProfile = () => {
         updatedAt: new Date()
       };
 
-      const updateResult = await updateEquipmentOwner(ownerPhoneNumber, updateData);
+      const updateResult = await updateEquipmentOwnerAction(ownerPhoneNumber, updateData);
 
       if (updateResult.success && updateResult.data) {
         setSuccess('تم تحديث البيانات بنجاح');
@@ -229,9 +230,11 @@ const EquipmentOwnerProfile = () => {
             <div className="md:w-1/3">
               <div className="relative w-40 h-40 mx-auto overflow-hidden rounded-full bg-gray-100">
                 {photoPreview ? (
-                  <img
+                  <Image
                     src={photoPreview}
                     alt="صورة صاحب المعدات"
+                    width={160}
+                    height={160}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -302,9 +305,11 @@ const EquipmentOwnerProfile = () => {
             <div className="md:w-1/3">
               <div className="relative w-40 h-40 mx-auto overflow-hidden rounded-full bg-gray-100">
                 {ownerData?.photoUrl ? (
-                  <img
+                  <Image
                     src={ownerData.photoUrl}
                     alt="صورة صاحب المعدات"
+                    width={160}
+                    height={160}
                     className="w-full h-full object-cover"
                   />
                 ) : (

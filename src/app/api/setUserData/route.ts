@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 
 export async function POST(req: NextRequest) {
   const { uid, userType, phoneNumber } = await req.json();
@@ -12,11 +12,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    if (!adminAuth) {
-      throw new Error('Authentication service is not initialized.');
-    }
+    const adminAuth = getAdminAuth();
 
-   await adminAuth!.setCustomUserClaims(uid, {
+   await adminAuth.setCustomUserClaims(uid, {
   userType,
   phoneNumber,
   });

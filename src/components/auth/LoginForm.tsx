@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { loginUserAction } from '@/app/auth/actions';
 import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase/config';
 
@@ -10,46 +11,31 @@ const LoginForm = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [customError, setCustomError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const [
-    signInWithEmailAndPassword,
-    user,
-    loading,
-    error,
-  ] = useSignInWithEmailAndPassword(auth);
+  const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setCustomError('');
-
-    const email = `${phoneNumber}@app.com`;
+    setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(email, password);
+      // Step 1: Authenticate with Firebase to get a user session
+      const email = `${phoneNumber}@app.com`;
+      const userCredential = await signInWithEmailAndPassword(email, password);
 
-      if (!user) {
-        setCustomError('فشل في تسجيل الدخول عبر Firebase');
+      if (!userCredential) {
+        setCustomError('فشل في تسجيل الدخول. يرجى التحقق من رقم الهاتف وكلمة المرور.');
+        setLoading(false);
         return;
       }
 
-      const token = await user.user?.getIdToken(true);
-
-      if (!token) {
-        setCustomError('فشل في جلب التوكن');
-        return;
-      }
-
-      // ✅ إرسال التوكن إلى API Route للتحقق من نوع المستخدم
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const result = await response.json();
+      // Step 2: Call the Server Action to verify user details in Firestore
+      const result = await loginUserAction(phoneNumber, password);
 
       if (result.success) {
+        // On success, redirect to the correct profile page
         switch (result.userType) {
           case 'drivers':
             router.push('/driver/profile');
@@ -64,11 +50,13 @@ const LoginForm = () => {
             setCustomError('نوع المستخدم غير معروف');
         }
       } else {
-        setCustomError(result.error || 'فشل في تسجيل الدخول');
+        setCustomError(result.error || 'فشل في التحقق من بيانات المستخدم.');
       }
-
     } catch (err) {
+      // This will catch errors from both Firebase auth and the server action
       setCustomError(err instanceof Error ? err.message : 'حدث خطأ أثناء تسجيل الدخول');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,9 +64,9 @@ const LoginForm = () => {
     <div className="bg-white p-8 rounded-lg shadow-md max-w-md mx-auto">
       <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">تسجيل الدخول</h2>
 
-      {(customError || error) && (
+      {customError && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-right">
-          {customError || error?.message}
+          {customError}
         </div>
       )}
 

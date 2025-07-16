@@ -25,14 +25,27 @@ const Header = () => {
 
   // Auth state and user type effect
   useEffect(() => {
+    const storedUserType = localStorage.getItem('userType');
+    if (storedUserType) {
+      setUserType(storedUserType as UserType);
+    }
+
     const unsubscribe = auth.onIdTokenChanged(async (currentUser) => {
       if (currentUser) {
         const idTokenResult = await currentUser.getIdTokenResult();
-        setUserType(idTokenResult.claims.userType as UserType || null);
+        const newUserType = idTokenResult.claims.userType as UserType || null;
+        setUserType(newUserType);
+        if (newUserType) {
+          localStorage.setItem('userType', newUserType);
+        } else {
+          localStorage.removeItem('userType');
+        }
       } else {
         setUserType(null);
+        localStorage.removeItem('userType');
       }
     });
+
     return () => unsubscribe();
   }, []);
 
