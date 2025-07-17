@@ -13,17 +13,12 @@ const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
   return driver.isVerified && (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700">
       {/* صورة السائق بأبعاد ثابتة */}
-      <div className="relative w-full aspect-w-16 aspect-h-9">
+      <div className="relative w-full h-48 overflow-hidden"> {/* ارتفاع ثابت */}
         <Image
           src={driver.photoUrl || '/images/imagesProfile.jpg'}
           alt={driver.name || 'صورة السائق'}
           fill
           className="object-cover"
-          style={{
-            objectFit: 'cover',
-            objectPosition: 'center'
-          }}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {/* شارة التوفر */}
         {driver.isAvailable && (

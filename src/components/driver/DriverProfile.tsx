@@ -79,6 +79,7 @@ const DriverProfile = () => {
           hasLicense: driver.hasLicense,
         });
         setPhotoPreview(driver.photoUrl || '');
+        console.log('Driver photoUrl:', driver.photoUrl);
       } else {
         setError('فشل في تحميل بيانات السائق');
       }
