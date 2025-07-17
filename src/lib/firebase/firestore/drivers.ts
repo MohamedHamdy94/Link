@@ -8,7 +8,7 @@ import {
   where
   
 } from 'firebase/firestore';
-import { getAdminDb } from '@/lib/firebase/admin';
+import { db } from '@/lib/firebase/config';
 import { Driver } from '@/lib/interface';
 
 // User collections
@@ -16,8 +16,8 @@ const DRIVERS_COLLECTION = 'drivers';
 
 export const getDrivers = async () => {
   try {
-    const adminDb = getAdminDb();
-    const querySnapshot = await adminDb.collection(DRIVERS_COLLECTION).where('isVerified', '==', true).get();
+    const q = query(collection(db, DRIVERS_COLLECTION), where('isVerified', '==', true));
+    const querySnapshot = await getDocs(q);
 
     const drivers: Driver[] = [];
     querySnapshot.forEach((doc) => {
@@ -33,8 +33,8 @@ export const getDrivers = async () => {
         phoneNumber: data.phoneNumber,
         isVerified: data.isVerified,
         userType: data.userType,
-        createdAt: data.createdAt?.toDate().toISOString(),
-        updatedAt: data.updatedAt?.toDate().toISOString(),
+        createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate().toISOString() : undefined,
+        updatedAt: data.updatedAt && typeof data.updatedAt.toDate === 'function' ? data.updatedAt.toDate().toISOString() : undefined,
       };
       drivers.push(driver);
     });

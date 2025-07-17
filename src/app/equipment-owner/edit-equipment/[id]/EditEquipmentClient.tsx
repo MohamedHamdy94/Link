@@ -198,7 +198,7 @@ if (!uploadResult.success || !uploadResult.url) {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex flex-col md:flex-row gap-6">
           <div className="md:w-1/3">
-            <div className="relative w-full h-48 mx-auto overflow-hidden rounded-lg bg-gray-100">
+            <div className="relative w-full aspect-w-16 aspect-h-9 mx-auto overflow-hidden rounded-lg bg-gray-100">
               {photoPreview ? (
                 <Image
                   src={photoPreview}

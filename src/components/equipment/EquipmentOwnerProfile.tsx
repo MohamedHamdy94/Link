@@ -392,7 +392,7 @@ const EquipmentOwnerProfile = () => {
               }
               return (
                 <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-                  <div className="h-40 relative overflow-hidden">
+                  <div className="relative overflow-hidden aspect-w-16 aspect-h-9">
                     {item.photoUrl ? (
                       <Image
                         src={item.photoUrl}

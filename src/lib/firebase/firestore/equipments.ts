@@ -11,7 +11,6 @@ import {
   DocumentData
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { getAdminDb } from '@/lib/firebase/admin';
 import { Equipment} from '@/lib/interface';
 
 // User collections
@@ -63,8 +62,8 @@ export const getEquipmentById = async (id: string): Promise<{ success: boolean; 
         photoUrl: data.photoUrl || '',
         ownerId: data.ownerId,
         ownerPhone: data.ownerPhone || '',
-        createdAt: data.createdAt?.toDate().toISOString(),
-        updatedAt: data.updatedAt?.toDate().toISOString(),
+        createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate().toISOString() : undefined,
+        updatedAt: data.updatedAt && typeof data.updatedAt.toDate === 'function' ? data.updatedAt.toDate().toISOString() : undefined,
       }
     };
   } catch (error) {
@@ -101,8 +100,8 @@ export const getEquipments = async () => {
         photoUrl: data.photoUrl || '',
         ownerId: data.ownerId,
         ownerPhone: data.ownerPhone || '',
-        createdAt: data.createdAt?.toDate().toISOString(),
-        updatedAt: data.updatedAt?.toDate().toISOString(),
+        createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate().toISOString() : undefined,
+        updatedAt: data.updatedAt && typeof data.updatedAt.toDate === 'function' ? data.updatedAt.toDate().toISOString() : undefined,
       };
       equipments.push(equipment);
     });

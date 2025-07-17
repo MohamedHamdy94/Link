@@ -3,7 +3,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore'; // Import Admin Firestore
 import { User } from '../interface';
 import { db } from './config';
-import { collection, getDocs, doc, updateDoc,  } from 'firebase/firestore';
+
 
 let adminAuthInstance: ReturnType<typeof getAuth> | undefined;
 let adminDbInstance: ReturnType<typeof getFirestore> | undefined; // Admin Firestore instance
@@ -61,7 +61,7 @@ export const getAllUsers = async (): Promise<{
 }> => {
   try {
     // جلب السائقين
-    const driversSnapshot = await getDocs(collection(db, 'drivers'));
+    const driversSnapshot = await getAdminDb().collection('drivers').get();
     const drivers: User[] = driversSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -70,8 +70,8 @@ export const getAllUsers = async (): Promise<{
         phoneNumber: data.phoneNumber || 'غير محدد',
         userType: 'drivers',
         isVerified: data.isVerified || false,
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate(),
+        createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(),
+        updatedAt: data.updatedAt && typeof data.updatedat.toDate === 'function' ? data.updatedAt.toDate() : undefined,
         age: data.age,
         equipmentType: data.equipmentType,
         hasLicense: data.hasLicense,
@@ -81,7 +81,7 @@ export const getAllUsers = async (): Promise<{
     });
 
     // جلب أصحاب المعدات
-    const ownersSnapshot = await getDocs(collection(db, 'equipmentOwners'));
+    const ownersSnapshot = await getAdminDb().collection('equipmentOwners').get();
     const owners: User[] = ownersSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -90,8 +90,8 @@ export const getAllUsers = async (): Promise<{
         phoneNumber: data.phoneNumber || 'غير محدد',
         userType: 'equipmentOwners',
         isVerified: data.isVerified || false,
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate(),
+        createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(),
+        updatedAt: data.updatedAt && typeof data.updatedAt.toDate === 'function' ? data.updatedAt.toDate() : undefined,
         equipmentDetails: data.equipmentDetails,
         photoUrl: data.photoUrl,
         password: data.password
@@ -115,8 +115,8 @@ export const getAllUsers = async (): Promise<{
 export const updateUserVerificationStatus = async (userType:string, userId: string, isVerified: boolean) => {
   try {
     // تحديث حالة isVerified في Firestore
-    const userRef = doc(db, userType, userId);
-    await updateDoc(userRef, { isVerified });
+    const userRef = getAdminDb().collection(userType).doc(userId);
+    await userRef.update({ isVerified });
 
     // تحديث المطالبات المخصصة في Firebase Authentication
     const adminAuth = getAdminAuth(); // Get the initialized adminAuth instance
@@ -143,7 +143,7 @@ export const updateUserVerificationStatus = async (userType:string, userId: stri
 // Check if user is admin
 export const checkAdminRole = async (userId: string) => {
   try {
-    const adminDoc = await getDocs(collection(db, 'admins'));
+    const adminDoc = await getAdminDb().collection('admins').get();
     const admins = adminDoc.docs.map(doc => ({
       id: doc.id,
       ...doc.data()

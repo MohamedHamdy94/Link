@@ -93,7 +93,7 @@ const EquipmentListPublic = ({ equipments }: EquipmentListPublicProps) => {
             <div key={item.id} className="bg-white relative overflow-hidden shadow-md rounded-lg flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
               <StatusBadge status={item.status} />
               
-              <div className="h-48 w-full overflow-hidden">
+              <div className="w-full overflow-hidden aspect-w-16 aspect-h-9">
                 {item.photoUrl ? (
                   <Image
                     width={500}
