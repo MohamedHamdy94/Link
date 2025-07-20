@@ -102,8 +102,8 @@ const EquipmentForm = () => {
       photoUrl, // استخدام المتغير photoUrl الذي تم تعريفه مسبقاً
       ownerId: phone,
       ownerPhone: phone,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(), // تحويل إلى string
+      updatedAt: new Date().toISOString(), // تحويل إلى string
     };
 
       // إرسال البيانات إلى Firebase
