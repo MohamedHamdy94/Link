@@ -144,7 +144,7 @@ const EquipmentOwnerProfile = () => {
       const updateData: Partial<OwnerData> = {
         name,
         ...(photoUrl && { photoUrl }),
-        updatedAt: new Date()
+        updatedAt: new Date().toISOString() // تحويل إلى string
       };
 
       const updateResult = await updateEquipmentOwnerAction(ownerPhoneNumber, updateData);
