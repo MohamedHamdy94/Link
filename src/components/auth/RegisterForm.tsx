@@ -62,8 +62,8 @@ const RegisterForm = () => {
     name,
     userType,
     isVerified: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date().toISOString(), // تحويل إلى string
+    updatedAt: new Date().toISOString(), // تحويل إلى string
     password, // Add password here
   };
 
