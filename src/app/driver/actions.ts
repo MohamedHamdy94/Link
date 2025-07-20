@@ -57,9 +57,9 @@ export const updateDriverAction = async (
       }
     }
 
-    const updatePayload: Partial<Driver> & { updatedAt: Date } = {
+    const updatePayload: Partial<Driver> & { updatedAt: string } = {
       ...driverData,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(), // تحويل إلى string
     };
 
     if (driverData.password) {
