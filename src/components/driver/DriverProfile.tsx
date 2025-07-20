@@ -66,7 +66,8 @@ const DriverProfile = () => {
           phoneNumber: data.phoneNumber || '',
           isVerified: data.isVerified || false,
           userType: data.userType,
-          updatedAt: new Date(),
+          createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate().toISOString() : undefined,
+          updatedAt: data.updatedAt && typeof data.updatedAt.toDate === 'function' ? data.updatedAt.toDate().toISOString() : new Date().toISOString(), // Ensure it's always a string
         });
 
         const driver = toDriver(id, result.data);
