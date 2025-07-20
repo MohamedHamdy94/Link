@@ -159,7 +159,7 @@ const DriverProfile = () => {
         photoUrl: newPhotoUrl, // استخدم الرابط الجديد هنا
         phoneNumber: driverData?.phoneNumber || '',
         isVerified: driverData?.isVerified || false,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(), // تحويل إلى string
       });
   
       if (updateResult.success && updateResult.data) {
