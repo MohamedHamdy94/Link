@@ -140,7 +140,7 @@ if (!uploadResult.success || !uploadResult.url) {
         status: formData.status as 'rent' | 'sale' | 'work',
         equipmentType: formData.equipmentType,
         photoUrl,
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       };
   
       // نعلم TypeScript أن fbId موجود لأنه تم التحقق منه مسبقاً
