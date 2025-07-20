@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 import React, { useState, useEffect } from 'react';
 import { updateEquipment } from '@/lib/firebase/firestore';
-import { uploadEquipmentPhoto } from '@/lib/firebase/storage';
+import { uploadEquipmentPhoto, deleteFileByUrl } from '@/lib/firebase/storage';
 import { useRouter } from 'next/navigation';
 import { Equipment } from '@/lib/interface';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -121,15 +121,25 @@ export default function EditEquipmentClient({ initialData }: EditEquipmentClient
   
     try {
       let photoUrl = initialData.photoUrl || '';
-  
+      const oldPhotoUrl = initialData.photoUrl; // حفظ رابط الصورة القديمة
+
       if (photoFile) {
-   const uploadResult = await uploadEquipmentPhoto(initialData.ownerId,initialData.fbId, photoFile);
-if (!uploadResult.success || !uploadResult.url) {
+        const uploadResult = await uploadEquipmentPhoto(initialData.ownerId, initialData.fbId, photoFile);
+        if (!uploadResult.success || !uploadResult.url) {
           setError('فشل في رفع الصورة');
           setSaving(false);
           return;
         }
         photoUrl = uploadResult.url;
+
+        // حذف الصورة القديمة إذا كانت موجودة ومختلفة عن الجديدة
+        if (oldPhotoUrl && oldPhotoUrl !== photoUrl) {
+          const deleteResult = await deleteFileByUrl(oldPhotoUrl);
+          if (!deleteResult.success) {
+            console.warn('Failed to delete old photo:', deleteResult.error);
+            // لا نوقف العملية هنا، لأن الصورة الجديدة تم رفعها بنجاح
+          }
+        }
       }
   
       const updateData: Equipment = {

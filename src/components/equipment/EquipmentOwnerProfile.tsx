@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getEquipmentsByOwner, getEquipmentOwner } from '@/lib/firebase/firestore';
 import { updateEquipmentOwnerAction } from '@/app/equipment-owner/actions';
-import { uploadDriverPhoto } from '@/lib/firebase/storage';
+import { uploadDriverPhoto, deleteFileByUrl } from '@/lib/firebase/storage';
 import { useRouter } from 'next/navigation';
 import { OwnerData, Equipment } from '@/lib/interface';
 import { auth } from '@/lib/firebase/config';
@@ -130,6 +130,7 @@ const EquipmentOwnerProfile = () => {
 
     try {
       let photoUrl = ownerData?.photoUrl;
+      const oldPhotoUrl = ownerData?.photoUrl; // حفظ رابط الصورة القديمة
 
       if (photoFile) {
         const uploadResult = await uploadDriverPhoto(ownerPhoneNumber, photoFile);
@@ -139,6 +140,15 @@ const EquipmentOwnerProfile = () => {
           return;
         }
         photoUrl = uploadResult.url;
+
+        // حذف الصورة القديمة إذا كانت موجودة ومختلفة عن الجديدة
+        if (oldPhotoUrl && oldPhotoUrl !== photoUrl) {
+          const deleteResult = await deleteFileByUrl(oldPhotoUrl);
+          if (!deleteResult.success) {
+            console.warn('Failed to delete old photo:', deleteResult.error);
+            // لا نوقف العملية هنا، لأن الصورة الجديدة تم رفعها بنجاح
+          }
+        }
       }
 
       const updateData: Partial<OwnerData> = {

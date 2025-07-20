@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { getDriver } from '@/lib/firebase/firestore';
 import { updateDriverAction } from '@/app/driver/actions';
-import { uploadDriverPhoto } from '@/lib/firebase/storage';
+import { uploadDriverPhoto, deleteFileByUrl } from '@/lib/firebase/storage';
 import {  logout } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -131,7 +131,8 @@ const DriverProfile = () => {
     
     try {
       let newPhotoUrl = driverData?.photoUrl || '';
-  
+      const oldPhotoUrl = driverData?.photoUrl; // حفظ رابط الصورة القديمة
+
       // Upload new photo if selected
       if (photoFile) {
         const uploadResult = await uploadDriverPhoto(phoneNumber, photoFile);
@@ -141,11 +142,19 @@ const DriverProfile = () => {
           setLoading(false);
           return;
         }
-          if (uploadResult.success && uploadResult.url) {
-         newPhotoUrl = uploadResult.url;
-        setPhotoPreview(newPhotoUrl);
+        if (uploadResult.success && uploadResult.url) {
+          newPhotoUrl = uploadResult.url;
+          setPhotoPreview(newPhotoUrl);
+
+          // حذف الصورة القديمة إذا كانت موجودة ومختلفة عن الجديدة
+          if (oldPhotoUrl && oldPhotoUrl !== newPhotoUrl) {
+            const deleteResult = await deleteFileByUrl(oldPhotoUrl);
+            if (!deleteResult.success) {
+              console.warn('Failed to delete old photo:', deleteResult.error);
+              // لا نوقف العملية هنا، لأن الصورة الجديدة تم رفعها بنجاح
+            }
+          }
         }
-      
       }
       
       // Update driver data
