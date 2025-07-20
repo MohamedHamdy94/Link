@@ -90,8 +90,12 @@ export const updateEquipmentOwnerAction = async (
         photoUrl: updatedData.photoUrl,
         isVerified: updatedData.isVerified,
         userType: updatedData.userType,
-        createdAt: updatedData.createdAt?.toDate() || new Date(),
-        updatedAt: updatedData.updatedAt?.toDate() || new Date(),
+        createdAt: updatedData.createdAt && typeof updatedData.createdAt.toDate === 'function'
+          ? updatedData.createdAt.toDate().toISOString()
+          : (updatedData.createdAt || new Date().toISOString()),
+        updatedAt: updatedData.updatedAt && typeof updatedData.updatedAt.toDate === 'function'
+          ? updatedData.updatedAt.toDate().toISOString()
+          : (updatedData.updatedAt || new Date().toISOString()),
         equipmentDetails: updatedData.equipmentDetails,
       },
     };
