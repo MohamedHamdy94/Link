@@ -27,13 +27,13 @@ export const createEquipmentOwnerAction = async (
 
     const hashedPassword = await hashPassword(ownerData.password);
 
-    const dataToSave: Partial<OwnerData> & { password?: string; createdAt: Date; updatedAt: Date; } = {
+    const dataToSave: Partial<OwnerData> & { password?: string; createdAt: string; updatedAt: string; } = {
       name: ownerData.name,
       phoneNumber: ownerData.phoneNumber,
       isVerified: false,
       userType: 'equipmentOwners',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     if (hashedPassword) {
@@ -60,9 +60,9 @@ export const updateEquipmentOwnerAction = async (
   try {
     const ownerRef = doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId);
 
-    const updatePayload: Partial<OwnerData> & { updatedAt: Date } = {
+    const updatePayload: Partial<OwnerData> & { updatedAt: string } = {
       ...data,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
     };
 
     if (data.password) {
