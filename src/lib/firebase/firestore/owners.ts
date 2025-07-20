@@ -24,6 +24,7 @@ export const getEquipmentsByOwner = async (
 
     const equipmentList: Equipment[] = querySnapshot.docs.map((doc) => ({
       id: doc.id,
+      fbId: doc.id, // إضافة fbId هنا
       ...doc.data(),
     })) as Equipment[];
 

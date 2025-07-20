@@ -58,14 +58,15 @@ export const setCustomClaimsForUser = async (uid: string, phoneNumber: string, u
 };
 
 export const updatePasswordAction = async (
-  uid: string,
+  uid: string, // إضافة uid مرة أخرى
+  phoneNumber: string,
   userType: UserType,
   oldPassword: string,
   newPassword: string
 ): Promise<ClaimsResult> => {
   try {
     // 1. Get user's current data from Firestore to verify old password
-    const userDocRef = doc(db, userType, uid); // Assuming UID is the doc ID
+    const userDocRef = doc(db, userType, phoneNumber); // استخدام phoneNumber لجلب المستند من Firestore
     const userDocSnap = await getDoc(userDocRef);
 
     if (!userDocSnap.exists()) {
@@ -90,7 +91,7 @@ export const updatePasswordAction = async (
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await updateDoc(userDocRef, { password: hashedPassword, updatedAt: new Date() });
 
-    return { success: true };
+    return { success: true, message: 'تم تحديث كلمة المرور بنجاح' };
   } catch (error) {
     console.error('Error updating password:', error);
     return { success: false, error: 'فشل في تحديث كلمة المرور' };

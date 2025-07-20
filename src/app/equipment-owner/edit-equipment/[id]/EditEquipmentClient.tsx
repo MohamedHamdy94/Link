@@ -148,7 +148,10 @@ if (!uploadResult.success || !uploadResult.url) {
   
       if (updateResult.success) {
         setSuccess('تم تحديث بيانات المعدة بنجاح');
-        setTimeout(() => setSuccess(''), 3000);
+        setTimeout(() => {
+          setSuccess('');
+          router.push('/equipment-owner/profile'); // إعادة التوجيه هنا
+        }, 1500); // يمكن تعديل التأخير حسب الحاجة
       } else {
         setError(updateResult.error?.toString() || 'فشل في تحديث البيانات');
       }

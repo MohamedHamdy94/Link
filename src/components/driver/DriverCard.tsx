@@ -19,6 +19,7 @@ const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
           alt={driver.name || 'صورة السائق'}
           fill
           className="object-cover"
+          sizes="(max-width: 1024px) 50vw, 33vw" // إضافة خاصية sizes هنا
         />
         {/* شارة التوفر */}
         {driver.isAvailable && (

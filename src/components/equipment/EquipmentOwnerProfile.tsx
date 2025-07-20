@@ -392,13 +392,15 @@ const EquipmentOwnerProfile = () => {
               }
               return (
                 <div key={item.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-                  <div className="relative overflow-hidden aspect-w-16 aspect-h-9">
+                  <div className="h-40 relative overflow-hidden">
                     {item.photoUrl ? (
                       <Image
                         src={item.photoUrl}
                         alt={item.name}
                         fill
                         className="object-cover"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        priority // إضافة خاصية priority هنا
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
