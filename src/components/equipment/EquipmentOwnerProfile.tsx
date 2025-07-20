@@ -69,8 +69,8 @@ const EquipmentOwnerProfile = () => {
             phoneNumber: data.phoneNumber || '',
             isVerified: data.isVerified || false,
             userType: data.userType,
-            createdAt: data.createdAt?.toDate() || new Date(),
-            updatedAt: data.updatedAt?.toDate() || new Date(),
+            createdAt: data.createdAt && typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate().toISOString() : (data.createdAt || new Date().toISOString()),
+            updatedAt: data.updatedAt && typeof data.updatedAt.toDate === 'function' ? data.updatedAt.toDate().toISOString() : (data.updatedAt || new Date().toISOString()),
           });
           setName(data.name || '');
           setPhotoPreview(data.photoUrl || '');
