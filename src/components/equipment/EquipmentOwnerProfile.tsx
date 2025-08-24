@@ -28,11 +28,11 @@ const EquipmentOwnerProfile = () => {
   const [equipmentLoading, setEquipmentLoading] = useState(true);
   const [ownerPhoneNumber, setOwnerPhoneNumber] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!loadingUser && !user) {
-      router.push('/auth/login');
-    }
-  }, [user, loadingUser, router]);
+  //useEffect(() => {
+  //  if (!loadingUser && !user) {
+   //   router.push('/auth/login');
+   // }
+ // }, [user, loadingUser, router]);
 
   useEffect(() => {
     if (loadingUser || !user) return;
