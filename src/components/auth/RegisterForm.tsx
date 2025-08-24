@@ -61,7 +61,7 @@ const RegisterForm = () => {
     phoneNumber,
     name,
     userType,
-    isVerified: false,
+    isVerified: true,
     createdAt: new Date().toISOString(), // تحويل إلى string
     updatedAt: new Date().toISOString(), // تحويل إلى string
     password, // Add password here
