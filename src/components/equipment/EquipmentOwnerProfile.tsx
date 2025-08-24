@@ -27,7 +27,7 @@ const EquipmentOwnerProfile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [equipmentLoading, setEquipmentLoading] = useState(true);
   const [ownerPhoneNumber, setOwnerPhoneNumber] = useState<string | null>(null);
-
+console.log(loadingUser , user)
   //useEffect(() => {
   //  if (!loadingUser && !user) {
    //   router.push('/auth/login');
