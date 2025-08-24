@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createDriverAction } from '@/app/driver/actions';
 import { createEquipmentOwnerAction } from '@/app/equipment-owner/actions';
 import { setCustomClaimsForUser } from '@/app/auth/actions';
-
+import { getWhatsAppGroupLink } from '@/lib/firebase/auth';
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase/config'; 
 
@@ -25,7 +25,7 @@ const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
   const [erroor, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+  const [whatsAppLink, setWhatsAppLink] = useState('');
 
 
  const [createUserWithEmailAndPassword ] = useCreateUserWithEmailAndPassword(auth);
@@ -61,7 +61,7 @@ const RegisterForm = () => {
     phoneNumber,
     name,
     userType,
-    isVerified: true,
+    isVerified: false,
     createdAt: new Date().toISOString(), // تحويل إلى string
     updatedAt: new Date().toISOString(), // تحويل إلى string
     password, // Add password here
@@ -89,7 +89,7 @@ const RegisterForm = () => {
       return;
     }
     setSuccess(`تم إنشاء حساب ${userType === 'drivers' ? 'السائق' : 'صاحب المعدات'} بنجاح`);
-    
+    setWhatsAppLink(getWhatsAppGroupLink());
   } else {
     setError('فشل في حفظ بيانات الحساب في Firestore');
   }
@@ -117,7 +117,17 @@ const RegisterForm = () => {
       {success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-right">
           <p>{success}</p>
-         
+          <p className="mt-2">
+            يرجى الانضمام إلى مجموعة الواتساب للتحقق من رقم هاتفك وتفعيل حسابك:
+            <a
+              href={whatsAppLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block mt-1 text-blue-600 hover:text-blue-800"
+            >
+              رابط مجموعة الواتساب
+            </a>
+          </p>
           <button
             onClick={() => router.push('/auth/login')}
             className="mt-3 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
