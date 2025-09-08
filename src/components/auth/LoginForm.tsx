@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { loginUserAction } from '@/app/auth/actions';
 import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase/config';
 
@@ -20,41 +19,62 @@ const LoginForm = () => {
     setCustomError('');
     setLoading(true);
 
+    const egyptianPhoneRegex = /^(010|011|012|015)\d{8}$/;
+    if (!egyptianPhoneRegex.test(phoneNumber)) {
+        setCustomError('يرجى إدخال رقم هاتف مصري صحيح مكون من 11 رقمًا.');
+        setLoading(false);
+        return;
+    }
+
     try {
+      // Convert local phone number to full E.164 format for authentication
+      const fullPhoneNumber = `+20${phoneNumber.substring(1)}`;
+      const email = `${fullPhoneNumber}@app.com`;
+
       // Step 1: Authenticate with Firebase to get a user session
-      const email = `${phoneNumber}@app.com`;
       const userCredential = await signInWithEmailAndPassword(email, password);
 
       if (!userCredential) {
+        // This case might be redundant as signInWithEmailAndPassword throws on failure
         setCustomError('فشل في تسجيل الدخول. يرجى التحقق من رقم الهاتف وكلمة المرور.');
         setLoading(false);
         return;
       }
 
-      // Step 2: Call the Server Action to verify user details in Firestore
-      const result = await loginUserAction(phoneNumber, password);
+      // On successful Firebase Auth, get the custom claims to decide redirection
+      const idTokenResult = await userCredential.user.getIdTokenResult(true); // Force refresh to get latest claims
+      const userType = idTokenResult.claims.userType;
 
-      if (result.success) {
-        // On success, redirect to the correct profile page
-        switch (result.userType) {
-          case 'drivers':
-            router.push('/driver/profile');
-            break;
-          case 'equipmentOwners':
-            router.push('/equipment-owner/profile');
-            break;
-          case 'admins':
-            router.push('/admin/dashboard');
-            break;
-          default:
-            setCustomError('نوع المستخدم غير معروف');
+      // Redirect based on userType claim
+      switch (userType) {
+        case 'drivers':
+          router.push('/driver/profile');
+          break;
+        case 'equipmentOwners':
+          router.push('/equipment-owner/profile');
+          break;
+        case 'admins':
+          router.push('/admin/dashboard');
+          break;
+        default:
+          // This case is important for users who completed registration but claims are not set yet
+          // or if they don't have a userType for some reason.
+          setCustomError('لم يتم تحديد نوع المستخدم. قد تحتاج إلى إكمال ملفك الشخصي.');
+          router.push('/auth/complete-profile'); // Redirect to complete profile
+      }
+
+    } catch (err) {
+      // Handle specific Firebase Auth errors
+      if (err instanceof Error && 'code' in err) {
+        const firebaseError = err as { code: string };
+        if (firebaseError.code === 'auth/invalid-credential' || firebaseError.code === 'auth/user-not-found' || firebaseError.code === 'auth/wrong-password') {
+          setCustomError('رقم الهاتف أو كلمة المرور غير صحيحة.');
+        } else {
+          setCustomError('حدث خطأ أثناء تسجيل الدخول: ' + err.message);
         }
       } else {
-        setCustomError(result.error || 'فشل في التحقق من بيانات المستخدم.');
+         setCustomError('حدث خطأ غير متوقع.');
       }
-    } catch (err) {
-      // This will catch errors from both Firebase auth and the server action
-      setCustomError(err instanceof Error ? err.message : 'حدث خطأ أثناء تسجيل الدخول');
     } finally {
       setLoading(false);
     }
@@ -73,7 +93,7 @@ const LoginForm = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 text-right mb-1">
-            رقم الهاتف
+            رقم الهاتف المصري
           </label>
           <input
             id="phoneNumber"
@@ -82,7 +102,8 @@ const LoginForm = () => {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
-            dir="rtl"
+            dir="ltr"
+            placeholder="01xxxxxxxxx"
           />
         </div>
 
@@ -101,6 +122,12 @@ const LoginForm = () => {
           />
         </div>
 
+        <div className="text-left">
+          <a href="/auth/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+            نسيت كلمة المرور؟
+          </a>
+        </div>
+
         <div>
           <button
             type="submit"
@@ -116,7 +143,7 @@ const LoginForm = () => {
 
       <div className="mt-4 text-center">
         <p className="text-sm text-gray-600">
-          ليس لديك حساب؟ 
+          ليس لديك حساب؟
           <a href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
             إنشاء حساب جديد
           </a>

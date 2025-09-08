@@ -4,6 +4,7 @@ import { storage } from './config';
 
 // Folder paths
 const DRIVER_PHOTOS_PATH = 'driver-photos';
+const OWNER_PHOTOS_PATH = 'owner-photos';
 const EQUIPMENT_PHOTOS_PATH = 'equipment-photos';
 
 /**
@@ -36,6 +37,43 @@ export const uploadDriverPhoto = async (driverId: string, file: File) => {
     return { success: true, url: downloadURL };
   } catch (error) {
     console.error('Error uploading driver photo:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'حدث خطأ أثناء رفع الصورة'
+    }; 
+  }
+};
+
+/**
+ * Upload an owner photo to Firebase Storage
+ * @param ownerId - The ID of the owner
+ * @param file - The file to upload
+ * @returns Object with success status and download URL or error
+ */
+export const uploadOwnerPhoto = async (ownerId: string, file: File) => {
+  try {
+    // التحقق من نوع الملف
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      throw new Error('نوع الملف غير مدعوم. يرجى استخدام صورة من نوع JPEG أو PNG أو WebP');
+    }
+
+    // التحقق من حجم الملف (5MB كحد أقصى)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new Error('حجم الصورة كبير جداً. الحد الأقصى المسموح به هو 5MB');
+    }
+
+    const fileExtension = file.name.split('.').pop();
+    const fileName = `${ownerId}_${Date.now()}.${fileExtension}`;
+    const storageRef = ref(storage, `${OWNER_PHOTOS_PATH}/${fileName}`);
+    
+    const snapshot = await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    
+    return { success: true, url: downloadURL };
+  } catch (error) {
+    console.error('Error uploading owner photo:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'حدث خطأ أثناء رفع الصورة'

@@ -55,9 +55,18 @@ const UpdatePasswordForm = () => {
     }
 
     const formData = new FormData(event.currentTarget);
+    const newPassword = formData.get('newPassword') as string;
+    const confirmNewPassword = formData.get('confirmNewPassword') as string;
+
+    if (newPassword !== confirmNewPassword) {
+      setMessage('كلمة المرور الجديدة وتأكيدها غير متطابقين.');
+      setSuccess(false);
+      setPending(false);
+      return;
+    }
 
     try {
-      const phoneNumberMatch = user.email?.match(/^(\d+)@/);
+      const phoneNumberMatch = user.email?.match(/^(\+?\d+)@/);
       const phoneNumber = phoneNumberMatch ? phoneNumberMatch[1] : null;
 
       if (!phoneNumber) {

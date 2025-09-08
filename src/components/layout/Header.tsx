@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -9,12 +10,78 @@ import { logout } from '@/lib/firebase/auth';
 
 type UserType = 'drivers' | 'equipmentOwners' | 'admins';
 
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: Array<string>;
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed',
+    platform: string
+  }>;
+  prompt(): Promise<void>;
+}
+
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [user, loading] = useAuthState(auth);
   const [userType, setUserType] = useState<UserType | null>(null);
+  const [claimsLoading, setClaimsLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+
+  // All hooks are now at the top level.
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  // Auth state, user type, and redirection logic effect
+  useEffect(() => {
+    const unsubscribe = auth.onIdTokenChanged(async (currentUser) => {
+      setClaimsLoading(true);
+      if (currentUser) {
+        const idTokenResult = await currentUser.getIdTokenResult(true);
+        const newUserType = idTokenResult.claims.userType as UserType | null;
+        setUserType(newUserType);
+
+        if (newUserType) {
+          localStorage.setItem('userType', newUserType);
+        } else {
+          localStorage.removeItem('userType');
+          const unauthenticatedPaths = ['/auth/complete-profile', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password'];
+          if (!unauthenticatedPaths.includes(pathname)) {
+            const phone = currentUser.phoneNumber;
+            if (phone) {
+              const localPhone = phone.startsWith('+20') ? '0' + phone.substring(3) : phone;
+              router.push(`/auth/complete-profile?phoneNumber=${encodeURIComponent(localPhone)}`);
+            } else {
+              router.push('/auth/register');
+            }
+          }
+        }
+      } else {
+        setUserType(null);
+        localStorage.removeItem('userType');
+      }
+      setClaimsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [pathname, router]); // Added missing dependencies
+
+  const handleInstall = () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+    }
+  };
 
   // Navigation items
   const navItems = [
@@ -22,32 +89,6 @@ const Header = () => {
     { href: '/equipment', label: 'المعدات' },
     { href: '/drivers', label: 'السائقين' },
   ];
-
-  // Auth state and user type effect
-  useEffect(() => {
-    const storedUserType = localStorage.getItem('userType');
-    if (storedUserType) {
-      setUserType(storedUserType as UserType);
-    }
-
-    const unsubscribe = auth.onIdTokenChanged(async (currentUser) => {
-      if (currentUser) {
-        const idTokenResult = await currentUser.getIdTokenResult();
-        const newUserType = idTokenResult.claims.userType as UserType || null;
-        setUserType(newUserType);
-        if (newUserType) {
-          localStorage.setItem('userType', newUserType);
-        } else {
-          localStorage.removeItem('userType');
-        }
-      } else {
-        setUserType(null);
-        localStorage.removeItem('userType');
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const handleLogout = () => {
     logout();
@@ -62,11 +103,17 @@ const Header = () => {
       case 'equipmentOwners':
         return '/equipment-owner/profile';
       case 'admins':
-        return '/admin/dashboard'; // Assuming an admin dashboard link
+        return '/admin/dashboard';
       default:
         return '/auth/login';
     }
   };
+
+  // Conditional rendering check is now just before the return statement.
+  const noHeaderPaths = ['/auth/complete-profile'];
+  if (noHeaderPaths.includes(pathname)) {
+    return null;
+  }
 
   // Render navigation link
   const renderNavLink = (href: string, label: string, mobile = false) => (
@@ -85,7 +132,7 @@ const Header = () => {
 
   // Render auth buttons
   const renderAuthButtons = (mobile = false) => {
-    if (loading) {
+    if (loading || claimsLoading) {
       return null; // Show nothing or a loading spinner while auth state is loading
     }
 
@@ -135,10 +182,10 @@ const Header = () => {
           {/* Logo and desktop nav */}
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="text-xl font-bold text-blue-600 flex-shrink-0 me-4">
-               Link
+              <Link href="/" className="flex-shrink-0 flex items-center">
+                <Image src="/images/link.jpg" alt="Link Logo" width={40} height={40} className="h-10 w-auto" />
               </Link>
-                  <div className="flex justify-between items-center ">
+                  <div className="hidden md:flex justify-between items-center ">
 
               <Link href="/equipment" className="text-xl font-bold px-4 hover:bg-gray-50 text-blue-600 ">
            المعدات
@@ -159,6 +206,14 @@ const Header = () => {
 
           {/* Desktop auth buttons */}
           <div className="hidden md:flex md:items-center md:space-x-4 rtl:space-x-reverse">
+            {installPrompt && (
+              <button
+                onClick={handleInstall}
+                className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+              >
+                تثبيت التطبيق
+              </button>
+            )}
             {renderAuthButtons()}
           </div>
 
@@ -195,6 +250,14 @@ const Header = () => {
   ))}
 </div>
           <div className="pt-4 pb-3 border-t border-gray-200 space-y-1">
+            {installPrompt && (
+              <button
+                onClick={handleInstall}
+                className="block w-full text-right px-3 py-2 border-r-4 border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+              >
+                تثبيت التطبيق
+              </button>
+            )}
             {renderAuthButtons(true)}
           </div>
         </div>

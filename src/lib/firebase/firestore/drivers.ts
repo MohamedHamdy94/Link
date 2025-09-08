@@ -16,7 +16,11 @@ const DRIVERS_COLLECTION = 'drivers';
 
 export const getDrivers = async () => {
   try {
-    const q = query(collection(db, DRIVERS_COLLECTION), where('isVerified', '==', true));
+    const q = query(
+      collection(db, DRIVERS_COLLECTION), 
+      where('isVerified', '==', true),
+      where('isAvailable', '==', true)
+    );
     const querySnapshot = await getDocs(q);
 
     const drivers: Driver[] = [];
@@ -52,7 +56,23 @@ export const getDriver = async (driverId: string) => {
   try {
     const driverDoc = await getDoc(doc(db, DRIVERS_COLLECTION, driverId));
     if (driverDoc.exists()) {
-      return { success: true, data: driverDoc.data() };
+      const data = driverDoc.data();
+      const driver: Driver = {
+        id: driverDoc.id,
+        name: data.name,
+        age: data.age,
+        equipmentType: data.equipmentType,
+        hasLicense: data.hasLicense,
+        isAvailable: data.isAvailable,
+        photoUrl: data.photoUrl,
+        phoneNumber: data.phoneNumber,
+        isVerified: data.isVerified,
+        userType: data.userType,
+        address: data.address,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      };
+      return { success: true, data: driver };
     } else {
       return { success: false, error: 'Driver not found' };
     }

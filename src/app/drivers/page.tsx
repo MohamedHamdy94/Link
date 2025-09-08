@@ -2,8 +2,8 @@ import DriversList from '@/components/driver/DriversList';
 import { getDrivers } from '@/lib/firebase/firestore';
 import { Driver } from '@/lib/interface';
 
-// Revalidate the data every hour
-export const revalidate = 300;
+// Revalidate the data every 60 seconds
+export const revalidate = 60;
 
 export default async function DriversListPage() {
   const { data: drivers, error } = await getDrivers();

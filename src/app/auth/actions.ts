@@ -7,39 +7,8 @@ import { getAdminAuth } from '@/lib/firebase/admin';
 
 type UserType = 'drivers' | 'equipmentOwners' | 'admins';
 
-interface AuthResponse {
-  success: boolean;
-  userType?: UserType;
-  error?: string;
-}
 
-export const loginUserAction = async (phoneNumber: string, password: string): Promise<AuthResponse> => {
-  try {
-    const userTypes: UserType[] = ['drivers', 'equipmentOwners', 'admins'];
-    
-    for (const userType of userTypes) {
-      const snapshot = await getDoc(doc(db, userType, phoneNumber));
-      
-      if (snapshot.exists()) {
-        const userData = snapshot.data();
-        // Ensure password exists before comparing
-        if (userData.password) {
-          const isPasswordValid = await bcrypt.compare(password, userData.password);
-          if (isPasswordValid) {
-            // IMPORTANT: Do not manage session here. 
-            // The login logic in the client will handle setting the session after a successful response.
-            return { success: true, userType };
-          }
-        }
-      }
-    }
 
-    return { success: false, error: 'رقم الهاتف أو كلمة المرور غير صحيحة' };
-  } catch (error) {
-    console.error('Login action error:', error);
-    return { success: false, error: 'حدث خطأ أثناء تسجيل الدخول' };
-  }
-};
 
 interface ClaimsResult {
   success: boolean;
@@ -94,6 +63,64 @@ export const updatePasswordAction = async (
     return { success: true, message: 'تم تحديث كلمة المرور بنجاح' };
   } catch (error) {
     console.error('Error updating password:', error);
-    return { success: false, error: 'فشل في تحديث كلمة المرور' };
+    return { success: false, error: 'حدث خطأ أثناء تسجيل الدخول' };
+  }
+};
+
+export const checkUserExistsByPhone = async (phoneNumber: string): Promise<{ exists: boolean }> => {
+  try {
+    const userTypes: UserType[] = ['drivers', 'equipmentOwners', 'admins'];
+    for (const userType of userTypes) {
+      const userDoc = await getDoc(doc(db, userType, phoneNumber));
+      if (userDoc.exists()) {
+        return { exists: true };
+      }
+    }
+    return { exists: false };
+  } catch (error) {
+    console.error('Error checking user existence:', error);
+    return { exists: false }; // Fail safely
+  }
+};
+
+export const resetPasswordAction = async (phoneNumber: string, newPassword: string): Promise<{ success: boolean; error?: string; }> => {
+  try {
+    const userTypes: UserType[] = ['drivers', 'equipmentOwners', 'admins'];
+    let userDoc = null;
+    let userType: UserType | null = null;
+
+    for (const type of userTypes) {
+      const docRef = doc(db, type, phoneNumber);
+      const snapshot = await getDoc(docRef);
+      if (snapshot.exists()) {
+        userDoc = snapshot;
+        userType = type;
+        break;
+      }
+    }
+
+    if (!userDoc || !userType) {
+      return { success: false, error: 'المستخدم غير موجود.' };
+    }
+
+    const userData = userDoc.data();
+    const uid = userData.uid;
+
+    if (!uid) {
+      return { success: false, error: 'UID للمستخدم غير موجود.' };
+    }
+
+    // 1. Update password in Firebase Auth
+    await getAdminAuth().updateUser(uid, { password: newPassword });
+
+    // 2. Update password hash in Firestore
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await updateDoc(userDoc.ref, { password: hashedPassword, updatedAt: new Date().toISOString() });
+
+    return { success: true };
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    return { success: false, error: 'حدث خطأ أثناء إعادة تعيين كلمة المرور.' };
   }
 };

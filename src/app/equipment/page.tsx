@@ -4,7 +4,7 @@ import { getEquipments } from '@/lib/firebase/firestore/equipments';
 import { Equipment } from '@/lib/interface';
 
 // Revalidate the data every hour
-export const revalidate = 300;
+export const revalidate = 60;
 
 export default async function EquipmentPage() {
   const { data: equipments, error } = await getEquipments();

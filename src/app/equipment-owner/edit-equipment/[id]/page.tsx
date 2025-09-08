@@ -8,32 +8,22 @@ export default async function EditEquipmentPage ({ params }: { params: Promise<{
 
 const id = (await params).id;
 
-  const equipmentData = await getEquipmentById(id);
+  const { data, success, error } = await getEquipmentById(id);
 
-  if (!equipmentData.success || !equipmentData.data) {
-    return <div className="text-center py-10">لم يتم العثور على المعدة</div>;
+  if (!success || !data) {
+    return <div className="text-center py-10">{error || 'لم يتم العثور على المعدة'}</div>;
   }
 
-  const data = equipmentData.data;
-
-const serializeEquipment = (data:Equipment): Equipment => {
-  return {
-    fbId: data.fbId,
-    id: data.id,
-    name: data.name,
-    description: data.description || '',
-    price: data.price,
-    status: data.status,
-    equipmentType: data.equipmentType,
-    photoUrl: data.photoUrl || '',
-    ownerId: data.ownerId,
-    ownerPhone: data.ownerPhone || '',
-    createdAt: data.createdAt,
-    updatedAt: data.updatedAt
+  // Serialization is important to ensure only plain objects are passed from Server to Client Components
+  const serializeEquipment = (equipment: Equipment): Equipment => {
+    return {
+      ...equipment,
+      createdAt: new Date(equipment.createdAt).toISOString(),
+      updatedAt: new Date(equipment.updatedAt).toISOString(),
+    };
   };
-};
 
+  const serializedData = serializeEquipment(data);
 
-const serializedData = serializeEquipment(data);
-return <EditEquipmentClient initialData={serializedData} />;
+  return <EditEquipmentClient equipment={serializedData} />;
 }

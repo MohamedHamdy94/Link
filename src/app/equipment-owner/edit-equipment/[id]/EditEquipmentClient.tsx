@@ -1,352 +1,284 @@
 'use client';
 
+import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
-
-import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { updateEquipment } from '@/lib/firebase/firestore';
 import { uploadEquipmentPhoto, deleteFileByUrl } from '@/lib/firebase/storage';
-import { useRouter } from 'next/navigation';
+import { deleteEquipmentAction } from '@/app/equipment-owner/actions';
 import { Equipment } from '@/lib/interface';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/lib/firebase/config'; 
+import imageCompression from 'browser-image-compression';
+
+const MAX_PHOTOS = 4;
 
 interface EditEquipmentClientProps {
-  initialData: Equipment;
+  equipment: Equipment;
 }
 
-export default function EditEquipmentClient({ initialData }: EditEquipmentClientProps) {
+export default function EditEquipmentClient({ equipment }: EditEquipmentClientProps) {
   const router = useRouter();
-    const [user, loading] = useAuthState(auth);
   
-  const [looading, setLoading] = useState(!initialData);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState(initialData.photoUrl || '');
-
   const [formData, setFormData] = useState({
-    name: initialData.name,
-    description: initialData.description || '',
-    price: initialData.price.toString(),
-    status: initialData.status,
-    equipmentType: initialData.equipmentType,
+    name: equipment.name,
+    description: equipment.description || '',
+    price: equipment.price?.toString() || '',
+    status: equipment.status,
+    equipmentType: equipment.equipmentType,
   });
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login');
+  const [priceOnRequest, setPriceOnRequest] = useState(equipment.priceOnRequest || false);
+  const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>(equipment.photoUrls || []);
+  const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([]);
+  const [newPhotoPreviews, setNewPhotoPreviews] = useState<string[]>([]);
+  
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [isProcessingImages, setIsProcessingImages] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const handlePhotoChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      const totalPhotos = existingPhotoUrls.length + newPhotoFiles.length + files.length;
+
+      if (totalPhotos > MAX_PHOTOS) {
+        setError(`لا يمكن رفع أكثر من ${MAX_PHOTOS} صور.`);
+        return;
+      }
+
+      setError('');
+      setIsProcessingImages(true);
+      const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true };
+
+      const compressedFiles: File[] = [];
+      const previews: string[] = [];
+
+      try {
+        for (const file of files) {
+          const compressedFile = await imageCompression(file, options);
+          compressedFiles.push(compressedFile);
+          previews.push(URL.createObjectURL(compressedFile));
+        }
+        setNewPhotoFiles(prev => [...prev, ...compressedFiles]);
+        setNewPhotoPreviews(prev => [...prev, ...previews]);
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        setError('حدث خطأ أثناء ضغط إحدى الصور.');
+      } finally {
+        setIsProcessingImages(false);
+      }
     }
-  }, [user, loading, router]);
+  }, [existingPhotoUrls.length, newPhotoFiles.length]);
 
-  useEffect(() => {
+  const handleRemoveExistingPhoto = (urlToRemove: string) => {
+    setExistingPhotoUrls(prev => prev.filter(url => url !== urlToRemove));
+  };
 
-
-    if (!initialData) {
-      setError('فشل في تحميل بيانات المعدة');
-      setLoading(false);
-    }
-  }, [initialData, router]);
-
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.match('image.*')) {
-      setError('يجب أن يكون الملف من نوع صورة');
-      return;
-    }
-
-    if (file.size > 2 * 1024 * 1024) {
-      setError('يجب أن يكون حجم الصورة أقل من 2MB');
-      return;
-    }
-
-    setPhotoFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPhotoPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+  const handleRemoveNewPhoto = (index: number) => {
+    setNewPhotoFiles(prev => prev.filter((_, i) => i !== index));
+    setNewPhotoPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const validateForm = (): boolean => {
-    if (!formData.name.trim()) {
-      setError('اسم المعدة مطلوب');
-      return false;
+  const handlePriceOnRequestChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = e.target.checked;
+    setPriceOnRequest(isChecked);
+    if (isChecked) {
+      setFormData(prev => ({ ...prev, price: '' }));
     }
-
-    if (!formData.price || isNaN(parseFloat(formData.price))) {
-      setError('السعر يجب أن يكون رقمًا صحيحًا');
-      return false;
-    }
-
-    if (!formData.equipmentType) {
-      setError('نوع المعدة مطلوب');
-      return false;
-    }
-
-    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    
-    if (!validateForm()) {
+
+    if (!priceOnRequest && !formData.price) {
+      setError('يجب إدخال السعر أو تحديد "السعر عند الطلب".');
       return;
     }
-  
-    // التحقق من وجود fbId
-    if (!initialData.fbId) {
-      setError('معرف المعدة غير موجود');
-      return;
-    }
-  
+
     setSaving(true);
-  
-    if (!user) {
-      router.push('/auth/login');
-      return;
-    }
-  
+
     try {
-      let photoUrl = initialData.photoUrl || '';
-      const oldPhotoUrl = initialData.photoUrl; // حفظ رابط الصورة القديمة
-
-      if (photoFile) {
-        const uploadResult = await uploadEquipmentPhoto(initialData.ownerId, initialData.fbId, photoFile);
-        if (!uploadResult.success || !uploadResult.url) {
-          setError('فشل في رفع الصورة');
-          setSaving(false);
-          return;
+      // 1. Upload new photos in parallel
+      const uploadPromises = newPhotoFiles.map(file => 
+        uploadEquipmentPhoto(equipment.ownerId, equipment.id, file)
+      );
+      const uploadResults = await Promise.all(uploadPromises);
+      const newUploadedUrls = uploadResults.map(result => {
+        if (result.success && result.url) {
+          return result.url;
         }
-        photoUrl = uploadResult.url;
+        throw new Error('فشل في رفع إحدى الصور الجديدة.');
+      });
 
-        // حذف الصورة القديمة إذا كانت موجودة ومختلفة عن الجديدة
-        if (oldPhotoUrl && oldPhotoUrl !== photoUrl) {
-          const deleteResult = await deleteFileByUrl(oldPhotoUrl);
-          if (!deleteResult.success) {
-            console.warn('Failed to delete old photo:', deleteResult.error);
-            // لا نوقف العملية هنا، لأن الصورة الجديدة تم رفعها بنجاح
-          }
-        }
+      // 2. Determine which old photos were deleted
+      const initialUrls = equipment.photoUrls || [];
+      const deletedUrls = initialUrls.filter(url => !existingPhotoUrls.includes(url));
+
+      // 3. Delete the removed photos from storage in parallel
+      const deletePromises = deletedUrls.map(url => deleteFileByUrl(url));
+      await Promise.all(deletePromises);
+
+      // 4. Create the final list of photo URLs
+      const finalPhotoUrls = [...existingPhotoUrls, ...newUploadedUrls];
+
+      if (finalPhotoUrls.length === 0) {
+        setError('يجب أن تحتوي المعدة على صورة واحدة على الأقل.');
+        setSaving(false);
+        return;
       }
-  
-      const updateData: Equipment = {
-        ...initialData,
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        status: formData.status as 'rent' | 'sale' | 'work',
-        equipmentType: formData.equipmentType,
-        photoUrl,
+
+      // 5. Update the equipment document in Firestore
+      const updateData: Partial<Equipment> = {
+        ...formData,
+        price: priceOnRequest ? null : parseFloat(formData.price),
+        priceOnRequest,
+        photoUrls: finalPhotoUrls,
         updatedAt: new Date().toISOString(),
       };
-  
-      // نعلم TypeScript أن fbId موجود لأنه تم التحقق منه مسبقاً
-      const updateResult = await updateEquipment(initialData.fbId, updateData);
-  
+
+      const updateResult = await updateEquipment(equipment.id, updateData);
+
       if (updateResult.success) {
-        setSuccess('تم تحديث بيانات المعدة بنجاح');
-        setTimeout(() => {
-          setSuccess('');
-          router.push('/equipment-owner/profile'); // إعادة التوجيه هنا
-        }, 1500); // يمكن تعديل التأخير حسب الحاجة
+        setSuccess('تم تحديث البيانات بنجاح. ستظهر التغييرات في القائمة العامة خلال دقيقة.');
+        setTimeout(() => router.push('/equipment-owner/profile'), 1500);
       } else {
-        setError(updateResult.error?.toString() || 'فشل في تحديث البيانات');
+        throw new Error('فشل في تحديث البيانات.');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
-      console.error(err);
     } finally {
       setSaving(false);
     }
   };
 
-  if (looading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (!initialData) {
-    return (
-      <div className="bg-white p-8 rounded-lg shadow-md max-w-3xl mx-auto text-center">
-        <p className="text-red-500 mb-4">لم يتم العثور على المعدة</p>
-        <button
-          onClick={() => router.back()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          العودة
-        </button>
-      </div>
-    );
-  }
+  const handleDeleteEquipment = async () => {
+    if (!window.confirm('هل أنت متأكد من رغبتك في حذف هذه المعدة؟ سيتم حذف جميع صورها وبياناتها بشكل نهائي.')) {
+      return;
+    }
+    setDeleting(true);
+    setError('');
+    try {
+      const result = await deleteEquipmentAction(equipment.id);
+      if (result.success) {
+        router.push('/equipment-owner/profile');
+      } else {
+        throw new Error(result.error || 'فشل في حذف المعدة.');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-md max-w-3xl mx-auto">
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-          {success}
-        </div>
-      )}
+    <div className="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">تعديل المعدة</h2>
+      {error && <div className="mb-4 p-4 bg-red-100 text-red-700 rounded text-right">{error}</div>}
+      {success && <div className="mb-4 p-4 bg-green-100 text-green-700 rounded text-right">{success}</div>}
+      {isProcessingImages && <div className="mb-4 p-4 bg-blue-100 text-blue-700 rounded text-right">جاري معالجة الصور...</div>}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="md:w-1/3">
-            <div className="relative w-full aspect-w-16 aspect-h-9 mx-auto overflow-hidden rounded-lg bg-gray-100">
-              {photoPreview ? (
-                <Image
-                  src={photoPreview}
-                  alt="صورة المعدة"
-                  width={500}
-                  height={500}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">
-                  لا توجد صورة
-                </div>
-              )}
-            </div>
-            <label className="block mt-4 text-center">
-              <span className="sr-only">اختر صورة</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoChange}
-                className="block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-md file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-blue-50 file:text-blue-700
-                  hover:file:bg-blue-100"
-              />
-            </label>
-          </div>
-
-          <div className="md:w-2/3 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 text-right mb-1">
-                اسم المعدة
-              </label>
-              <input
-                type="text"
-                name="name"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                value={formData.name}
-                onChange={handleChange}
-                dir="rtl"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 text-right mb-1">
-                الوصف
-              </label>
-              <textarea
-                name="description"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                rows={3}
-                value={formData.description}
-                onChange={handleChange}
-                dir="rtl"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 text-right mb-1">
-                  السعر
-                </label>
-                <input
-                  type="number"
-                  name="price"
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                  value={formData.price}
-                  onChange={handleChange}
-                  dir="rtl"
-                />
+        {/* Photo Management Section */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 text-right mb-2">الصور الحالية</label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {existingPhotoUrls.map((url) => (
+              <div key={url} className="relative group">
+                <Image src={url} alt="صورة حالية" width={200} height={200} className="w-full h-28 object-cover rounded-md" />
+                <button type="button" onClick={() => handleRemoveExistingPhoto(url)} className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs leading-none opacity-50 group-hover:opacity-100">
+                  &times;
+                </button>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 text-right mb-1">
-                  حالة المعدة
-                </label>
-                <select
-                  name="status"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                  value={formData.status}
-                  onChange={handleChange}
-                >
-                  <option value="rent">للإيجار</option>
-                  <option value="sale">للبيع</option>
-                  <option value="work">تعمل الان (غير متاح)</option>
-                </select>
+            ))}
+            {newPhotoPreviews.map((preview, index) => (
+              <div key={index} className="relative group">
+                <Image src={preview} alt={`معاينة ${index + 1}`} width={200} height={200} className="w-full h-28 object-cover rounded-md border-2 border-blue-400" />
+                <button type="button" onClick={() => handleRemoveNewPhoto(index)} className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs leading-none opacity-50 group-hover:opacity-100">
+                  &times;
+                </button>
               </div>
-            </div>
-
-            <div>
-              <label htmlFor="equipmentType" className="block text-sm font-medium text-gray-700 text-right mb-1">
-                نوع المعدة *
-              </label>
-              <select
-                id="equipmentType"
-                name="equipmentType"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                value={formData.equipmentType}
-                onChange={handleChange}
-                dir="rtl"
-              >
-                <option value="">اختر نوع المعدة</option>
-                <option value="حفار">حفار</option>
-                <option value="سيزر">سيزر</option>
-                <option value="لودر">لودر</option>
-                <option value="ونش">ونش</option>
-                <option value="مانلفت">مانلفت</option>
-                <option value="فورك"> فورك </option>
-              </select>
-            </div>
+            ))}
           </div>
+          {(existingPhotoUrls.length + newPhotoFiles.length) < MAX_PHOTOS && (
+            <div className="mt-4">
+              <label className="block w-full text-center px-3 py-4 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:bg-gray-50">
+                <span className="block text-sm text-gray-600">إضافة المزيد من الصور (بحد أقصى {MAX_PHOTOS})</span>
+                <input type="file" accept="image/*" multiple onChange={handlePhotoChange} className="hidden" disabled={isProcessingImages} />
+              </label>
+            </div>
+          )}
         </div>
 
-        <div className="flex justify-end space-x-4 rtl:space-x-reverse">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-          >
-            إلغاء
+        {/* Form Fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 text-right mb-1">اسم المعدة</label>
+            <input type="text" name="name" required className="w-full px-3 py-2 border border-gray-300 rounded-md text-right" value={formData.name} onChange={handleChange} dir="rtl" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 text-right mb-1">نوع المعدة</label>
+            <select name="equipmentType" required className="w-full px-3 py-2 border border-gray-300 rounded-md text-right" value={formData.equipmentType} onChange={handleChange} dir="rtl">
+              <option value="">اختر نوع المعدة</option>
+              <option value="حفار">حفار</option>
+              <option value="سيزر">سيزر</option>
+              <option value="لودر">لودر</option>
+              <option value="ونش">ونش</option>
+              <option value="مانلفت">مانلفت</option>
+              <option value="فورك">فورك</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 text-right mb-1">السعر</label>
+            <input type="number" name="price" required={!priceOnRequest} disabled={priceOnRequest} className={`w-full px-3 py-2 border border-gray-300 rounded-md text-right ${priceOnRequest ? 'bg-gray-100' : ''}`} value={formData.price} onChange={handleChange} dir="rtl" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 text-right mb-1">الحالة</label>
+            <select name="status" className="w-full px-3 py-2 border border-gray-300 rounded-md text-right" value={formData.status} onChange={handleChange}>
+              <option value="rent">للإيجار</option>
+              <option value="sale">للبيع</option>
+              <option value="work">تعمل الان (غير متاح)</option>
+            </select>
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 text-right mb-1">الوصف</label>
+            <textarea name="description" className="w-full px-3 py-2 border border-gray-300 rounded-md text-right" rows={4} value={formData.description} onChange={handleChange} dir="rtl" />
+          </div>
+           <div className="flex items-center justify-end">
+                <label htmlFor="priceOnRequest" className="mr-2 block text-sm text-gray-700">
+                    السعر عند الطلب (تواصل معي)
+                </label>
+                <input 
+                    id="priceOnRequest" 
+                    type="checkbox" 
+                    checked={priceOnRequest}
+                    onChange={handlePriceOnRequestChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
+                />
+            </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-between items-center mt-6 pt-6 border-t">
+          <button type="button" onClick={handleDeleteEquipment} disabled={deleting} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50">
+            {deleting ? 'جاري الحذف...' : 'حذف المعدة'}
           </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 ${
-              saving ? 'opacity-70 cursor-not-allowed' : ''
-            }`}
-          >
-            {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-          </button>
+          <div className="flex gap-4">
+            <button type="button" onClick={() => router.back()} className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+              إلغاء
+            </button>
+            <button type="submit" disabled={saving || isProcessingImages} className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50`}>
+              {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+            </button>
+          </div>
         </div>
       </form>
     </div>

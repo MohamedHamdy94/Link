@@ -19,10 +19,10 @@ export const createDriverAction = async (driverId: string, driverData: Driver) =
     await setDoc(doc(db, DRIVERS_COLLECTION, driverId), {
       ...driverData,
       password: hashedPassword,
-      isVerified: false,
+      isVerified: true,
       userType: 'drivers',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     });
 
     return { success: true };

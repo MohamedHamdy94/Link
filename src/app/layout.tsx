@@ -1,3 +1,6 @@
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/react';
+import BottomNavBar from '@/components/layout/BottomNavBar';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Inter, Tajawal } from 'next/font/google';
@@ -16,7 +19,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'موقع Link',
+  title: 'موقع واصل',
   description: 'منصة لربط سائقي المعدات بأصحاب المعدات',
 };
 
@@ -27,10 +30,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body className={`${tajawal.variable} ${inter.variable} font-tajawal min-h-screen flex flex-col`}>
         <Header />
         <main className="flex-grow">{children}</main>
         <Footer />
+        <BottomNavBar />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

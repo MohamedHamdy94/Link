@@ -5,6 +5,9 @@ import { db } from '@/lib/firebase/config';
 import { OwnerData, UpdateResult } from '@/lib/interface';
 import { isPhoneTaken } from '@/lib/firebase/firestore/utils';
 import bcrypt from 'bcryptjs';
+import { revalidatePath } from 'next/cache';
+import { getAdminAuth } from '@/lib/firebase/admin';
+import { deleteEquipment, updateEquipmentOwnerDetailsInEquipments } from '@/lib/firebase/firestore/equipments';
 
 const EQUIPMENT_OWNERS_COLLECTION = 'equipmentOwners';
 
@@ -20,27 +23,29 @@ export const createEquipmentOwnerAction = async (
   ownerId: string,
   ownerData: OwnerData
 ): Promise<UpdateResult<null>> => {
+  console.log('createEquipmentOwnerAction: ownerId', ownerId);
+  console.log('createEquipmentOwnerAction: ownerData', ownerData);
   try {
-    if (await isPhoneTaken(ownerData.phoneNumber)) {
+    const isTaken = await isPhoneTaken(ownerData.phoneNumber);
+    console.log('createEquipmentOwnerAction: isPhoneTaken result', isTaken);
+    if (isTaken) {
       return { success: false, error: 'رقم الجوال مستخدم من قبل' };
     }
 
     const hashedPassword = await hashPassword(ownerData.password);
 
-    const dataToSave: Partial<OwnerData> & { password?: string; createdAt: string; updatedAt: string; } = {
-      name: ownerData.name,
-      phoneNumber: ownerData.phoneNumber,
-      isVerified: false,
+    const dataToSave = {
+      ...ownerData,
+      password: hashedPassword,
+      isVerified: true,
       userType: 'equipmentOwners',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
-    if (hashedPassword) {
-      dataToSave.password = hashedPassword;
-    }
-
+    console.log('createEquipmentOwnerAction: Saving data', dataToSave);
     await setDoc(doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId), dataToSave);
+    console.log('createEquipmentOwnerAction: setDoc successful');
 
     return { success: true };
   } catch (error) {
@@ -59,6 +64,11 @@ export const updateEquipmentOwnerAction = async (
 ): Promise<UpdateResult<OwnerData>> => {
   try {
     const ownerRef = doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId);
+    const ownerDoc = await getDoc(ownerRef); // Get the document first
+
+    if (!ownerDoc.exists()) { // Check if it exists
+      return { success: false, error: 'بيانات المالك غير موجودة. يرجى إكمال ملفك الشخصي.' };
+    }
 
     const updatePayload: Partial<OwnerData> & { updatedAt: string } = {
       ...data,
@@ -74,9 +84,25 @@ export const updateEquipmentOwnerAction = async (
 
     await updateDoc(ownerRef, updatePayload);
 
-    const updatedDoc = await getDoc(ownerRef);
-    if (!updatedDoc.exists()) {
-      return { success: false, error: 'المستخدم غير موجود' };
+    // Propagate owner name and photo changes to their equipment
+        const detailsToPropagate: { ownerName?: string; ownerPhotoUrl?: string; ownerAddress?: string } = {};
+    if (data.name) {
+      detailsToPropagate.ownerName = data.name;
+    }
+    if (data.photoUrl) {
+      detailsToPropagate.ownerPhotoUrl = data.photoUrl;
+    }
+    if (data.address) {
+      detailsToPropagate.ownerAddress = data.address;
+    }
+
+    if (Object.keys(detailsToPropagate).length > 0) {
+      await updateEquipmentOwnerDetailsInEquipments(ownerId, detailsToPropagate);
+    }
+
+    const updatedDoc = await getDoc(ownerRef); // Re-fetch to get updated data
+    if (!updatedDoc.exists()) { // This check might be redundant if the first one passes, but good for safety
+      return { success: false, error: 'المستخدم غير موجود بعد التحديث (خطأ غير متوقع)' };
     }
 
     const updatedData = updatedDoc.data();
@@ -86,6 +112,7 @@ export const updateEquipmentOwnerAction = async (
       data: {
         id: updatedDoc.id,
         name: updatedData.name,
+        address: updatedData.address,
         phoneNumber: updatedData.phoneNumber,
         photoUrl: updatedData.photoUrl,
         isVerified: updatedData.isVerified,
@@ -101,7 +128,7 @@ export const updateEquipmentOwnerAction = async (
     };
   } catch (error) {
     console.error('Error updating equipment owner:', error);
-    return { success: false, error: 'حدث خطأ غير متوقع' };
+    return { success: false, error: error instanceof Error ? error.message : 'حدث خطأ غير متوقع' };
   }
 };
 
@@ -127,5 +154,78 @@ export const verifyAndUpdateEquipmentOwnerAction = async (
   } catch (error) {
     console.error('Error verifying and updating:', error);
     return { success: false, error: 'حدث خطأ أثناء التحقق والتحديث' };
+  }
+};
+
+// ✅ حذف معدة
+export const deleteEquipmentAction = async (equipmentId: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const result = await deleteEquipment(equipmentId);
+    if (!result.success) {
+      throw new Error(result.error as string);
+    }
+    
+    // Revalidate the profile page to show the updated list of equipment
+    revalidatePath('/equipment-owner/profile');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error in deleteEquipmentAction:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'فشل في حذف المعدة',
+    };
+  }
+};
+
+// ✅ تغيير كلمة مرور مالك معدات
+export const changeEquipmentOwnerPasswordAction = async (
+  ownerId: string,
+  oldPassword: string,
+  newPassword: string
+): Promise<UpdateResult<null>> => {
+  console.log('Changing password for owner:', ownerId);
+  console.log('Old password provided:', oldPassword);
+  console.log('New password provided:', newPassword);
+  try {
+    const ownerRef = doc(db, EQUIPMENT_OWNERS_COLLECTION, ownerId);
+    const ownerDoc = await getDoc(ownerRef);
+
+    if (!ownerDoc.exists()) {
+      return { success: false, error: 'المستخدم غير موجود' };
+    }
+
+    const ownerData = ownerDoc.data();
+    console.log('Password hash stored in DB:', ownerData.password);
+    const isMatch = await bcrypt.compare(oldPassword, ownerData.password);
+    console.log('Password match result:', isMatch);
+
+    if (!isMatch) {
+      return { success: false, error: 'كلمة المرور القديمة غير صحيحة' };
+    }
+
+    // Update password in Firebase Auth
+    const adminAuth = getAdminAuth();
+    await adminAuth.updateUser(ownerData.uid, {
+      password: newPassword,
+    });
+
+    const hashedNewPassword = await hashPassword(newPassword);
+    console.log('New password hashed:', hashedNewPassword);
+
+    console.log('Updating document with new password...');
+    await updateDoc(ownerRef, {
+      password: hashedNewPassword,
+      updatedAt: new Date().toISOString(),
+    });
+    console.log('Password updated successfully.');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error changing equipment owner password:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'حدث خطأ غير متوقع',
+    };
   }
 };

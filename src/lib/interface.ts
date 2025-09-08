@@ -10,6 +10,7 @@ export interface Driver {
   isAvailable: boolean;
   photoUrl?: string;
   phoneNumber: string;
+  address?: string; // Add address field
   isVerified: boolean;
   userType: string;
   password?: string; // لا ينصح بتخزينه في الواجهة الأمامية
@@ -21,6 +22,7 @@ export interface OwnerData {
   photoUrl?: string; // Optional string for the photo URL
   name?: string; // Optional string for the owner's name
   phoneNumber: string; // Optional string for the phone number
+  address?: string; // Add address field
   isVerified?: boolean; // Optional boolean for the verification status
   equipmentDetails?: string; // Optional string for the equipment details
   userType: string;
@@ -32,6 +34,7 @@ export interface User {
   id: string | undefined;
   name: string;
   phoneNumber: string;
+  address?: string;
   userType: 'drivers' | 'equipmentOwners';
   isVerified: boolean;
   createdAt: string;
@@ -56,12 +59,16 @@ export interface Equipment {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: number | null;
+  priceOnRequest: boolean;
   status: string;
   equipmentType: string;
-  photoUrl: string;
+  photoUrls: string[];
   ownerId: string;
   ownerPhone: string;
+  ownerName: string;
+  ownerPhotoUrl?: string;
+  ownerAddress?: string;
   createdAt: string; 
   updatedAt: string;
 }
