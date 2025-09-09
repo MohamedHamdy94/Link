@@ -40,7 +40,7 @@ const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
             <span className="text-gray-600 dark:text-gray-300 text-sm">{driver.age} سنة</span>
             {driver.hasLicense && (
               <span className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-semibold px-2 py-1 rounded">
-                يحمل رخصة
+                يحمل رخصة اصلية
               </span>
             )}
           </div>
