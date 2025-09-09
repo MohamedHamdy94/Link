@@ -20,7 +20,7 @@ export default function Home() {
               alt="Welcome Image"
               width={250} 
               height={150}
-              className="rounded-lg shadow-lg"
+              
               priority
             />
           </div>
