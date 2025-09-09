@@ -30,7 +30,7 @@ const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
         </div>
 
         {/* محتوى البطاقة */}
-        <div className="p-4 flex-grow flex flex-col justify-between">
+        <div className="p-2 flex-grow flex flex-col justify-between">
           <div>
             <h3 className="text-lg font-bold text-gray-800 dark:text-white truncate text-right">{driver.name}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 text-right mt-1">{driver.equipmentType}</p>
@@ -39,7 +39,7 @@ const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
           <div className="mt-3 flex justify-between items-center">
             <span className="text-gray-600 dark:text-gray-300 text-sm">{driver.age} سنة</span>
             {driver.hasLicense && (
-              <span className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-semibold px-2 py-1 rounded">
+              <span className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-semibold px-1 py-1 rounded">
                 يحمل رخصة اصلية
               </span>
             )}
