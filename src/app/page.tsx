@@ -13,8 +13,8 @@ export default function Home() {
     <main className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="bg-white text-gray-800">
-        <div className="container mx-auto px-6 py-12 text-center">
-          <div className="flex justify-center mb-6">
+        <div className="container mx-auto px-4 py-8 text-center">
+          <div className="flex justify-center mb-4">
             <Image
               src="https://firebasestorage.googleapis.com/v0/b/manlift-36e37.appspot.com/o/project%2FhomeBageWellcom.png?alt=media&token=60dea685-f06f-43e8-b0bf-7a066cb8739f"
               alt="Welcome Image"
@@ -27,7 +27,7 @@ export default function Home() {
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
             مرحباً بك في منصة واصل
           </h1>
-          <p className="text-lg md:text-xl text-gray-300 mb-8">
+          <p className="text-lg md:text-xl text-gray-500 mb-4">
             المكان الأمثل لإيجاد وتأجير المعدات الثقيلة، والعثور على سائقين متاحين بسهولة وأمان.
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
