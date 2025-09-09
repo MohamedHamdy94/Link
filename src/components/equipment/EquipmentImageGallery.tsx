@@ -35,7 +35,8 @@ const EquipmentImageGallery = ({ photoUrls }: EquipmentImageGalleryProps) => {
             <Image
               src={mainImage}
               alt="Main equipment view"
-              fill
+                          layout="fill"
+            objectFit="contain"
               className="object-contain"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
