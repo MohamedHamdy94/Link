@@ -46,7 +46,8 @@ const EquipmentDetail = ({ equipment }: EquipmentDetailProps) => {
                 <Image
                   src={equipment.ownerPhotoUrl || '/images/imagesProfile.jpg'}
                   alt={equipment.ownerName}
-                  fill
+                              layout="fill"
+            objectFit="contain"
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
