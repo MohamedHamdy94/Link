@@ -33,7 +33,7 @@ const DriverCard: React.FC<{ driver: Driver }> = ({ driver }) => {
         <div className="p-2 flex-grow flex flex-col justify-between">
           <div>
             <h3 className="text-lg font-bold text-gray-800 dark:text-white truncate text-right">{driver.name}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-right mt-1">{driver.equipmentType}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-right mt-1">{driver.equipmentType} سائق</p>
           </div>
 
           <div className="mt-3 flex justify-between items-center">
