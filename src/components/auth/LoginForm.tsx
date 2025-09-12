@@ -16,23 +16,28 @@ const LoginForm = () => {
   const [user, loadingUser] = useAuthState(auth);
 
   useEffect(() => {
-    if (user) {
-      const userType = localStorage.getItem('userType');
-      switch (userType) {
-        case 'drivers':
-          router.push('/driver/profile');
-          break;
-        case 'equipmentOwners':
-          router.push('/equipment-owner/profile');
-          break;
-        case 'admins':
-          router.push('/admin/dashboard');
-          break;
-        default:
-          // If userType is not in localStorage, maybe they need to complete their profile
-          router.push('/auth/complete-profile');
+    const redirectUser = async () => {
+      if (user) {
+        const idTokenResult = await user.getIdTokenResult(true);
+        const userType = idTokenResult.claims.userType;
+
+        switch (userType) {
+          case 'drivers':
+            router.push('/driver/profile');
+            break;
+          case 'equipmentOwners':
+            router.push('/equipment-owner/profile');
+            break;
+          case 'admins':
+            router.push('/admin/dashboard');
+            break;
+          default:
+            router.push('/auth/complete-profile');
+        }
       }
-    }
+    };
+
+    redirectUser();
   }, [user, router]);
 
   if (loadingUser || user) {

@@ -24,34 +24,6 @@ const RegisterForm = () => {
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
   const [user, loadingUser] = useAuthState(auth);
 
-  useEffect(() => {
-    if (user) {
-      const userType = localStorage.getItem('userType');
-      switch (userType) {
-        case 'drivers':
-          router.push('/driver/profile');
-          break;
-        case 'equipmentOwners':
-          router.push('/equipment-owner/profile');
-          break;
-        case 'admins':
-          router.push('/admin/dashboard');
-          break;
-        default:
-          // If userType is not in localStorage, maybe they need to complete their profile
-          router.push('/auth/complete-profile');
-      }
-    }
-  }, [user, router]);
-
-  if (loadingUser || user) {
-      return (
-        <div className="flex justify-center items-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      );
-  }
-
   const initializeRecaptcha = useCallback(() => {
     if (window.recaptchaVerifier) {
       window.recaptchaVerifier.clear();
@@ -69,12 +41,45 @@ const RegisterForm = () => {
   }, []);
 
   useEffect(() => {
+    const redirectUser = async () => {
+      if (user) {
+        const idTokenResult = await user.getIdTokenResult(true);
+        const userType = idTokenResult.claims.userType;
+
+        switch (userType) {
+          case 'drivers':
+            router.push('/driver/profile');
+            break;
+          case 'equipmentOwners':
+            router.push('/equipment-owner/profile');
+            break;
+          case 'admins':
+            router.push('/admin/dashboard');
+            break;
+          default:
+            router.push('/auth/complete-profile');
+        }
+      }
+    };
+
+    redirectUser();
+  }, [user, router]);
+
+  useEffect(() => {
     return () => {
       if (window.recaptchaVerifier) {
         window.recaptchaVerifier.clear();
       }
     };
   }, []);
+
+  if (loadingUser || user) {
+      return (
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      );
+  }
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
