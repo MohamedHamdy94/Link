@@ -22,7 +22,7 @@ const Footer = () => {
           <div className="text-center md:text-right">
             <h3 className="text-lg font-medium text-gray-900">موقع واصل</h3>
             <p className="mt-2 text-sm text-gray-500">
-              منصة لربط سائقي المعدات بأصحاب المعدات
+              منصة للوصل بين سائقي المعدات و أصحاب المعدات
             </p>
           </div>
           
