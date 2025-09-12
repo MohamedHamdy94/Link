@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Camera } from 'lucide-react';
 import { uploadDriverPhoto, uploadOwnerPhoto, deleteFileByUrl } from '@/lib/firebase/storage';
@@ -23,10 +23,24 @@ const ProfileImageUploader = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Cleanup effect for the preview URL
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Create and set a preview URL
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
 
     setLoading(true);
     setError(null);
@@ -57,6 +71,7 @@ const ProfileImageUploader = ({
         }
 
         onPhotoUpdate(newPhotoUrl);
+        window.location.reload(); // Hard refresh the page
       } else {
         throw new Error(uploadResult.error || 'فشل في رفع الصورة.');
       }
@@ -71,8 +86,9 @@ const ProfileImageUploader = ({
   return (
     <div className="relative w-32 h-32 rounded-full overflow-hidden group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-75 z-10">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+          <p className="text-white text-sm mt-2">جاري تحميل الصورة...</p>
         </div>
       )}
       {error && (
@@ -81,7 +97,8 @@ const ProfileImageUploader = ({
         </div>
       )}
       <Image
-        src={currentPhotoUrl || '/images/imagesProfile.jpg'}
+        key={previewUrl || currentPhotoUrl} // Add key to force re-render
+        src={previewUrl || currentPhotoUrl || '/images/imagesProfile.jpg'}
         alt="صورة الملف الشخصي"
         layout="fill"
         objectFit="cover"
