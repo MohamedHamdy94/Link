@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
+import { useSignInWithEmailAndPassword, useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/lib/firebase/config';
 
 const LoginForm = () => {
@@ -13,6 +13,35 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
 
   const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
+  const [user, loadingUser] = useAuthState(auth);
+
+  useEffect(() => {
+    if (user) {
+      const userType = localStorage.getItem('userType');
+      switch (userType) {
+        case 'drivers':
+          router.push('/driver/profile');
+          break;
+        case 'equipmentOwners':
+          router.push('/equipment-owner/profile');
+          break;
+        case 'admins':
+          router.push('/admin/dashboard');
+          break;
+        default:
+          // If userType is not in localStorage, maybe they need to complete their profile
+          router.push('/auth/complete-profile');
+      }
+    }
+  }, [user, router]);
+
+  if (loadingUser || user) {
+      return (
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

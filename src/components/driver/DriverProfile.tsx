@@ -1,16 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getDriverByPhoneNumber } from '@/lib/firebase/firestore';
 import { updateDriverAction } from '@/app/driver/actions';
-import { uploadDriverPhoto, deleteFileByUrl } from '@/lib/firebase/storage';
 import { logout } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Driver } from '@/lib/interface';
 import { auth } from '@/lib/firebase/config';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import ProfileImageUploader from '@/components/common/ProfileImageUploader';
 
 const DriverProfile = () => {
   const router = useRouter();
@@ -32,8 +31,6 @@ const DriverProfile = () => {
     hasLicense: false,
     address: '',
   });
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -66,7 +63,6 @@ const DriverProfile = () => {
             hasLicense: driver.hasLicense,
             address: driver.address || '',
           });
-          setPhotoPreview(driver.photoUrl || '');
 
           if (!driver.isVerified) {
             const createdAt = new Date(driver.createdAt || 0).getTime();
@@ -96,18 +92,6 @@ const DriverProfile = () => {
     fetchDriverData();
   }, [authLoading, user]);
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setPhotoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
@@ -126,20 +110,6 @@ const DriverProfile = () => {
     }
 
     try {
-      let newPhotoUrl = driverData?.photoUrl || '';
-      const oldPhotoUrl = driverData?.photoUrl;
-
-      if (photoFile) {
-        const uploadResult = await uploadDriverPhoto(phoneNumber, photoFile);
-        if (!uploadResult.success || !uploadResult.url) {
-          throw new Error('فشل في رفع الصورة');
-        }
-        newPhotoUrl = uploadResult.url;
-        if (oldPhotoUrl && oldPhotoUrl !== newPhotoUrl) {
-          await deleteFileByUrl(oldPhotoUrl);
-        }
-      }
-
       const updateResult = await updateDriverAction(phoneNumber, {
         name: formData.name,
         age: parseInt(formData.age),
@@ -147,7 +117,6 @@ const DriverProfile = () => {
         isAvailable: formData.isAvailable,
         hasLicense: formData.hasLicense,
         address: formData.address,
-        photoUrl: newPhotoUrl,
       });
 
       if (updateResult.success && updateResult.data) {
@@ -201,16 +170,13 @@ const DriverProfile = () => {
       {isEditing ? (
         <EditForm
           formData={formData}
-          photoPreview={photoPreview}
           pageLoading={pageLoading}
-          
           handleInputChange={handleInputChange}
-          handlePhotoChange={handlePhotoChange}
           handleSubmit={handleSubmit}
           onCancel={() => setIsEditing(false)}
         />
       ) : (
-        <ProfileView driverData={driverData} onEdit={() => setIsEditing(true)} />
+        <ProfileView driverData={driverData} onEdit={() => setIsEditing(true)} setDriverData={setDriverData} />
       )}
     </div>
   );
@@ -226,19 +192,21 @@ const VerificationAlert = ({ message }: { message: string }) => (
 interface ProfileViewProps {
   driverData: Driver;
   onEdit: () => void;
+  setDriverData: React.Dispatch<React.SetStateAction<Driver | null>>;
 }
 
-const ProfileView = ({ driverData, onEdit }: ProfileViewProps) => (
+const ProfileView = ({ driverData, onEdit, setDriverData }: ProfileViewProps) => (
   <div>
     <div className="flex flex-col md:flex-row gap-6">
       <div className="md:w-1/3">
-        <div className="relative w-40 h-40 mx-auto overflow-hidden rounded-full bg-gray-100">
-          {driverData.photoUrl ? (
-            <Image src={driverData.photoUrl} alt="صورة السائق" width={160} height={160} className="w-full h-full object-cover" />
-          ) : (
-            <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">لا توجد صورة</div>
-          )}
-        </div>
+        <ProfileImageUploader
+          currentPhotoUrl={driverData.photoUrl}
+          userType="drivers"
+          userId={driverData.phoneNumber}
+          onPhotoUpdate={(newUrl) => {
+            setDriverData(prev => prev ? { ...prev, photoUrl: newUrl || undefined } : null);
+          }}
+        />
       </div>
       <div className="md:w-2/3">
         <ProfileField label="الاسم" value={driverData.name} />
@@ -277,44 +245,17 @@ const ProfileField = ({ label, value, valueClassName = '' }: ProfileFieldProps) 
 
 interface EditFormProps {
   formData: { name: string; age: string; equipmentType: string; isAvailable: boolean; hasLicense: boolean; address: string; };
-  photoPreview: string;
   pageLoading: boolean;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  handlePhotoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
 }
 
-const EditForm = ({ formData, photoPreview, pageLoading, handleInputChange, handlePhotoChange, handleSubmit, onCancel }: EditFormProps) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+const EditForm = ({ formData, pageLoading, handleInputChange, handleSubmit, onCancel }: EditFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex flex-col md:flex-row gap-6">
-        <div className="md:w-1/3">
-          <div className="mb-4">
-            <div 
-              className="relative w-40 h-40 mx-auto overflow-hidden rounded-full bg-gray-100 cursor-pointer group"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {photoPreview ? (
-                <Image src={photoPreview} alt="صورة السائق" width={160} height={160} className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">لا توجد صورة</div>
-              )}
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-white text-sm">تغيير الصورة</span>
-              </div>
-            </div>
-            <input 
-              ref={fileInputRef}
-              type="file" 
-              accept="image/*" 
-              onChange={handlePhotoChange} 
-              className="hidden" 
-            />
-          </div>
-        </div>
         <div className="md:w-2/3 space-y-4">
           <FormInput label="الاسم" name="name" type="text" required value={formData.name} onChange={handleInputChange} />
           <FormInput label="السن" name="age" type="number" required value={formData.age} onChange={handleInputChange} />

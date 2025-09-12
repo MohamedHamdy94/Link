@@ -1,17 +1,16 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import Image from 'next/image';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getEquipmentsByOwner, getEquipmentOwner } from '@/lib/firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { OwnerData, Equipment } from '@/lib/interface';
 import { auth } from '@/lib/firebase/config';
 import { useAuthState } from 'react-firebase-hooks/auth';
-
 import { logout } from '@/lib/firebase/auth';
 import EquipmentCard from '@/components/equipment/EquipmentCard';
-import { uploadOwnerPhoto, deleteFileByUrl } from '@/lib/firebase/storage';
 import { updateEquipmentOwnerAction, changeEquipmentOwnerPasswordAction } from '@/app/equipment-owner/actions';
+import ProfileImageUploader from '@/components/common/ProfileImageUploader';
+
 
 const EquipmentOwnerProfile = () => {
   const router = useRouter();
@@ -22,8 +21,6 @@ const EquipmentOwnerProfile = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [equipmentLoading, setEquipmentLoading] = useState(true);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState('');
   const [success, setSuccess] = useState<string | null>(null);
   const [verificationMessage, setVerificationMessage] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -106,18 +103,6 @@ const EquipmentOwnerProfile = () => {
     router.push('/equipment-owner/add-equipment');
   }, [router]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setPhotoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   if (isLoading && !ownerData) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -186,11 +171,8 @@ const EquipmentOwnerProfile = () => {
       ) : isEditing ? (
         <EditForm
           formData={formData}
-          photoPreview={photoPreview}
-          ownerData={ownerData}
           pageLoading={isLoading}
           handleInputChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-          handlePhotoChange={handleFileChange}
           handleSubmit={async (e) => {
             e.preventDefault();
             setError(null);
@@ -203,32 +185,15 @@ const EquipmentOwnerProfile = () => {
             }
 
             try {
-              let newPhotoUrl = ownerData?.photoUrl || '';
-              const oldPhotoUrl = ownerData?.photoUrl;
-
-              if (photoFile) {
-                const uploadResult = await uploadOwnerPhoto(user.phoneNumber!, photoFile);
-                if (!uploadResult.success || !uploadResult.url) {
-                  throw new Error('فشل في رفع الصورة');
-                }
-                newPhotoUrl = uploadResult.url;
-                if (oldPhotoUrl && oldPhotoUrl !== newPhotoUrl) {
-                  await deleteFileByUrl(oldPhotoUrl);
-                }
-              }
-
-                            const updateResult = await updateEquipmentOwnerAction(user.phoneNumber!, {
+              const updateResult = await updateEquipmentOwnerAction(user.phoneNumber!, {
                 name: formData.name,
                 address: formData.address,
-                photoUrl: newPhotoUrl,
               });
 
               if (updateResult.success && updateResult.data) {
                 setSuccess('تم تحديث البيانات بنجاح.');
                 setOwnerData(updateResult.data as OwnerData);
                 setIsEditing(false);
-                setPhotoPreview(''); // Reset photo preview after successful update
-                setPhotoFile(null); // Reset photo file after successful update
               } else {
                 throw new Error(updateResult.error?.toString() || 'فشل في تحديث البيانات');
               }
@@ -240,12 +205,10 @@ const EquipmentOwnerProfile = () => {
           }}
           onCancel={() => {
             setIsEditing(false);
-            setPhotoPreview(''); // Reset photo preview when canceling
-            setPhotoFile(null); // Reset photo file when canceling
           }}
         />
       ) : (
-        <ProfileView ownerData={ownerData} onEdit={() => setIsEditing(true)} setIsChangingPassword={setIsChangingPassword} />
+        <ProfileView ownerData={ownerData} onEdit={() => setIsEditing(true)} setIsChangingPassword={setIsChangingPassword} setOwnerData={setOwnerData} />
       )}
 
       <div className="mt-8">
@@ -296,19 +259,21 @@ interface ProfileViewProps {
   ownerData: OwnerData | null;
   onEdit: () => void;
   setIsChangingPassword: (isChanging: boolean) => void;
+  setOwnerData: React.Dispatch<React.SetStateAction<OwnerData | null>>;
 }
 
-const ProfileView = ({ ownerData, onEdit, setIsChangingPassword }: ProfileViewProps) => (
+const ProfileView = ({ ownerData, onEdit, setIsChangingPassword, setOwnerData }: ProfileViewProps) => (
   <div>
     <div className="flex flex-col md:flex-row gap-6">
       <div className="md:w-1/3">
-        <div className="relative w-32 h-32 mx-auto overflow-hidden rounded-full bg-gray-100">
-          {ownerData?.photoUrl ? (
-            <Image src={ownerData.photoUrl} alt="صورة المالك" width={128} height={128} className="w-full h-full object-cover" />
-          ) : (
-            <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">لا توجد صورة</div>
-          )}
-        </div>
+        <ProfileImageUploader
+          currentPhotoUrl={ownerData?.photoUrl}
+          userType="equipmentOwners"
+          userId={ownerData?.phoneNumber || ''}
+          onPhotoUpdate={(newUrl) => {
+            setOwnerData(prev => prev ? { ...prev, photoUrl: newUrl || undefined } : null);
+          }}
+        />
       </div>
       <div className="md:w-2/3">
         <ProfileField label="الاسم" value={ownerData?.name || 'غير محدد'} />
@@ -400,57 +365,17 @@ const ProfileField = ({ label, value, valueClassName = '' }: ProfileFieldProps) 
 
 interface EditFormProps {
   formData: { name: string; address: string; };
-  photoPreview: string;
-  ownerData: OwnerData | null;
   pageLoading: boolean;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handlePhotoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
 }
 
-const EditForm = ({ formData, photoPreview, ownerData, pageLoading, handleInputChange, handlePhotoChange, handleSubmit, onCancel }: EditFormProps) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // تحديد الصورة المعروضة (الصورة الجديدة المختارة أو الصورة القديمة)
-  const displayedPhoto = photoPreview || ownerData?.photoUrl;
+const EditForm = ({ formData, pageLoading, handleInputChange, handleSubmit, onCancel }: EditFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex flex-col md:flex-row gap-6">
-        <div className="md:w-1/3">
-          <div className="mb-4">
-            <div 
-              className="relative w-32 h-32 mx-auto overflow-hidden rounded-full bg-gray-100 cursor-pointer group"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              {displayedPhoto ? (
-                <Image src={displayedPhoto} alt="صورة المالك" width={128} height={128} className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">لا توجد صورة</div>
-              )}
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-white text-sm">تغيير الصورة</span>
-              </div>
-            </div>
-            <input 
-              ref={fileInputRef}
-              type="file" 
-              accept="image/*" 
-              onChange={handlePhotoChange} 
-              className="hidden" 
-            />
-            <div className="text-center mt-2">
-              <button 
-                type="button" 
-                onClick={() => fileInputRef.current?.click()}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                اختيار صورة
-              </button>
-            </div>
-          </div>
-        </div>
         <div className="md:w-2/3 space-y-4">
           <FormInput label="الاسم" name="name" type="text" required value={formData.name} onChange={handleInputChange} />
           <FormInput label="العنوان" name="address" type="text" value={formData.address} onChange={handleInputChange} />

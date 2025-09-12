@@ -23,7 +23,7 @@ const DriverDetail = ({ driver }: DriverDetailProps) => {
     <div className="w-full h-screen flex flex-col p-0 font-sans">
       <div className="flex-grow bg-white rounded-none shadow-none overflow-auto">
         {/* Image Section */}
-        <div className="relative w-full h-64">
+        <div className="relative w-full h-72">
           <Image
             src={driver.photoUrl || '/images/imagesProfile.jpg'}
             alt={`صورة ${driver.name}`}

@@ -1,0 +1,105 @@
+'use client';
+
+import React, { useState, useRef } from 'react';
+import Image from 'next/image';
+import { Camera } from 'lucide-react';
+import { uploadDriverPhoto, uploadOwnerPhoto, deleteFileByUrl } from '@/lib/firebase/storage';
+import { updateDriverAction } from '@/app/driver/actions';
+import { updateEquipmentOwnerAction } from '@/app/equipment-owner/actions';
+
+interface ProfileImageUploaderProps {
+  currentPhotoUrl?: string | null;
+  userType: 'drivers' | 'equipmentOwners';
+  userId: string;
+  onPhotoUpdate: (newUrl: string | null) => void;
+}
+
+const ProfileImageUploader = ({
+  currentPhotoUrl,
+  userType,
+  userId,
+  onPhotoUpdate,
+}: ProfileImageUploaderProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      let newPhotoUrl = '';
+      let uploadResult;
+
+      if (userType === 'drivers') {
+        uploadResult = await uploadDriverPhoto(userId, file);
+      } else {
+        uploadResult = await uploadOwnerPhoto(userId, file);
+      }
+
+      if (uploadResult.success && uploadResult.url) {
+        newPhotoUrl = uploadResult.url;
+
+        // Delete old photo if it exists and is different
+        if (currentPhotoUrl && currentPhotoUrl !== newPhotoUrl) {
+          await deleteFileByUrl(currentPhotoUrl);
+        }
+
+        // Update photoUrl in Firestore
+        if (userType === 'drivers') {
+          await updateDriverAction(userId, { photoUrl: newPhotoUrl });
+        } else {
+          await updateEquipmentOwnerAction(userId, { photoUrl: newPhotoUrl });
+        }
+
+        onPhotoUpdate(newPhotoUrl);
+      } else {
+        throw new Error(uploadResult.error || 'فشل في رفع الصورة.');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'حدث خطأ أثناء تحميل الصورة.');
+      console.error('Error uploading photo:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="relative w-32 h-32 rounded-full overflow-hidden group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+        </div>
+      )}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-red-500 bg-opacity-75 text-white text-xs text-center p-1 z-10">
+          {error}
+        </div>
+      )}
+      <Image
+        src={currentPhotoUrl || '/images/imagesProfile.jpg'}
+        alt="صورة الملف الشخصي"
+        layout="fill"
+        objectFit="cover"
+        className="transition-opacity duration-300 group-hover:opacity-75"
+      />
+      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+        <Camera size={32} className="text-white" />
+      </div>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/*"
+        className="hidden"
+        disabled={loading}
+      />
+    </div>
+  );
+};
+
+export default ProfileImageUploader;

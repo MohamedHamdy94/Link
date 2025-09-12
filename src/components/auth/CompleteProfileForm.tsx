@@ -1,8 +1,7 @@
 'use client';
 
-import { uploadDriverPhoto, uploadOwnerPhoto } from '@/lib/firebase/storage';
-import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createDriverAction } from '@/app/driver/actions';
 import { createEquipmentOwnerAction } from '@/app/equipment-owner/actions';
@@ -28,8 +27,6 @@ const phoneNumber = phoneNumberFromQuery || '';  const [password, setPassword] =
   const [isAvailable, setIsAvailable] = useState(true);
   const [hasLicense, setHasLicense] = useState(true);
   const [address, setAddress] = useState('');
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -55,14 +52,6 @@ const phoneNumber = phoneNumberFromQuery || '';  const [password, setPassword] =
     }
   }, [phoneNumberFromQuery, router]);
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setPhotoFile(file);
-      setPhotoPreview(URL.createObjectURL(file));
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -87,26 +76,7 @@ const phoneNumber = phoneNumberFromQuery || '';  const [password, setPassword] =
     console.log('Submitting form...');
 
     try {
-      console.log('Step 1: Uploading photo...');
-      // 1. Upload photo if it exists
-      let photoUrl = '';
-      if (photoFile) {
-        let uploadResult;
-        if (userType === 'drivers') {
-          uploadResult = await uploadDriverPhoto(fullPhoneNumber, photoFile);
-        } else {
-          uploadResult = await uploadOwnerPhoto(fullPhoneNumber, photoFile);
-        }
-
-        if (uploadResult.success && uploadResult.url) {
-          photoUrl = uploadResult.url;
-        } else {
-          throw new Error('فشل في رفع الصورة. يرجى المحاولة مرة أخرى.');
-        }
-      }
-      console.log('Step 1 complete. Photo URL:', photoUrl);
-
-      // 2. Prepare data for Firestore
+      // 1. Prepare data for Firestore
       console.log('Step 2: Preparing data for Firestore...');
       const uid = currentUser.uid;
       const commonData = {
@@ -119,7 +89,7 @@ const phoneNumber = phoneNumberFromQuery || '';  const [password, setPassword] =
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         password, // This should be handled by the action (hashing)
-        photoUrl, // Add the new photo URL
+        photoUrl: '', // Default empty photoUrl
       };
       console.log('Step 2 complete. Common data:', commonData);
 
@@ -233,22 +203,7 @@ const phoneNumber = phoneNumberFromQuery || '';  const [password, setPassword] =
 
           <form onSubmit={handleSubmit} className="space-y-6">
 
-            {/* Photo Upload Section */}
-            <div className="flex flex-col items-center space-y-4">
-              <label htmlFor="photo-upload" className="cursor-pointer">
-                <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center border-2 border-dashed border-gray-400 hover:border-blue-500 transition-colors">
-                  {photoPreview ? (
-                    <Image src={photoPreview} alt="معاينة الصورة" width={128} height={128} className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <div className="text-center text-gray-500">
-                      <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      <span className="mt-2 block text-sm">إضافة صورة</span>
-                    </div>
-                  )}
-                </div>
-              </label>
-              <input id="photo-upload" name="photo-upload" type="file" className="sr-only" accept="image/*" onChange={handlePhotoChange} />
-            </div>
+            
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                

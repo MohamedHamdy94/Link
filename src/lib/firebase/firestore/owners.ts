@@ -52,6 +52,7 @@ export const getEquipmentOwner = async (ownerId: string): Promise<{ success: boo
         name: data.name || '',
         photoUrl: data.photoUrl || undefined,
         phoneNumber: data.phoneNumber || '',
+        address: data.address || '', // Add address field
         isVerified: data.isVerified || false,
         userType: data.userType || 'equipmentOwners',
         createdAt: data.createdAt && typeof data.createdAt.toDate === 'function'
